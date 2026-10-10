@@ -4,6 +4,7 @@ import avatar from '../assets/avatar.jpg';
 import banner from '../assets/banner-field.jpg';
 import Bio from '../components/Bio.astro';
 import EmptyPosts from '../components/EmptyPosts.astro';
+import Search from '../components/Search.astro';
 import TitleText from '../components/TitleText.astro';
 import { AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, STANDALONE_PAGES } from '../consts';
 import Layout from '../layouts/Layout.astro';
@@ -39,53 +40,57 @@ const groups = groupPosts(await getSortedPosts());
 		</header>
 
 		<main id="main" class="home">
-			<section class="block" aria-labelledby="h-pages">
-				<h2 id="h-pages" class="block-title">交互网页</h2>
-				<ul class="list">
+			{/* 站内搜索：有搜索词时下面的列表藏起来，结果排在搜索框下面（见 Search.astro） */}
+			<Search id="home-search" variant="inline" hides="home-lists" class="home-search" />
+			<div id="home-lists">
+				<section class="block" aria-labelledby="h-pages">
+					<h2 id="h-pages" class="block-title">交互网页</h2>
+					<ul class="list">
+						{
+							STANDALONE_PAGES.map((page) => (
+								<li>
+									<a class="item" href={page.href}>
+										<span class="item-title">{page.title}</span>
+										<span class="item-desc">{page.description}</span>
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</section>
+
+				<section class="block" aria-labelledby="h-posts">
+					<h2 id="h-posts" class="block-title">文章</h2>
+					{groups.length === 0 && <EmptyPosts />}
 					{
-						STANDALONE_PAGES.map((page) => (
-							<li>
-								<a class="item" href={page.href}>
-									<span class="item-title">{page.title}</span>
-									<span class="item-desc">{page.description}</span>
-								</a>
-							</li>
+						groups.map((group) => (
+							<section class="year" aria-label={group.label}>
+								<h3 class="year-title">{group.label}</h3>
+								<ul class="list">
+									{group.posts.map((post) => {
+										const date = listDateText(post);
+										const source = sourceInfo(post);
+										return (
+											<li>
+												<a class="item" href={postHref(post)}>
+													<span class="item-title"><TitleText text={post.data.title} /></span>
+													{post.data.description && <span class="item-desc">{post.data.description}</span>}
+													<span class="item-meta">
+														{date && <time datetime={isoDate(post) ?? undefined}>{date}</time>}
+														{source?.platforms.map((p) => (
+															<span class="item-src">{p}</span>
+														))}
+													</span>
+												</a>
+											</li>
+										);
+									})}
+								</ul>
+							</section>
 						))
 					}
-				</ul>
-			</section>
-
-			<section class="block" aria-labelledby="h-posts">
-				<h2 id="h-posts" class="block-title">文章</h2>
-				{groups.length === 0 && <EmptyPosts />}
-				{
-					groups.map((group) => (
-						<section class="year" aria-label={group.label}>
-							<h3 class="year-title">{group.label}</h3>
-							<ul class="list">
-								{group.posts.map((post) => {
-									const date = listDateText(post);
-									const source = sourceInfo(post);
-									return (
-										<li>
-											<a class="item" href={postHref(post)}>
-												<span class="item-title"><TitleText text={post.data.title} /></span>
-												{post.data.description && <span class="item-desc">{post.data.description}</span>}
-												<span class="item-meta">
-													{date && <time datetime={isoDate(post) ?? undefined}>{date}</time>}
-													{source?.platforms.map((p) => (
-														<span class="item-src">{p}</span>
-													))}
-												</span>
-											</a>
-										</li>
-									);
-								})}
-							</ul>
-						</section>
-					))
-				}
-			</section>
+				</section>
+			</div>
 		</main>
 	</div>
 </Layout>
@@ -165,6 +170,10 @@ const groups = groupPosts(await getSortedPosts());
 	.profile-nav a:hover {
 		text-decoration: underline;
 		text-underline-offset: 0.22em;
+	}
+
+	.home :global(.home-search) {
+		margin-top: var(--s-6);
 	}
 
 	.block {

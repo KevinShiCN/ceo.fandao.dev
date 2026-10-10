@@ -1,0 +1,23 @@
+---
+// 放大镜：搜索框里和顶栏「搜索」按钮上用。线条用当前文字颜色，旁边总有文字或输入框，读屏跳过。
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<svg class:list={['search-icon', className]} viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+	<circle cx="10.5" cy="10.5" r="6.5"></circle>
+	<path d="m15.5 15.5 5 5"></path>
+</svg>
+
+<style>
+	.search-icon {
+		flex: none;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+	}
+</style>

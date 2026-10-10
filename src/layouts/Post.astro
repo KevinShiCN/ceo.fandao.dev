@@ -27,7 +27,7 @@ const hasToc = toc.length > 0;
 	<main id="main" class:list={['post', hasToc && 'post-has-toc']}>
 		<article>
 			<header class="post-head">
-				<h1 class="post-title"><TitleText text={title} /></h1>
+				<h1 class="post-title" data-pagefind-meta="title"><TitleText text={title} /></h1>
 				<p class="post-date">
 					<time datetime={isoDate(post) ?? undefined}>{fullDateText(post)}</time>
 					{updated && <span>更新于 {updated}</span>}
@@ -46,7 +46,8 @@ const hasToc = toc.length > 0;
 					/>
 				)
 			}
-			<div class="prose">
+			{/* 站内搜索只收标题（上面 h1 的 title 元数据）和这里的正文，见 src/lib/search-index.mjs */}
+			<div class="prose" data-pagefind-body>
 				<Fragment set:html={body} />
 			</div>
 		</article>

@@ -8,7 +8,8 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="关于" description={SITE_DESCRIPTION}>
-	<main id="main" class="about">
+	{/* 关于页整页收进站内搜索，结果里的标题显示「关于」，见 src/lib/search-index.mjs */}
+	<main id="main" class="about" data-pagefind-body data-pagefind-meta="title:关于">
 		<Image
 			class="about-photo"
 			src={avatar}

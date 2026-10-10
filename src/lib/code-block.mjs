@@ -17,7 +17,8 @@ export function codeBlockTransformer() {
 			if (!pre) return;
 			const lang = String(this.options.lang ?? 'plaintext').toLowerCase();
 			const wrap = PROSE_LANGS.has(lang);
-			const head = el('div', { className: ['code-head'] }, [
+			// 按钮和读屏提示不是正文：data-pagefind-ignore 让站内搜索不收这一行（见 src/lib/search-index.mjs）
+			const head = el('div', { className: ['code-head'], dataPagefindIgnore: 'all' }, [
 				el('button', { type: 'button', className: ['code-copy'], hidden: true }, [txt('复制')]),
 				el('span', { className: ['code-status', 'visually-hidden'], role: 'status', ariaLive: 'polite' }),
 			]);

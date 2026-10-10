@@ -5,6 +5,8 @@ import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import avatar from '../assets/avatar.jpg';
 import BaseHead from '../components/BaseHead.astro';
+import Search from '../components/Search.astro';
+import SearchIcon from '../components/SearchIcon.astro';
 import { AUTHOR, LINKS } from '../consts';
 import { navItems } from '../lib/nav';
 import { withBase } from '../lib/url';
@@ -40,15 +42,39 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 							<Image class="me-avatar" src={avatar} alt="" width={64} height={64} />
 							<span>{AUTHOR.name}</span>
 						</a>
-						<nav class="topbar-nav" aria-label="站点导航">
-							{nav.map((item) => (
-								<a href={item.href} aria-current={item.current ? 'page' : undefined}>
-									{item.label}
-								</a>
-							))}
-						</nav>
+						<div class="topbar-right">
+							<nav class="topbar-nav" aria-label="站点导航">
+								{nav.map((item) => (
+									<a href={item.href} aria-current={item.current ? 'page' : undefined}>
+										{item.label}
+									</a>
+								))}
+							</nav>
+							<button
+								type="button"
+								class="topbar-search"
+								aria-haspopup="dialog"
+								aria-controls="search-dialog"
+								data-search-open="search-dialog"
+							>
+								<SearchIcon class="topbar-search-icon" />
+								<span>搜索</span>
+							</button>
+						</div>
 					</div>
 				</header>
+			)
+		}
+		{
+			/* 顶栏「搜索」打开的浮层；首页没有顶栏，搜索框直接放在文章列表上方 */
+			topbar && (
+				<dialog id="search-dialog" class="search-dialog" aria-label="搜文章">
+					<Search id="dialog-search" variant="panel">
+						<button type="button" class="search-close" data-search-close>
+							关闭
+						</button>
+					</Search>
+				</dialog>
 			)
 		}
 		<slot />
@@ -102,6 +128,12 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 		object-fit: cover;
 	}
 
+	.topbar-right {
+		display: flex;
+		align-items: center;
+		gap: var(--s-1);
+	}
+
 	.topbar-nav {
 		display: flex;
 		gap: var(--s-1);
@@ -120,6 +152,98 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 	.topbar-nav a:hover,
 	.topbar-nav a[aria-current='page'] {
 		color: var(--c-link);
+	}
+
+	.topbar-search {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 44px;
+		margin: 0;
+		padding: 0 var(--s-3);
+		border: 0;
+		background: none;
+		color: var(--c-text-2);
+		font: inherit;
+		font-size: 15px;
+		cursor: pointer;
+		touch-action: manipulation;
+	}
+
+	.topbar-search:hover {
+		color: var(--c-link);
+	}
+
+	.topbar-search:active {
+		color: var(--c-link-hover);
+	}
+
+	.topbar-search :global(.topbar-search-icon) {
+		width: 17px;
+		height: 17px;
+	}
+
+	/* 搜索浮层（里面的结构和行为在 Search.astro）：手机上占满屏幕，电脑上是靠上居中的面板 */
+	.search-dialog {
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		max-height: none;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: var(--c-bg);
+		color: var(--c-text);
+		/* 浮层里滑到头不带着后面的页面滚 */
+		overscroll-behavior: contain;
+	}
+
+	.search-dialog[open] {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.search-dialog::backdrop {
+		background: var(--c-scrim);
+	}
+
+	.search-close {
+		flex: none;
+		min-height: 44px;
+		margin: 0;
+		padding: 0 var(--s-2);
+		border: 0;
+		background: none;
+		color: var(--c-link);
+		font: inherit;
+		font-size: 16px;
+		cursor: pointer;
+		touch-action: manipulation;
+	}
+
+	.search-close:hover,
+	.search-close:active {
+		color: var(--c-link-hover);
+	}
+
+	/* 浮层打开时后面的页面不跟着滚；留出滚动条的位置，页面不左右跳 */
+	:global(html.search-open) {
+		overflow: hidden;
+		scrollbar-gutter: stable;
+	}
+
+	@media (min-width: 768px) {
+		/* 浏览器默认把弹出的 dialog 上下撑满（top、bottom 都是 0），bottom 放开，面板高度随内容，最高 76vh */
+		.search-dialog {
+			bottom: auto;
+			width: min(720px, calc(100% - 2 * var(--gutter)));
+			height: auto;
+			max-height: min(76vh, 760px);
+			margin: 12vh auto auto;
+			border: 1px solid var(--c-line);
+			border-radius: 12px;
+			box-shadow: 0 24px 64px var(--c-panel-shadow);
+		}
 	}
 
 	.site-footer {

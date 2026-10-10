@@ -1,0 +1,499 @@
+---
+// 站内搜索：输入框和结果列表。在浏览器里用 Pagefind 搜，索引在构建时生成（src/lib/search-index.mjs），不用服务器。
+//   inline：首页文章列表上方。有搜索词时把 hides 指定的元素（文章列表）藏起来，结果排在输入框下面；清空后列表回来。
+//   panel：顶栏「搜索」打开的浮层里（Layout.astro）。搜索框固定在上面，结果在下面滚动。
+// 每条结果显示文章标题和命中的一段正文，关键词由 Pagefind 包上 <mark>。
+import SearchIcon from './SearchIcon.astro';
+
+interface Props {
+	/** 拼输入框、结果列表 id 的前缀，同一页里不能重复 */
+	id: string;
+	variant: 'inline' | 'panel';
+	/** 有搜索词时要藏起来的元素 id（首页的文章列表） */
+	hides?: string;
+	class?: string;
+}
+
+const { id, variant, hides, class: className } = Astro.props;
+/** 浮层刚打开、还没输入时显示的一句，不留一片空白；首页下面就是文章列表，不用 */
+const idle = variant === 'panel' ? '搜全部文章的标题和正文' : '';
+---
+
+<div class:list={['search', `search-${variant}`, className]} data-search data-search-hides={hides}>
+	<form class="search-bar" role="search" data-search-form>
+		<label class="search-field">
+			<span class="visually-hidden">搜文章</span>
+			<SearchIcon class="search-field-icon" />
+			<input
+				id={`${id}-input`}
+				class="search-input"
+				type="search"
+				placeholder="搜文章"
+				autocomplete="off"
+				spellcheck="false"
+				enterkeyhint="search"
+				aria-controls={`${id}-results`}
+				data-search-input
+			/>
+		</label>
+		<slot />
+	</form>
+	<div class="search-body">
+		<p class="search-status" role="status" aria-live="polite" data-search-status data-idle={idle}>{idle}</p>
+		<ul id={`${id}-results`} class="search-results" data-search-results></ul>
+		<button type="button" class="search-more" data-search-more hidden></button>
+	</div>
+</div>
+
+<script>
+	// Pagefind 浏览器接口里用到的部分（pagefind.js 是构建后才生成的文件，见 Pagefind 文档 api.md）
+	interface PagefindData {
+		url: string;
+		/** 整页正文（Pagefind 在中文词之间插了零宽空格） */
+		content: string;
+		/** 命中的一段，关键词包了 <mark> */
+		excerpt: string;
+		meta: { title?: string };
+	}
+	interface PagefindHit {
+		data(): Promise<PagefindData>;
+	}
+	interface Pagefind {
+		options(options: Record<string, unknown>): Promise<void>;
+		init(): Promise<void>;
+		search(term: string): Promise<{ results: PagefindHit[] } | null>;
+	}
+
+	/** 部署前缀：正式站是 /，预览站放在别的网站的子路径下（SITE_BASE），都以 / 结尾（astro.config.mjs 校验过） */
+	const BASE = import.meta.env.BASE_URL;
+	/** 一次列几条，多了点「再看」 */
+	const PAGE_SIZE = 10;
+	/** 停止打字多久开始搜 */
+	const DEBOUNCE_MS = 200;
+	/** 超过这么久还没出结果才显示「正在搜索」，免得每打一个字闪一下 */
+	const SLOW_MS = 300;
+	const NARROW = window.matchMedia('(max-width: 767px)');
+	const COARSE_POINTER = window.matchMedia('(pointer: coarse)');
+
+	let loading: Promise<Pagefind> | undefined;
+
+	/** 第一次用到搜索时才下载 Pagefind 的脚本和索引（构建出的 pagefind/ 目录） */
+	function loadPagefind(): Promise<Pagefind> {
+		if (!loading) {
+			const attempt = (async () => {
+				// 地址是拼出来的，不让打包工具去解析
+				const pagefind: Pagefind = await import(/* @vite-ignore */ `${BASE}pagefind/pagefind.js`);
+				// 预览站在子路径下，结果地址要带上同样的前缀
+				await pagefind.options({ baseUrl: BASE });
+				await pagefind.init();
+				return pagefind;
+			})();
+			loading = attempt;
+			// 没下载成功（比如断网）不记住，下次搜索时重新下载
+			attempt.catch(() => {
+				if (loading === attempt) loading = undefined;
+			});
+		}
+		return loading;
+	}
+
+	/** 比对用：转小写，去掉空白、标点符号和 Pagefind 在中文词之间插的零宽空格 */
+	function normalize(text: string): string {
+		return text.toLowerCase().replace(/[\s\u200b\p{P}\p{S}]/gu, '');
+	}
+
+	/**
+	 * Pagefind 找到的页面里，只留标题或正文里原样含有每个搜索词（按空格分开）的，顺序仍按 Pagefind 的相关度。
+	 * 原因：页面是中文，Pagefind 会把搜索词切成小段分别找。「号商」切成「号」「商」，页面里两个字都有、隔得再远也算命中；
+	 * 索引里没有的英文词会切成单个字母，搜 mattpocock 会命中只含字母 m 的页面。
+	 * 要看每页全文，所以一次取回全部结果的数据；文章到几百篇时再改成分批。
+	 */
+	async function keepLiteralMatches(hits: PagefindHit[], query: string): Promise<PagefindHit[]> {
+		const terms = query.split(/\s+/).map(normalize).filter(Boolean);
+		if (terms.length === 0) return hits;
+		const all = await Promise.all(hits.map((hit) => hit.data()));
+		return all
+			.filter((data) => {
+				const title = normalize(data.meta.title ?? '');
+				const body = normalize(data.content);
+				return terms.every((term) => title.includes(term) || body.includes(term));
+			})
+			.map((data) => ({ data: async () => data }));
+	}
+
+	/** 片段开头的半句话：8 个字以内就到句末，中间没有高亮 */
+	const PARTIAL_SENTENCE = /^[^<。？！]{0,8}[。？！]\s*/u;
+	const LEADING_PUNCTUATION = /^[\s，、；：,;:）」』]+/u;
+
+	/**
+	 * Pagefind 截取正文中间的一段，开头常是半句（「号。第 2 篇……」）。截断处补「…」，开头的半句和标点去掉。
+	 * Pagefind 1.5.2 还没有补省略号的选项；是否截断，拿片段首尾和全文首尾比。
+	 */
+	function trimExcerpt(snippet: HTMLElement, content: string) {
+		const whole = normalize(content);
+		const part = normalize(snippet.textContent ?? '');
+		if (!part) return;
+		if (!whole.startsWith(part.slice(0, 12))) {
+			snippet.innerHTML = snippet.innerHTML.replace(PARTIAL_SENTENCE, '').replace(LEADING_PUNCTUATION, '');
+			snippet.prepend('…');
+		}
+		if (!whole.endsWith(part.slice(-12))) snippet.append('…');
+	}
+
+	function renderHit({ url, excerpt, content, meta }: PagefindData): HTMLLIElement {
+		const item = document.createElement('li');
+		const link = document.createElement('a');
+		link.className = 'search-hit';
+		link.href = url;
+		const title = document.createElement('span');
+		title.className = 'search-hit-title';
+		title.textContent = meta.title || url;
+		const snippet = document.createElement('span');
+		snippet.className = 'search-hit-excerpt';
+		// Pagefind 生成片段时先把正文里的 < > & 转义，再给关键词加 <mark>，可以直接当 HTML 放（文档 api.md「Loading a result」）。
+		// 中文分了词，「审计员」会是挨着的「<mark>审计</mark><mark>员</mark>」，并成一段高亮，中间不断开；
+		// Pagefind 在不带标点的小标题后面补了英文句点（「这个站放什么. 这里……」），跟在汉字后面的换成空格
+		snippet.innerHTML = excerpt.replaceAll('</mark><mark>', '').replace(/(\p{Script=Han}(?:<\/mark>)?)\. /gu, '$1 ');
+		trimExcerpt(snippet, content);
+		link.append(title, snippet);
+		item.append(link);
+		return item;
+	}
+
+	function setup(root: HTMLElement) {
+		const form = root.querySelector<HTMLFormElement>('[data-search-form]');
+		const input = root.querySelector<HTMLInputElement>('[data-search-input]');
+		const status = root.querySelector<HTMLElement>('[data-search-status]');
+		const list = root.querySelector<HTMLElement>('[data-search-results]');
+		const more = root.querySelector<HTMLButtonElement>('[data-search-more]');
+		if (!form || !input || !status || !list || !more) return;
+		const hides = root.dataset.searchHides ? document.getElementById(root.dataset.searchHides) : null;
+		const idle = status.dataset.idle ?? '';
+
+		let run = 0; // 每搜一次加一；上一次搜索晚回来的结果不要
+		let hits: PagefindHit[] = [];
+		let shown = 0;
+		let typing: number | undefined;
+
+		const reset = () => {
+			run += 1;
+			hits = [];
+			shown = 0;
+			list.replaceChildren();
+			more.hidden = true;
+			status.textContent = idle;
+			delete root.dataset.active;
+			if (hides) hides.hidden = false;
+		};
+
+		/** 取下一页结果的标题和片段；replace 为真时换掉上一次搜索的结果 */
+		const showPage = async (current: number, replace: boolean): Promise<boolean> => {
+			const page = hits.slice(shown, shown + PAGE_SIZE);
+			const items = (await Promise.all(page.map((hit) => hit.data()))).map(renderHit);
+			if (current !== run) return false;
+			if (replace) list.replaceChildren(...items);
+			else list.append(...items);
+			shown += page.length;
+			const rest = hits.length - shown;
+			more.hidden = rest === 0;
+			more.textContent = `再看 ${Math.min(rest, PAGE_SIZE)} 篇`;
+			return true;
+		};
+
+		const search = async (term: string) => {
+			const query = term.trim();
+			if (!query) {
+				reset();
+				return;
+			}
+			run += 1;
+			const current = run;
+			root.dataset.active = '';
+			if (hides) hides.hidden = true;
+			const slow = window.setTimeout(() => {
+				if (current === run) status.textContent = '正在搜索…';
+			}, SLOW_MS);
+			try {
+				const pagefind = await loadPagefind();
+				const result = await pagefind.search(query);
+				if (current !== run || !result) return;
+				const found = await keepLiteralMatches(result.results, query);
+				if (current !== run) return;
+				hits = found;
+				shown = 0;
+				if (!(await showPage(current, true))) return;
+				status.textContent =
+					hits.length > 0 ? `找到 ${hits.length} 篇` : `没找到和「${query}」有关的文章，换个短一点的词试试`;
+			} catch (error) {
+				if (current !== run) return;
+				console.error('站内搜索出错', error);
+				list.replaceChildren();
+				more.hidden = true;
+				status.textContent = import.meta.env.DEV
+					? '本地开发时没有搜索索引：先 npm run build，再 npm run preview'
+					: '搜索没加载出来，检查网络后刷新页面再试';
+			} finally {
+				window.clearTimeout(slow);
+			}
+		};
+
+		const searchSoon = () => {
+			window.clearTimeout(typing);
+			typing = window.setTimeout(() => void search(input.value), DEBOUNCE_MS);
+		};
+
+		input.addEventListener('input', (event) => {
+			// 拼音输入法还在选字时不搜，选完字（compositionend）再搜
+			if (event instanceof InputEvent && event.isComposing) return;
+			if (!input.value.trim()) {
+				window.clearTimeout(typing);
+				reset();
+				return;
+			}
+			searchSoon();
+		});
+		input.addEventListener('compositionend', searchSoon);
+		input.addEventListener('focus', () => {
+			// 先把脚本和索引下载好，打完字马上出结果。这里失败不用管：真正搜索时会重新下载，失败会显示出来
+			loadPagefind().catch(() => undefined);
+			// 首页在手机上：搜索框挪到屏幕顶上，键盘弹出来后下面还看得到结果
+			if (root.classList.contains('search-inline') && NARROW.matches) root.scrollIntoView({ block: 'start' });
+		});
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			window.clearTimeout(typing);
+			void search(input.value);
+			// 手机上按了键盘上的「搜索」就收起键盘，把结果露出来
+			if (COARSE_POINTER.matches) input.blur();
+		});
+		more.addEventListener('click', async () => {
+			more.disabled = true;
+			try {
+				await showPage(run, false);
+			} catch (error) {
+				console.error('站内搜索：后面的结果没取到', error);
+				status.textContent = '后面的结果没加载出来，刷新页面再试';
+			} finally {
+				more.disabled = false;
+			}
+		});
+		// 从文章返回时，浏览器可能把搜索词填回输入框，照着它把结果也搜出来
+		if (input.value.trim()) void search(input.value);
+	}
+
+	/** 顶栏「搜索」按钮：打开它 data-search-open 指向的浮层 */
+	function setupOpener(opener: HTMLElement) {
+		const dialog = document.getElementById(opener.dataset.searchOpen ?? '');
+		if (!(dialog instanceof HTMLDialogElement)) return;
+		const input = dialog.querySelector<HTMLInputElement>('[data-search-input]');
+		const page = document.documentElement;
+		opener.addEventListener('click', () => {
+			dialog.showModal();
+			page.classList.add('search-open');
+			// 在点击里直接聚焦，手机上键盘才会弹出来；再次打开时选中上次的词，直接打字就换掉
+			input?.focus();
+			input?.select();
+		});
+		dialog.addEventListener('close', () => page.classList.remove('search-open'));
+		// 点面板外面压暗的地方关闭：面板内容铺满整个 dialog，点到 dialog 本身就是点在遮罩上
+		dialog.addEventListener('click', (event) => {
+			if (event.target === dialog) dialog.close();
+		});
+		dialog.querySelectorAll('[data-search-close]').forEach((button) => {
+			button.addEventListener('click', () => dialog.close());
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-search]').forEach(setup);
+	document.querySelectorAll<HTMLElement>('[data-search-open]').forEach(setupOpener);
+</script>
+
+<style>
+	.search-bar {
+		display: flex;
+		align-items: center;
+		gap: var(--s-2);
+	}
+
+	.search-field {
+		position: relative;
+		display: flex;
+		flex: 1;
+		align-items: center;
+		min-width: 0;
+	}
+
+	.search-field :global(.search-field-icon) {
+		position: absolute;
+		left: 14px;
+		color: var(--c-text-2);
+		pointer-events: none;
+	}
+
+	.search-input {
+		width: 100%;
+		min-width: 0;
+		min-height: 48px;
+		margin: 0;
+		padding: 0 var(--s-3) 0 44px;
+		border: 1px solid var(--c-field-border);
+		border-radius: var(--radius-img);
+		background: var(--c-bg);
+		color: var(--c-text);
+		font: inherit;
+		/* 不小于 16px：iPhone 上点进输入框不会放大页面 */
+		font-size: 17px;
+		line-height: 1.4;
+		letter-spacing: 0.02em;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.search-input::-webkit-search-decoration {
+		-webkit-appearance: none;
+	}
+
+	.search-input::placeholder {
+		color: var(--c-text-2);
+		opacity: 1;
+	}
+
+	.search-input:focus-visible {
+		outline: none;
+		border-color: var(--c-focus);
+		box-shadow: 0 0 0 1px var(--c-focus);
+	}
+
+	.search-status {
+		margin: var(--s-4) 0 0;
+		color: var(--c-text-2);
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	.search-status:empty,
+	.search-results:empty {
+		display: none;
+	}
+
+	.search-results {
+		margin: var(--s-1) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.search-results :global(li + li) {
+		border-top: 1px solid var(--c-line);
+	}
+
+	.search-results :global(.search-hit) {
+		display: block;
+		padding: var(--s-3) 0 14px;
+		color: var(--c-text);
+		text-decoration: none;
+	}
+
+	.search-results :global(.search-hit-title) {
+		display: block;
+		font-size: 17px;
+		font-weight: 600;
+		line-height: 1.5;
+		overflow-wrap: anywhere;
+	}
+
+	.search-results :global(.search-hit:hover .search-hit-title) {
+		color: var(--c-link);
+	}
+
+	/* 片段里可能有很长的命令或网址，任意处可断行，手机上不撑出横向滚动 */
+	.search-results :global(.search-hit-excerpt) {
+		display: block;
+		margin-top: 2px;
+		color: var(--c-text-2);
+		font-size: 14.5px;
+		line-height: 1.7;
+		overflow-wrap: anywhere;
+	}
+
+	.search-results :global(mark) {
+		padding: 0.08em 0.12em;
+		border-radius: 3px;
+		background: var(--c-mark-bg);
+		color: var(--c-mark-text);
+	}
+
+	.search-more {
+		min-height: 44px;
+		margin-top: var(--s-3);
+		padding: 0 var(--s-4);
+		border: var(--copy-border);
+		border-radius: var(--radius-button);
+		background: var(--c-copy-bg);
+		color: var(--c-copy-text);
+		font: inherit;
+		font-size: 15px;
+		cursor: pointer;
+		touch-action: manipulation;
+	}
+
+	.search-more:hover {
+		background: var(--c-copy-bg-hover);
+	}
+
+	.search-more:active {
+		transform: translateY(1px);
+	}
+
+	.search-more:disabled {
+		cursor: progress;
+		opacity: 0.6;
+	}
+
+	/* 首页：手机上点进搜索框时脚本把它滚到屏幕顶上，这里留一点空 */
+	.search-inline {
+		scroll-margin-top: var(--s-3);
+	}
+
+	/* 浮层里：搜索框固定在上面，结果在下面单独滚动（浮层本身见 Layout.astro） */
+	.search-panel {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.search-panel .search-bar {
+		padding: var(--s-3) var(--gutter);
+		border-bottom: 1px solid var(--c-line);
+	}
+
+	.search-panel .search-body {
+		flex: 1;
+		min-height: 0;
+		padding: 0 var(--gutter) var(--s-5);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	/* 手机上首页搜索时文章列表藏起来、页面变短：结果区至少一屏高，搜索框停在屏幕顶上，不会因为页面变短被挤到键盘后面 */
+	@media (max-width: 767px) {
+		.search-inline[data-active] .search-body {
+			min-height: 100vh;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.search-input {
+			min-height: 52px;
+			font-size: 18px;
+		}
+
+		.search-results :global(.search-hit-title) {
+			font-size: 18px;
+		}
+
+		.search-results :global(.search-hit-excerpt) {
+			font-size: 15px;
+		}
+	}
+</style>

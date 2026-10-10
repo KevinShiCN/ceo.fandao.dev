@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { codeBlockTransformer } from './src/lib/code-block.mjs';
+import { searchIndex } from './src/lib/search-index.mjs';
 
 // 正式站：https://ceo.fandao.dev 的根路径。
 // 预览构建放在别的网站的子路径下时，用环境变量换掉站点和前缀，例如：
@@ -24,6 +25,8 @@ export default defineConfig({
 		mdx(),
 		// public/ 下的独立网页不经过 Astro 路由，手动登记进 sitemap
 		sitemap({ customPages: [new URL('matt/', siteRoot).href] }),
+		// 构建完在输出目录里建站内搜索索引（pagefind/），换了 --outDir 也跟着走
+		searchIndex(),
 	],
 	image: {
 		layout: 'constrained',

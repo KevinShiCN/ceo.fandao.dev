@@ -31,6 +31,13 @@
 	--c-copy-fail-text: #ffffff;
 	--copy-border: 1px solid #cdd7de;
 
+	/* 站内搜索：命中的词铺一层稻穗的浅黄绿；输入框的边比分隔线深一档；搜索浮层后面压暗页面 */
+	--c-mark-bg: #e6eca8;
+	--c-mark-text: #1b231e;
+	--c-field-border: #b5c3cc;
+	--c-scrim: rgb(27 35 30 / 0.45);
+	--c-panel-shadow: rgb(27 35 30 / 0.18);
+
 	--font-body: var(--font-cjk);
 	--font-display: var(--font-cjk);
 	--fs-body: 17px;

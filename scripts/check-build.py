@@ -4,6 +4,8 @@
 1. 站内链接和资源：HTML / CSS / SVG / RSS / sitemap / JS 里每个站内地址，都要对得上输出目录里的真实文件。
 2. 外站资源：页面不许从别的网站加载任何东西（图片、脚本、样式、字体、iframe 等）。
    外站超链接（<a href>，包括脚本里拼出来的 <a href>）不算，只单独计数。
+3. 站内搜索 Pagefind 自带的脚本（构建时生成在 pagefind/）照样逐个检查，其中几处字符串读过上下文、确认不下载东西，
+   在 PAGEFIND_CHECKED 里逐条写明原因后放行，其余照常算外站资源或坏链。
 
 用法：
     python3 scripts/check-build.py dist
@@ -62,6 +64,22 @@ JS_LOCAL_REF = re.compile(r'[\'"`](\.{0,2}/[^\'"`\s]+?\.(?:m?js|css|json|webp|pn
 SVG_HREF = re.compile(r'\s(?:xlink:)?href\s*=\s*([\'"])(.*?)\1', re.S)
 XML_URL = re.compile(r'<(?:link|loc|guid|url)\b[^>]*>\s*([^<\s]+)\s*</', re.I)
 
+# Pagefind 1.5.2 的 pagefind.js 和 pagefind-worker.js 里，被上面的规则当成外站地址或站内文件的字符串。
+# 2026-10-10 逐个读了上下文，都不会让浏览器去下载东西，所以放行；只认这两个文件里的这几个原样字符串。
+# Pagefind 升级后字符串一变，就会重新报出来，再逐个看。
+PAGEFIND_SCRIPTS = ('pagefind/pagefind.js', 'pagefind/pagefind-worker.js')
+PAGEFIND_CHECKED = {
+    'https://example.com${anchored_url}': (
+        '拼结果里小标题的锚点：把站内路径接在假域名后面交给 new URL() 设 hash，'
+        '紧接着 .replace(/^https:\\/\\/example.com/, "") 去掉假域名，不发请求'
+    ),
+    'https://example.com${normalized}': (
+        '给结果地址加高亮参数（highlightParam，本站没开）时同样借假域名解析，'
+        '紧接着 .replace(/^https:\\/\\/example\\.com/, "") 去掉，不发请求'
+    ),
+    './pagefind_web_bg.js': 'wasm-bindgen 生成的 WebAssembly 导入对象的键名（模块名），不是文件地址，不下载',
+}
+
 
 def doc_url(out_dir: Path, file: Path) -> str:
     """文件在站点上的地址：.../index.html 按目录地址算（和静态服务器一致）"""
@@ -84,6 +102,7 @@ class Report:
         self.external_resources: list[tuple[str, str, str]] = []
         self.external_links: list[tuple[str, str]] = []
         self.js_urls: list[tuple[str, str, str]] = []  # (文件, 地址, 分类)
+        self.checked: list[tuple[str, str]] = []  # (文件, 字符串)：Pagefind 脚本里逐条核对过、放行的
 
 
 class PageParser(HTMLParser):
@@ -178,6 +197,14 @@ def check_css(report: Report, out_dir: Path, source: str, base_url: str, css: st
         check_ref(report, out_dir, source, base_url, url, 'resource')
 
 
+def pagefind_checked(report: Report, source: str, text: str) -> bool:
+    """Pagefind 脚本里核对过的字符串：记下来，不再按地址检查"""
+    if source in PAGEFIND_SCRIPTS and text in PAGEFIND_CHECKED:
+        report.checked.append((source, text))
+        return True
+    return False
+
+
 def classify_js_urls(report: Report, source: str, scripts: list[tuple[str, str]]) -> None:
     """脚本里的 http(s)：只有拼成 <a href> 的才算外站超链接，其余一律记为外站资源。"""
     code = '\n'.join(text for kind, text in scripts if kind != 'application/json')
@@ -191,6 +218,8 @@ def classify_js_urls(report: Report, source: str, scripts: list[tuple[str, str]]
                 report.js_urls.append((source, match.group(), label))
             continue
         for match in JS_HTTP.finditer(text):
+            if pagefind_checked(report, source, match.group()):
+                continue
             before = text[max(0, match.start() - 40) : match.start()]
             as_href = re.search(r'href\s*[:=]\s*[\'"`]?$', before)
             report.js_urls.append((source, match.group(), '脚本拼 <a href>' if as_href else '用途不明'))
@@ -203,7 +232,8 @@ def json_key_of(text: str, pos: int) -> str | None:
 
 def check_js_local_refs(report: Report, out_dir: Path, source: str, base_url: str, code: str) -> None:
     for ref in JS_LOCAL_REF.findall(code):
-        check_ref(report, out_dir, source, base_url, ref, 'resource')
+        if not pagefind_checked(report, source, ref):
+            check_ref(report, out_dir, source, base_url, ref, 'resource')
 
 
 def main() -> int:
@@ -271,6 +301,12 @@ def main() -> int:
     for source, url, label in report.js_urls:
         if '用途不明' in label:
             print(f'    用途不明 {source} -> {url}')
+    print(f'  Pagefind 脚本里逐条核对后放行的字符串：{len(report.checked)} 处')
+    for source, text in report.checked:
+        print(f'    {source}：{text}（{PAGEFIND_CHECKED[text]}）')
+    unseen = sorted(set(PAGEFIND_CHECKED) - {text for _, text in report.checked})
+    if unseen:
+        print(f'    放行清单里这些没在构建产物里出现，Pagefind 可能升级了，清单该更新：{"、".join(unseen)}')
     print(f'  需要处理：坏链 {len(report.broken)}，外站资源 {len(report.external_resources)}，脚本里用途不明的外链 {len(js_bad)}')
     return 1 if report.broken or report.external_resources or js_bad else 0
 
