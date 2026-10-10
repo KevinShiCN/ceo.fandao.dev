@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matt Pocock 的 Skills 线路图：38 个 Skill 怎么用出效果</title>
+<meta name="description" content="Matt Pocock 的 38 个 Agent Skill 中文讲解：线路图、场景路由、逐个详解、阶段切换、概念词典、公开发言和版本演进。">
+<style>/* ===== tokens ===== */
+:root {
+  color-scheme: light;
+  --paper: oklch(98.7% 0.004 240);
+  --surface: oklch(100% 0 0);
+  --sunken: oklch(96.4% 0.007 245);
+  --ink: oklch(23% 0.035 258);
+  --ink-2: oklch(40% 0.03 258);
+  --ink-3: oklch(50% 0.022 258);
+  --rule: oklch(90% 0.01 250);
+  --rule-strong: oklch(80% 0.014 250);
+  --focus: oklch(52% 0.2 262);
+  --on-accent: oklch(99% 0 0);
+  --line-main: oklch(50% 0.19 262);
+  --line-way: oklch(47% 0.17 305);
+  --line-triage: oklch(63% 0.15 62);
+  --line-bug: oklch(54% 0.2 27);
+  --line-health: oklch(52% 0.13 158);
+  --line-vocab: oklch(56% 0.07 70);
+  --line-free: oklch(60% 0.02 258);
+  --line-off: oklch(72% 0.012 258);
+  --tint-main: oklch(95.5% 0.025 262);
+  --scrim: oklch(23% 0.035 258 / 0.38);
+  --shadow-pop: 0 1px 0 oklch(23% 0.035 258 / 0.06), 0 18px 40px -16px oklch(23% 0.035 258 / 0.3);
+  --r-s: 4px;
+  --r-m: 8px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 72px;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: oklch(19% 0.02 258);
+    --surface: oklch(23% 0.022 258);
+    --sunken: oklch(26% 0.022 258);
+    --ink: oklch(94% 0.01 250);
+    --ink-2: oklch(81% 0.015 250);
+    --ink-3: oklch(71% 0.015 250);
+    --rule: oklch(32% 0.02 258);
+    --rule-strong: oklch(44% 0.02 258);
+    --focus: oklch(76% 0.13 262);
+    --on-accent: oklch(16% 0.02 258);
+    --line-main: oklch(70% 0.15 262);
+    --line-way: oklch(70% 0.14 305);
+    --line-triage: oklch(78% 0.13 65);
+    --line-bug: oklch(70% 0.16 27);
+    --line-health: oklch(74% 0.13 158);
+    --line-vocab: oklch(74% 0.07 70);
+    --line-free: oklch(66% 0.02 258);
+    --line-off: oklch(50% 0.015 258);
+    --tint-main: oklch(31% 0.05 262);
+    --scrim: oklch(8% 0.02 258 / 0.62);
+    --shadow-pop: 0 18px 40px -16px oklch(0% 0 0 / 0.65);
+  }
+}
+
+/* ===== base ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html.lock { overflow: hidden; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.75 var(--font-sans); }
+a { color: var(--line-main); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+code, kbd { font-family: var(--font-mono); font-size: .9em; }
+code { padding: 1px 5px; border-radius: var(--r-s); background: var(--sunken); }
+p { margin: 0 0 var(--s3); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 100; padding: 8px 14px; background: var(--ink); color: var(--paper); border-radius: var(--r-s); }
+.skip-link:focus { left: 8px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--ink-3); }
+.small { font-size: 14px; }
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ===== top bar ===== */
+.topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: var(--s5); height: 56px; padding: 0 150px 0 var(--s5); background: var(--paper); border-bottom: 1px solid var(--rule); }
+.brand { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--ink); text-decoration: none; }
+.qs { position: relative; flex: 1; max-width: 440px; }
+.qs .ico { position: absolute; left: 10px; top: 9px; color: var(--ink-3); pointer-events: none; }
+.qs input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 15px var(--font-sans); }
+.qs input::placeholder { color: var(--ink-3); }
+.qs-list { position: absolute; top: 42px; left: 0; right: 0; display: none; margin: 0; padding: 4px; list-style: none; max-height: 60vh; overflow: auto; background: var(--surface); border: 1px solid var(--rule-strong); border-radius: var(--r-m); box-shadow: var(--shadow-pop); }
+.qs-list.on { display: block; }
+.qs-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 8px 10px; border-radius: var(--r-s); cursor: pointer; }
+.qs-list li[aria-selected="true"], .qs-list li:hover { background: var(--tint-main); }
+.qs-list .cmd { font: 600 14px var(--font-mono); }
+.qs-list .one { font-size: 13px; color: var(--ink-2); }
+.qs-list .empty { display: block; color: var(--ink-3); cursor: default; }
+
+/* ===== shell ===== */
+.shell { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: var(--s7); max-width: 1360px; margin: 0 auto; padding: 0 var(--s5); }
+.toc { position: sticky; top: 72px; align-self: start; max-height: calc(100vh - 88px); overflow: auto; padding: var(--s5) 0; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc a { display: block; padding: 6px 10px; color: var(--ink-2); text-decoration: none; border-radius: var(--r-s); font-size: 14px; line-height: 1.45; }
+.toc a:hover { background: var(--sunken); color: var(--ink); }
+.toc a[aria-current="true"] { color: var(--ink); background: var(--tint-main); font-weight: 600; }
+.toc-mobile { display: none; margin: var(--s4) 0 0; border: 1px solid var(--rule); border-radius: var(--r-m); background: var(--surface); }
+.toc-mobile summary { padding: 10px 14px; cursor: pointer; font-weight: 600; }
+.toc-mobile ol { margin: 0; padding: 0 14px 12px 32px; }
+.toc-mobile a { display: block; padding: 4px 0; }
+main { min-width: 0; }
+.section { padding: var(--s8) 0; border-top: 1px solid var(--rule); scroll-margin-top: 60px; }
+.section.first { border-top: 0; padding-top: var(--s6); }
+h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.2; margin: 0 0 var(--s4); letter-spacing: -.01em; }
+h2 { font-size: clamp(23px, 2.6vw, 30px); line-height: 1.3; margin: 0 0 var(--s3); }
+h3 { font-size: 18px; line-height: 1.45; margin: 0 0 var(--s2); }
+h4 { font-size: 16px; line-height: 1.5; margin: 0 0 4px; }
+.lede { font-size: 18px; color: var(--ink-2); max-width: 40em; margin: 0 0 var(--s5); }
+.prose { max-width: 44em; }
+.sec-intro { color: var(--ink-2); max-width: 44em; margin-bottom: var(--s5); }
+
+/* ===== buttons, chips, tags ===== */
+.btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 500 14px var(--font-sans); text-decoration: none; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.btn:hover { border-color: var(--ink-3); background: var(--sunken); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+.btn.primary { background: var(--line-main); border-color: var(--line-main); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.sk { --dot: var(--line-free); display: inline; padding: 1px 6px; border: 1px solid transparent; border-radius: var(--r-s); background: var(--sunken); color: var(--ink); font: 500 .9em/1.7 var(--font-mono); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color .15s, color .15s; }
+.sk::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 50%; border: 2.5px solid var(--dot); background: var(--surface); vertical-align: -1px; }
+.sk:hover { border-color: var(--focus); color: var(--focus); }
+.chips .sk, .route-line .sk, .free-grid .sk, td .sk { display: inline-block; font-size: 14px; border-color: var(--rule-strong); background: var(--surface); }
+.chips .sk:hover, .route-line .sk:hover, .free-grid .sk:hover, td .sk:hover { border-color: var(--focus); }
+.chips .sk:active, .route-line .sk:active, .free-grid .sk:active { transform: translateY(1px); }
+[data-line="main"] { --dot: var(--line-main); }
+[data-line="way"] { --dot: var(--line-way); }
+[data-line="triage"] { --dot: var(--line-triage); }
+[data-line="bug"] { --dot: var(--line-bug); }
+[data-line="health"] { --dot: var(--line-health); }
+[data-line="vocab"] { --dot: var(--line-vocab); }
+[data-line="free"] { --dot: var(--line-free); }
+[data-line="off"] { --dot: var(--line-off); }
+.tag { display: inline-block; padding: 0 7px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); font-size: 12.5px; line-height: 1.8; color: var(--ink-2); white-space: nowrap; }
+.tag.solid { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.tag.warn { border-color: var(--line-triage); }
+
+/* ===== hero + map ===== */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: var(--s6); align-items: start; }
+.start { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); padding: var(--s5); }
+.start h2 { font-size: 18px; margin-bottom: var(--s4); }
+.start ol { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s5); }
+.start li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--s3); font-size: 15px; line-height: 1.75; }
+.start li::before { content: counter(s); width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 3px solid var(--line-main); color: var(--ink); font-weight: 700; font-size: 13px; }
+.start .note { margin: var(--s3) 0 0; font-size: 13px; color: var(--ink-3); }
+.map-frame { margin: var(--s5) 0 var(--s3); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); overflow-x: auto; overscroll-behavior-x: contain; }
+.map-frame svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.map-hint { display: none; font-size: 13px; color: var(--ink-3); margin: 0 0 var(--s2); }
+.ln { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ln-main { stroke: var(--line-main); stroke-width: 8; }
+.ln-main-alt { stroke: var(--line-main); stroke-width: 5; }
+.ln-detour { stroke: var(--line-main); stroke-width: 4; stroke-dasharray: 2 9; }
+.ln-way { stroke: var(--line-way); stroke-width: 7; }
+.ln-triage { stroke: var(--line-triage); stroke-width: 7; }
+.ln-bug { stroke: var(--line-bug); stroke-width: 7; }
+.ln-health { stroke: var(--line-health); stroke-width: 7; }
+.ln-vocab { stroke: var(--line-vocab); stroke-width: 5; stroke-dasharray: 1 10; }
+.ln-start { stroke: var(--line-free); stroke-width: 4; stroke-dasharray: 2 8; }
+.ln-shaft { stroke: var(--line-vocab); stroke-width: 3; stroke-dasharray: 1 7; }
+.st { cursor: pointer; }
+.st .mk { fill: var(--surface); stroke: var(--ink); stroke-width: 3.5; transition: stroke .15s, stroke-width .15s; }
+.st .mk.ix { stroke-width: 4.5; }
+.st text, .map-note { paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.t-cmd { font: 600 15px var(--font-mono); fill: var(--ink); }
+.t-cmd.sm { font-size: 14px; }
+.t-cap { font: 14px var(--font-sans); fill: var(--ink-2); }
+.map-note { font: 14px var(--font-sans); fill: var(--ink-3); }
+.map-note.b { font-weight: 600; fill: var(--ink-2); }
+.jn { fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
+.term { fill: var(--ink); }
+.st:hover .mk { stroke: var(--focus); stroke-width: 5; }
+.st:hover .t-cmd { fill: var(--focus); }
+.st:focus { outline: none; }
+.st:focus-visible .mk { stroke: var(--focus); stroke-width: 6; }
+.st:focus-visible .t-cmd { fill: var(--focus); text-decoration: underline; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin: 0 0 var(--s5); padding: 0; list-style: none; font-size: 14px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: var(--s2); }
+.sw { --dot: var(--line-free); width: 30px; height: 0; border-top: 6px solid var(--dot); border-radius: 3px; }
+.sw.dot { border-top-style: dotted; }
+.free-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s5); margin-top: var(--s4); }
+.free-grid h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin-bottom: var(--s2); }
+.free-grid ul { list-style: none; margin: 0; padding: 0; }
+.free-grid li { margin-bottom: var(--s2); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.free-grid li .sk { margin-bottom: 2px; }
+
+/* ===== tips ===== */
+.tipgroups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); }
+.tipgroup > h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin-bottom: var(--s2); }
+.tip { padding: var(--s4) 0; border-top: 1px solid var(--rule); }
+.tip p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.tip .src { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
+.tip blockquote { margin: 6px 0 0; font-size: 14px; color: var(--ink-3); }
+
+/* ===== router ===== */
+.router { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--s6); align-items: start; }
+.sit-group h3 { font-size: 14px; color: var(--ink-3); font-weight: 600; margin: var(--s4) 0 var(--s1); }
+.sit-group:first-child h3 { margin-top: 0; }
+.sit { display: block; width: 100%; min-height: 40px; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-s); background: none; color: var(--ink); font: 15px/1.5 var(--font-sans); text-align: left; cursor: pointer; transition: background-color .15s; }
+.sit:hover { background: var(--sunken); }
+.sit[aria-pressed="true"] { background: var(--tint-main); border-color: var(--rule-strong); font-weight: 600; }
+.route { position: sticky; top: 76px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); padding: var(--s5); }
+.route h3 { font-size: 20px; }
+.route-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) 0; margin: var(--s4) 0; padding: 0; list-style: none; }
+.route-line li { display: flex; align-items: center; }
+.route-line li + li::before { content: ""; width: 26px; height: 4px; margin: 0 4px; border-radius: 2px; background: var(--line-main); }
+.route .note { color: var(--ink-2); margin: 0; }
+.route .src { margin-top: var(--s3); font-size: 13px; color: var(--ink-3); }
+
+/* ===== catalog ===== */
+.cat-tools { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin: var(--s4) 0 var(--s2); }
+.cat-search { position: relative; flex: 1 1 260px; max-width: 360px; }
+.cat-search .ico { position: absolute; left: 10px; top: 11px; color: var(--ink-3); pointer-events: none; }
+.cat-search input { width: 100%; height: 40px; padding: 0 12px 0 36px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 15px var(--font-sans); }
+.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: var(--r-s); overflow: hidden; }
+.seg button { min-height: 38px; padding: 0 12px; border: 0; border-left: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink-2); font: 14px var(--font-sans); cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { background: var(--sunken); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.cat-count { font-size: 14px; color: var(--ink-3); }
+.cat-group { margin-top: var(--s6); }
+.cat-group h3 .n { color: var(--ink-3); font-weight: 500; font-size: 15px; margin-left: 6px; }
+.cat-group .gnote { margin: 0 0 var(--s2); font-size: 14px; color: var(--ink-3); }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s6); margin: 0; padding: 0; list-style: none; }
+.row { border-top: 1px solid var(--rule); }
+.row a { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: center; padding: 11px 6px; color: inherit; text-decoration: none; border-radius: var(--r-s); transition: background-color .15s; }
+.row a:hover { background: var(--sunken); }
+.row .dot { width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--dot); background: var(--surface); }
+.row .cmd { font: 600 15px var(--font-mono); overflow-wrap: anywhere; }
+.row .tags { display: flex; gap: 4px; }
+.row .one { grid-column: 2 / 4; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+.empty-state { padding: var(--s6) 0; color: var(--ink-2); }
+.empty-state p { margin-bottom: var(--s3); }
+
+/* ===== phase tree ===== */
+.tree { list-style: none; margin: var(--s5) 0; padding: 0; counter-reset: q; max-width: 780px; }
+.tree li { counter-increment: q; position: relative; padding: 0 0 var(--s5) 54px; }
+.tree li::before { content: counter(q); position: absolute; left: 0; top: 0; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 3.5px solid var(--line-main); background: var(--surface); color: var(--ink); font-weight: 700; }
+.tree li::after { content: ""; position: absolute; left: 15.5px; top: 34px; bottom: 0; width: 3px; background: var(--line-main); }
+.tree li:last-child::after { display: none; }
+.tree .q { font-weight: 650; font-size: 17px; margin: 3px 0 4px; }
+.tree .then { margin: 0 0 4px; }
+.tree .why { margin: 0; color: var(--ink-2); font-size: 15px; }
+.compare { max-width: 780px; }
+
+/* ===== why ===== */
+.fails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); }
+.fail { padding-top: var(--s4); border-top: 3px solid var(--ink); }
+.fail p { color: var(--ink-2); font-size: 15px; }
+.fail blockquote { margin: var(--s2) 0 var(--s3); font-size: 14.5px; color: var(--ink-2); }
+.fail cite { display: block; font-style: normal; font-size: 13px; color: var(--ink-3); }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); margin-top: var(--s6); }
+.split .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s2); }
+
+/* ===== glossary ===== */
+.gloss { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s7); }
+.gloss h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin: 0 0 var(--s1); }
+.gloss dl { margin: 0; }
+.gloss dt { font-weight: 650; margin-top: var(--s3); }
+.gloss dt .en { font: 500 13px var(--font-mono); color: var(--ink-3); margin-left: 6px; }
+.gloss dd { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
+
+/* ===== quotes, tables, timeline ===== */
+.quotes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s6); }
+.quotes li { border-top: 1px solid var(--rule); padding-top: var(--s3); }
+.quotes .en { margin: 0 0 6px; font-size: 15px; }
+.quotes .zh { margin: 0 0 6px; font-size: 14.5px; color: var(--ink-2); }
+.quotes .meta { margin: 0; font-size: 13px; color: var(--ink-3); }
+.table-wrap { overflow-x: auto; margin: var(--s4) 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+td .sk { white-space: normal; }
+.timeline { list-style: none; margin: var(--s5) 0 0 10px; padding: 0; border-left: 3px solid var(--rule-strong); max-width: 820px; }
+.timeline li { position: relative; padding: 0 0 var(--s5) var(--s5); }
+.timeline li::before { content: ""; position: absolute; left: -11.5px; top: 5px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 3.5px solid var(--line-main); }
+.timeline .when { font-weight: 600; color: var(--ink); }
+.timeline .when .ver { font-family: var(--font-mono); margin-left: 8px; }
+.timeline ul { margin: 4px 0 0; padding-left: 1.2em; color: var(--ink-2); font-size: 15px; }
+.env-list { max-width: 48em; padding-left: 1.2em; }
+.env-list li { margin-bottom: var(--s3); }
+.callout { max-width: 48em; padding: var(--s4) var(--s5); border: 1px solid var(--line-triage); border-radius: var(--r-m); background: var(--surface); margin: var(--s5) 0; }
+.callout h3 { font-size: 16px; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* ===== drawer ===== */
+.scrim { position: fixed; inset: 0; z-index: 60; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 70; width: min(620px, 100vw); display: flex; flex-direction: column; background: var(--surface); box-shadow: var(--shadow-pop); transform: translateX(100%); visibility: hidden; transition: transform .24s var(--ease-out), visibility 0s linear .24s; }
+.drawer.on { transform: none; visibility: visible; transition: transform .24s var(--ease-out), visibility 0s; }
+.d-bar { display: flex; align-items: center; gap: var(--s2); padding: 10px 150px 10px var(--s4); border-bottom: 1px solid var(--rule); }
+.d-head { padding: var(--s5) var(--s5) var(--s3); }
+.d-head h2 { font: 700 26px/1.3 var(--font-mono); margin: 0 0 var(--s2); overflow-wrap: anywhere; }
+.d-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.d-one { font-size: 17px; margin: var(--s3) 0 0; }
+.d-body { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 var(--s5) var(--s7); }
+.d-sec { margin-top: var(--s5); }
+.d-sec > h3 { font-size: 14.5px; color: var(--ink-3); font-weight: 600; margin: 0 0 var(--s2); }
+.d-sec ul, .d-sec ol { margin: 0; padding-left: 1.3em; }
+.d-sec li { margin: 5px 0; }
+.d-sec .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.d-note { padding: var(--s3) var(--s4); border: 1px solid var(--line-triage); border-radius: var(--r-m); font-size: 14.5px; }
+.d-quote { margin: 0; font-size: 15px; }
+.d-quote cite { display: block; margin-top: 4px; font-style: normal; font-size: 13px; color: var(--ink-3); }
+.d-terms dt { font-weight: 600; font-family: var(--font-mono); font-size: 14px; margin-top: var(--s2); }
+.d-terms dd { margin: 0; color: var(--ink-2); font-size: 15px; }
+.faq { border-top: 1px solid var(--rule); padding: 8px 0; }
+.faq summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.faq p { margin: 4px 0 0; color: var(--ink-2); font-size: 15px; }
+.flow { padding: var(--s3) 0; border-top: 1px solid var(--rule); }
+.flow h4 { margin-bottom: 2px; }
+.flow p { margin: 0 0 6px; font-size: 14.5px; color: var(--ink-2); }
+.d-src { font-size: 13px; color: var(--ink-3); }
+.d-src ul { padding-left: 1.2em; }
+.toast { position: fixed; left: 50%; bottom: 24px; z-index: 90; transform: translate(-50%, 16px); padding: 10px 16px; border-radius: var(--r-m); background: var(--ink); color: var(--paper); font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== responsive ===== */
+@media (max-width: 1180px) {
+  .tipgroups { grid-template-columns: 1fr; gap: var(--s4); }
+  .free-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  .shell { grid-template-columns: 1fr; gap: 0; }
+  .toc { display: none; }
+  .toc-mobile { display: block; }
+  .router { grid-template-columns: 1fr; }
+  .route { position: static; }
+}
+@media (max-width: 900px) {
+  .map-hint { display: block; }
+  .rows, .fails, .split, .gloss, .quotes, .start ol { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .topbar { padding: 0 128px 0 var(--s3); gap: var(--s3); }
+  .brand { display: none; }
+  .shell { padding: 0 var(--s4); }
+  .section { padding: var(--s7) 0; }
+  .free-grid { grid-template-columns: 1fr; }
+  .d-bar { padding-right: 128px; }
+  .d-head, .d-body { padding-left: var(--s4); padding-right: var(--s4); }
+  .row .tags { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+@media print {
+  .topbar, .toc, .toc-mobile, .drawer, .scrim, .toast { display: none !important; }
+  .shell { display: block; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="topbar">
+  <a class="brand" href="#top">Matt Pocock Skills 线路图</a>
+  <div class="qs" role="search">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <label class="vh" for="qs-input">搜索 Skill</label>
+    <input id="qs-input" type="search" placeholder="搜 Skill：tdd、追问、bug、spec（按 / 键）" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="qs-list" aria-autocomplete="list">
+    <ul class="qs-list" id="qs-list" role="listbox" aria-label="搜索结果"></ul>
+  </div>
+</header>
+<div class="shell">
+  <nav class="toc" aria-label="目录">
+    <ol id="toc-list">
+      <li><a href="#top">线路图</a></li>
+      <li><a href="#tips">用出效果的 8 条</a></li>
+      <li><a href="#router">我现在要……</a></li>
+      <li><a href="#catalog">38 站索引</a></li>
+      <li><a href="#phase">换不换会话</a></li>
+      <li><a href="#why">为什么这样设计</a></li>
+      <li><a href="#terms">概念词典</a></li>
+      <li><a href="#matt">Matt 公开怎么说</a></li>
+      <li><a href="#history">版本和改名</a></li>
+      <li><a href="#sources">来源</a></li>
+    </ol>
+  </nav>
+  <main id="main">
+    <details class="toc-mobile">
+      <summary>目录</summary>
+      <ol>
+        <li><a href="#top">线路图</a></li>
+        <li><a href="#tips">用出效果的 8 条</a></li>
+        <li><a href="#router">我现在要……</a></li>
+        <li><a href="#catalog">38 站索引</a></li>
+        <li><a href="#phase">换不换会话</a></li>
+        <li><a href="#why">为什么这样设计</a></li>
+        <li><a href="#terms">概念词典</a></li>
+        <li><a href="#matt">Matt 公开怎么说</a></li>
+        <li><a href="#history">版本和改名</a></li>
+        <li><a href="#sources">来源</a></li>
+      </ol>
+    </details>
+
+    <section class="section first" id="top" aria-labelledby="h-top">
+      <h1 id="h-top">Matt Pocock 的 Skills 线路图</h1>
+      <p class="lede">Matt 把他的 Skill 排成一条主干线：从想法到上线。三条匝道从旁边汇进来，底下垫着一层共用词汇，外面还有一圈随时能用的独立站。一共 38 个：插件里 25 个，另有杂项 4 个、测试版 9 个。点图上任何一站，看它干什么、什么时候用、怎么用好。</p>
+      <p class="muted small">内容整理自 <a href="https://github.com/mattpocock/skills" rel="noopener">mattpocock/skills</a>（MIT License）。</p>
+      <div class="start" aria-labelledby="h-start">
+        <h2 id="h-start">现在就能做的 3 步</h2>
+        <ol>
+          <li><span>下次改代码前，先敲 <a class="sk" href="#skill/grilling">/grilling</a>，让 Agent 把你问清楚再动手。这次要新定业务名词，就换成 <a class="sk" href="#skill/grill-with-docs">/grill-with-docs</a>。</span></li>
+          <li><span>问完敲 <a class="sk" href="#skill/to-spec">/to-spec</a> 存档。一个会话做得完，接着敲 <a class="sk" href="#skill/implement">/implement</a>。</span></li>
+          <li><span>不知道该用哪个，敲 <a class="sk" href="#skill/ask-matt">/ask-matt</a> 问路，或者看下面的「我现在要……」。</span></li>
+        </ol>
+        <p class="note">这 3 步是我自己在用的轻量版。Matt 原版在有仓库时默认用 /grill-with-docs。</p>
+      </div>
+
+      <p class="map-hint">图比屏幕宽，左右滑动看全图。</p>
+      <div class="map-frame">
+        <svg viewBox="0 0 1200 600" role="group" aria-labelledby="map-title">
+          <title id="map-title">Skill 线路图：主干线从想法到上线，三条匝道和一条保养线汇入，地下一层是共用词汇</title>
+          <!-- 线 -->
+          <path class="ln ln-vocab" d="M150 450 H1010"/>
+          <path class="ln ln-shaft" d="M250 440 V318"/>
+          <path class="ln ln-start" d="M60 300 H250"/>
+          <path class="ln ln-health" d="M40 150 H160 C214 150 250 186 250 236 V300"/>
+          <path class="ln ln-way" d="M330 80 H536 C586 80 610 112 610 162 V300"/>
+          <path class="ln ln-main" d="M250 300 H1120"/>
+          <path class="ln ln-detour" d="M292 300 C292 232 318 196 370 196 C422 196 448 232 448 300"/>
+          <path class="ln ln-main-alt" d="M520 300 C548 300 556 372 596 372 H786 C826 372 846 346 852 316"/>
+          <path class="ln ln-main-alt" d="M854 290 C854 240 859 214 870 214 C881 214 886 240 886 290"/>
+          <path class="ln ln-triage" d="M1140 520 H1000 C940 520 888 474 888 404 V316"/>
+          <path class="ln ln-bug" d="M60 535 H440"/>
+
+          <!-- 起点、终点、岔口和说明 -->
+          <rect class="term" x="35" y="136" width="10" height="28" rx="3"/>
+          <text class="map-note" x="36" y="186">有空就跑一次</text>
+          <rect class="term" x="325" y="66" width="10" height="28" rx="3"/>
+          <text class="map-note" x="314" y="85" text-anchor="end">大而模糊，一个会话装不下</text>
+          <rect class="term" x="1135" y="506" width="10" height="28" rx="3"/>
+          <text class="map-note" x="1150" y="494" text-anchor="end">别人报的 bug 和需求</text>
+          <rect class="term" x="55" y="521" width="10" height="28" rx="3"/>
+          <text class="map-note" x="52" y="511">出 bug 了</text>
+          <rect class="term" x="435" y="521" width="10" height="28" rx="3"/>
+          <text class="map-note" x="440" y="511" text-anchor="middle">修好，补回归测试</text>
+          <rect class="term" x="1115" y="282" width="10" height="36" rx="3"/>
+          <text class="map-note b" x="1120" y="340" text-anchor="middle">提交代码</text>
+          <rect class="jn" x="511" y="291" width="18" height="18" transform="rotate(45 520 300)"/>
+          <text class="map-note b" x="520" y="274" text-anchor="middle">跨多个会话？</text>
+          <text class="map-note" x="566" y="288">是</text>
+          <text class="map-note" x="690" y="396" text-anchor="middle">否：一个会话做得完，直接实现</text>
+          <text class="map-note" x="560" y="438" text-anchor="middle">地下层：共用词汇，上面的站会调用它们</text>
+
+          <!-- 站 -->
+          <a class="st" href="#skill/setup-matt-pocock-skills" aria-label="/setup-matt-pocock-skills：起点站，每个仓库先跑一次">
+            <circle class="mk" cx="60" cy="300" r="10"/>
+            <text class="t-cap" x="30" y="246">起点站：每个仓库先跑一次</text>
+            <text class="t-cmd sm" x="30" y="266">/setup-matt-pocock-skills</text>
+          </a>
+          <a class="st" href="#skill/improve-codebase-architecture" aria-label="/improve-codebase-architecture：保养线，找能加深的模块">
+            <circle class="mk" cx="160" cy="150" r="10"/>
+            <text class="t-cap" x="160" y="108" text-anchor="middle">保养线：找能加深的模块</text>
+            <text class="t-cmd sm" x="160" y="127" text-anchor="middle">/improve-codebase-architecture</text>
+          </a>
+          <a class="st" href="#skill/grill-with-docs" aria-label="/grill-with-docs：被追问，顺手定名词">
+            <circle class="mk ix" cx="250" cy="300" r="13"/>
+            <text class="t-cmd" x="250" y="338" text-anchor="middle">/grill-with-docs</text>
+            <text class="t-cap" x="250" y="357" text-anchor="middle">被追问，顺手定名词</text>
+          </a>
+          <a class="st" href="#skill/prototype" aria-label="/prototype：原型绕行，聊不清就做出来看">
+            <circle class="mk" cx="370" cy="196" r="10"/>
+            <text class="t-cap" x="370" y="153" text-anchor="middle">原型绕行：聊不清就做出来看</text>
+            <text class="t-cmd" x="370" y="172" text-anchor="middle">/prototype</text>
+          </a>
+          <a class="st" href="#skill/handoff" aria-label="/handoff：带着上下文去做原型">
+            <circle class="mk" cx="302" cy="241" r="6"/>
+          </a>
+          <a class="st" href="#skill/handoff" aria-label="/handoff：做完原型带着结论回来">
+            <circle class="mk" cx="438" cy="241" r="6"/>
+            <text class="t-cmd sm" x="452" y="238">/handoff 往返</text>
+          </a>
+          <a class="st" href="#skill/to-spec" aria-label="/to-spec：整理成 spec">
+            <circle class="mk ix" cx="610" cy="300" r="12"/>
+            <text class="t-cmd" x="610" y="338" text-anchor="middle">/to-spec</text>
+            <text class="t-cap" x="610" y="357" text-anchor="middle">整理成 spec</text>
+          </a>
+          <a class="st" href="#skill/to-tickets" aria-label="/to-tickets：拆成一张张小单">
+            <circle class="mk" cx="735" cy="300" r="10"/>
+            <text class="t-cmd" x="735" y="338" text-anchor="middle">/to-tickets</text>
+            <text class="t-cap" x="735" y="357" text-anchor="middle">拆成一张张小单</text>
+          </a>
+          <a class="st" href="#skill/implement" aria-label="/implement：按单实现，收尾审查">
+            <rect class="mk ix" x="846" y="287" width="48" height="26" rx="13"/>
+            <text class="t-cap" x="834" y="243" text-anchor="end">按单实现，收尾审查</text>
+            <text class="t-cmd" x="834" y="262" text-anchor="end">/implement</text>
+          </a>
+          <a class="st" href="#skill/tdd" aria-label="/tdd：红到绿，一次一片">
+            <circle class="mk" cx="870" cy="214" r="10"/>
+            <text class="t-cap" x="870" y="171" text-anchor="middle">红→绿，一次一片</text>
+            <text class="t-cmd" x="870" y="190" text-anchor="middle">/tdd</text>
+          </a>
+          <a class="st" href="#skill/code-review" aria-label="/code-review：两条轴审 diff">
+            <circle class="mk" cx="1000" cy="300" r="10"/>
+            <text class="t-cmd" x="1000" y="338" text-anchor="middle">/code-review</text>
+            <text class="t-cap" x="1000" y="357" text-anchor="middle">两条轴审 diff</text>
+          </a>
+          <a class="st" href="#skill/wayfinder" aria-label="/wayfinder：画决策地图，一次做一个决定">
+            <circle class="mk" cx="450" cy="80" r="10"/>
+            <text class="t-cap" x="450" y="37" text-anchor="middle">画决策地图，一次做一个决定</text>
+            <text class="t-cmd" x="450" y="56" text-anchor="middle">/wayfinder</text>
+          </a>
+          <a class="st" href="#skill/triage" aria-label="/triage：分拣成能交给 Agent 的单">
+            <circle class="mk" cx="1000" cy="520" r="10"/>
+            <text class="t-cmd" x="1000" y="556" text-anchor="middle">/triage</text>
+            <text class="t-cap" x="1000" y="575" text-anchor="middle">分拣成能交给 Agent 的单</text>
+          </a>
+          <a class="st" href="#skill/diagnosing-bugs" aria-label="/diagnosing-bugs：先造能复现的反馈回路">
+            <circle class="mk" cx="230" cy="535" r="10"/>
+            <text class="t-cmd" x="230" y="571" text-anchor="middle">/diagnosing-bugs</text>
+            <text class="t-cap" x="230" y="590" text-anchor="middle">先造能复现的反馈回路</text>
+          </a>
+          <a class="st" href="#skill/improve-codebase-architecture" aria-label="复盘发现没有好接缝时，转 /improve-codebase-architecture">
+            <text class="map-note" x="456" y="539">没有好接缝时转 /improve-codebase-architecture</text>
+          </a>
+          <a class="st" href="#skill/domain-modeling" aria-label="/domain-modeling：磨名词，写 CONTEXT.md 和 ADR">
+            <circle class="mk" cx="250" cy="450" r="10"/>
+            <text class="t-cmd" x="250" y="480" text-anchor="middle">/domain-modeling</text>
+            <text class="t-cap" x="250" y="499" text-anchor="middle">磨名词，写 CONTEXT.md 和 ADR</text>
+          </a>
+          <a class="st" href="#skill/codebase-design" aria-label="/codebase-design：深模块词汇">
+            <circle class="mk" cx="780" cy="450" r="10"/>
+            <text class="t-cmd" x="780" y="480" text-anchor="middle">/codebase-design</text>
+            <text class="t-cap" x="780" y="499" text-anchor="middle">深模块词汇：接口、接缝、深度</text>
+          </a>
+          <a class="st" href="#skill/ask-matt" aria-label="/ask-matt：问路，不知道坐哪条线时问它">
+            <rect class="mk" x="1100" y="60" width="22" height="22" rx="4"/>
+            <text class="t-cmd" x="1088" y="70" text-anchor="end">/ask-matt</text>
+            <text class="t-cap" x="1088" y="89" text-anchor="end">问路：不知道坐哪条线</text>
+          </a>
+        </svg>
+      </div>
+      <ul class="legend" aria-label="图例">
+        <li><span class="sw" data-line="main"></span>主干线：想法到上线</li>
+        <li><span class="sw" data-line="way"></span>匝道：大到一个会话装不下</li>
+        <li><span class="sw" data-line="triage"></span>匝道：别人报的问题</li>
+        <li><span class="sw" data-line="bug"></span>匝道：出 bug 了，修好即止</li>
+        <li><span class="sw" data-line="health"></span>保养线：代码健康</li>
+        <li><span class="sw dot" data-line="vocab"></span>地下层：共用词汇</li>
+        <li><span class="sw dot" data-line="free"></span>起点站和虚线绕行</li>
+      </ul>
+
+      <h2>不在线路上的独立站</h2>
+      <p class="sec-intro">不属于哪条线，什么时候需要什么时候用。灰色圆点表示独立站。</p>
+      <div class="free-grid">
+        <div>
+          <h3>问路和追问</h3>
+          <ul>
+            <li><a class="sk" href="#skill/ask-matt">/ask-matt</a><br>按你的情况指到该用的 Skill 或路线</li>
+            <li><a class="sk" href="#skill/grill-me">/grill-me</a><br>没有代码仓库时的追问，不存文件</li>
+            <li><a class="sk" href="#skill/grilling">/grilling</a><br>追问的内核，好几个 Skill 都在调用它</li>
+          </ul>
+        </div>
+        <div>
+          <h3>资料和别人</h3>
+          <ul>
+            <li><a class="sk" href="#skill/research">/research</a><br>后台读一手资料，留下带出处的笔记</li>
+            <li><a class="sk" href="#skill/to-questionnaire">/to-questionnaire</a><br>答案在别人脑子里时，生成一份问卷</li>
+            <li><a class="sk" href="#skill/wizard">/wizard</a><br>只有人能做的步骤，生成交互式向导</li>
+          </ul>
+        </div>
+        <div>
+          <h3>会话和表达</h3>
+          <ul>
+            <li><a class="sk" href="#skill/handoff">/handoff</a><br>把会话写成能带走的交接文件</li>
+            <li><a class="sk" href="#skill/wait-what">/wait-what</a><br>没听懂时让它换个说法重讲</li>
+            <li><a class="sk" href="#skill/writing-for-agents">/writing-for-agents</a><br>写给 Agent 看的文档怎么写</li>
+            <li><a class="sk" href="#skill/teach">/teach</a><br>跨好几次会话学一个新东西</li>
+          </ul>
+        </div>
+        <div>
+          <h3>代码</h3>
+          <ul>
+            <li><a class="sk" href="#skill/prototype">/prototype</a><br>一次性原型，回答一个设计问题</li>
+            <li><a class="sk" href="#skill/resolving-merge-conflicts">/resolving-merge-conflicts</a><br>按两边意图逐块解冲突，不放弃合并</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="tips" aria-labelledby="h-tips">
+      <h2 id="h-tips">用出效果的 8 条</h2>
+      <p class="sec-intro">从 Matt 的 README、问路 Skill 和教程页里提炼。每条下面注明出处。</p>
+      <div class="tipgroups">
+        <div class="tipgroup">
+          <h3>动手前：先对齐</h3>
+          <div class="tip">
+            <h4>每次改东西前，先被追问一遍</h4>
+            <p>Agent 一轮一轮问你，直到设计树上每个分支都有答案。能查到的事实它自己派人去查，只把决定交给你；每道题都附它推荐的答案，你按编号回。你确认双方想法一致之前，它不动手。</p>
+            <blockquote>“Use them <i>every</i> time you want to make a change.”</blockquote>
+            <p class="src">出处：README；<a class="sk" href="#skill/grilling">/grilling</a> 原文</p>
+          </div>
+          <div class="tip">
+            <h4>让 Agent 说你们的行话</h4>
+            <p><a class="sk" href="#skill/grill-with-docs">/grill-with-docs</a> 边问边把项目里的叫法写进 CONTEXT.md。有了共享语言，对话变短，变量和文件命名一致，Agent 思考花的 token 也更少。Matt 说这可能是整套里最厉害的一招。</p>
+            <blockquote>“It might be the single coolest technique in this repo.”</blockquote>
+            <p class="src">出处：README 第 2 节</p>
+          </div>
+          <div class="tip">
+            <h4>按活的大小选路线</h4>
+            <p>一个会话做得完：追问完直接 <a class="sk" href="#skill/implement">/implement</a>。要跨好几个会话：先 <a class="sk" href="#skill/to-spec">/to-spec</a> 再 <a class="sk" href="#skill/to-tickets">/to-tickets</a>，每张单单独实现。大到装不下、路还看不清，才用 <a class="sk" href="#skill/wayfinder">/wayfinder</a>，它最重，普通功能别用。</p>
+            <p class="src">出处：<a class="sk" href="#skill/ask-matt">/ask-matt</a> 主干线</p>
+          </div>
+        </div>
+        <div class="tipgroup">
+          <h3>动手时：给反馈、管上下文</h3>
+          <div class="tip">
+            <h4>给 Agent 反馈回路</h4>
+            <p>类型检查、浏览器、自动化测试，少了它们 Agent 就是闭着眼写。<a class="sk" href="#skill/tdd">/tdd</a> 一次只做一片：先写一条会失败的测试，再让它通过。难搞的 bug 先造一条对它稳定报错的命令，再谈猜原因。</p>
+            <blockquote>“The rate of feedback is your speed limit.”（Matt 引《程序员修炼之道》）</blockquote>
+            <p class="src">出处：README 第 3 节；<a class="sk" href="#skill/diagnosing-bugs">/diagnosing-bugs</a> 原文</p>
+          </div>
+          <div class="tip">
+            <h4>追问、spec、拆单放在同一个会话</h4>
+            <p>这三步中间别压缩、别清空，让后一步直接用前一步的原始推理。之后每张单开一次 <a class="sk" href="#skill/implement">/implement</a>，单与单之间 /clear。会话快用到约 15 万 token 的「聪明区」上限时，在阶段交界处 /compact 再继续。</p>
+            <p class="src">出处：<a class="sk" href="#skill/ask-matt">/ask-matt</a> 的上下文卫生一节</p>
+          </div>
+          <div class="tip">
+            <h4>换不换会话，只在阶段交界处决定</h4>
+            <p>按顺序问：能继续吗？上下文还有用吗？东西要带走吗？能交给子 agent 吗？都不是才 /compact。<a class="sk" href="#skill/handoff">/handoff</a> 只在换工具、换目录、交给同事或分出支线时用。详见「换不换会话」。</p>
+            <p class="src">出处：ask-matt 的 PHASE-BOUNDARIES.md</p>
+          </div>
+        </div>
+        <div class="tipgroup">
+          <h3>长期：养代码</h3>
+          <div class="tip">
+            <h4>定期做一次架构体检</h4>
+            <p><a class="sk" href="#skill/improve-codebase-architecture">/improve-codebase-architecture</a> 找出能加深的模块，出一份 HTML 报告，你挑一个接着追问。它只负责找候选，不会替你把一团乱麻理清。频率上，README 说每隔几天，文章说每周一次或开发量猛增之后。</p>
+            <p class="src">出处：README 第 4 节；aihero.dev《5 Agent Skills I Use Every Day》</p>
+          </div>
+          <div class="tip">
+            <h4>把模块做深</h4>
+            <p>接口小，背后行为多，放在干净的接缝上，测试和调用方走同一个接口。Agent 写代码越快，代码变乱也越快，所以要天天在设计上下功夫。</p>
+            <blockquote>“Invest in the design of the system <i>every day</i>.”（Matt 引 Kent Beck）</blockquote>
+            <p class="src">出处：README 第 4 节；<a class="sk" href="#skill/codebase-design">/codebase-design</a> 原文</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="router" aria-labelledby="h-router">
+      <h2 id="h-router">我现在要……</h2>
+      <p class="sec-intro">挑一个最像你眼下情况的，右边给出该坐的路线。路线按 Matt 的问路 Skill（ask-matt）整理。</p>
+      <div class="router">
+        <div id="sit-list"></div>
+        <div class="route" id="route" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="catalog" aria-labelledby="h-catalog">
+      <h2 id="h-catalog">38 站索引</h2>
+      <p class="sec-intro">全部 Skill，按 Matt 仓库里的分组排列。圆圈颜色对应线路图上的线。点任意一行看详解。</p>
+      <div class="cat-tools">
+        <div class="cat-search">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <label class="vh" for="cat-q">筛选 Skill</label>
+          <input id="cat-q" type="search" placeholder="按名字或中文说明筛选" autocomplete="off">
+        </div>
+        <div class="seg" role="group" aria-label="按调用方式筛选">
+          <button type="button" data-inv="all" aria-pressed="true">全部</button>
+          <button type="button" data-inv="user" aria-pressed="false">你敲的</button>
+          <button type="button" data-inv="model" aria-pressed="false">Agent 也会自己用</button>
+        </div>
+        <div class="seg" role="group" aria-label="按安装方式筛选">
+          <button type="button" data-inst="all" aria-pressed="true">全部</button>
+          <button type="button" data-inst="plugin" aria-pressed="false">插件里有</button>
+          <button type="button" data-inst="extra" aria-pressed="false">要另装</button>
+        </div>
+        <span class="cat-count" id="cat-count" aria-live="polite"></span>
+      </div>
+      <div id="cat-groups"></div>
+    </section>
+    <section class="section" id="phase" aria-labelledby="h-phase">
+      <h2 id="h-phase">换不换会话：阶段交界处的 5 个问题</h2>
+      <p class="sec-intro">一个「阶段」是会话里的一段活：追问、实现、验收。一段活做完、下一段还没开始，才是做这个决定的时候；做到一半不决定，要么继续，要么把剩下的拆给子 agent。按顺序问，第一个回答「是」的就是答案。</p>
+      <ol class="tree">
+        <li>
+          <p class="q">能在这个会话里继续吗？</p>
+          <p class="then">能，就继续。</p>
+          <p class="why">两种情况算能：下一步要直接用这一步的原始推理（追问完接着实现是标准例子），或者「聪明区」还剩够用的空间（约 15 万 token）。继续不花任何代价，也不丢任何东西，所以最先排除它。</p>
+        </li>
+        <li>
+          <p class="q">这个会话里的东西，对接下来的事已经没用了？</p>
+          <p class="then">用 /clear。</p>
+          <p class="why">最便宜的一步，立刻拿回整个窗口，旧会话以后还能恢复。代价是单向的：清掉还有用的上下文，你会丢掉「为什么这样做」，回头看 diff 也找不回来。</p>
+        </li>
+        <li>
+          <p class="q">东西要带走吗？</p>
+          <p class="then">用 <a class="sk" href="#skill/handoff">/handoff</a>。</p>
+          <p class="why">只有四种情况需要：换工具（比如从 Claude 换到 Codex）、换目录或仓库、交给同事、在阶段中途分出一个支线任务。它买的是「能带走」，没东西要带走就用不着。</p>
+        </li>
+        <li>
+          <p class="q">这件事能不用你盯着就做完吗？</p>
+          <p class="then">派一个子 agent。</p>
+          <p class="why">范围收得够紧、中途不需要你掌舵的活，典型是自动审查：子 agent 在自己的窗口里读 diff、写报告，当前会话原封不动。</p>
+        </li>
+        <li>
+          <p class="q">以上都不是？</p>
+          <p class="then">用 /compact，并告诉它下一步要干什么，比如 <code>/compact we're going to QA this area</code>。</p>
+          <p class="why">它是兜底，不是第一选择。一上来就压缩，新会话会把被摘要抹平的决定「自信地记错」。</p>
+        </li>
+      </ol>
+      <div class="compare">
+        <h3>为什么先问「能不能继续」</h3>
+        <p class="muted small">除了继续，其他做法都会把原样的会话（一手资料）换成它的摘要（二手资料）。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">资料</th><th scope="col">信息</th><th scope="col">噪音</th><th scope="col">腾挪空间</th></tr></thead>
+            <tbody>
+              <tr><td>一手：继续当前会话</td><td>完整</td><td>多</td><td>小</td></tr>
+              <tr><td>二手：/compact、/handoff</td><td>有损失</td><td>少</td><td>大</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted small">出处：ask-matt/PHASE-BOUNDARIES.md。Matt 也说这 5 个问题都带主观判断，同一个交界处不同的日子可能走不同的路，价值在于按顺序问。</p>
+      </div>
+    </section>
+
+    <section class="section" id="why" aria-labelledby="h-why">
+      <h2 id="h-why">为什么这样设计</h2>
+      <p class="sec-intro">Matt 说这些 Skill 用来修 Agent 常见的四种翻车。它们故意做得小、好改、能拼着用，不挑模型。他不认同 GSD、BMAD、Spec-Kit 这类把整个流程接过去的框架：它们拿走你的控制权，流程本身出了 bug 也难修。</p>
+      <div class="fails">
+        <div class="fail">
+          <h3>Agent 没做成你想要的</h3>
+          <p>你以为它懂了，做出来才发现完全没懂。解法是开工前让它追问你。</p>
+          <blockquote>“No-one knows exactly what they want”<cite>David Thomas 和 Andrew Hunt，《程序员修炼之道》</cite></blockquote>
+          <p><a class="sk" href="#skill/grill-me">/grill-me</a> <a class="sk" href="#skill/grill-with-docs">/grill-with-docs</a> <a class="sk" href="#skill/grilling">/grilling</a></p>
+        </div>
+        <div class="fail">
+          <h3>Agent 太啰嗦</h3>
+          <p>它被丢进项目，边干边猜行话，一个词能说清的事用二十个词。解法是一份共享语言文档。</p>
+          <blockquote>“With a ubiquitous language, conversations among developers and expressions of the code are all derived from the same domain model.”<cite>Eric Evans，《领域驱动设计》</cite></blockquote>
+          <p><a class="sk" href="#skill/grill-with-docs">/grill-with-docs</a> <a class="sk" href="#skill/domain-modeling">/domain-modeling</a> <a class="sk" href="#skill/wait-what">/wait-what</a></p>
+        </div>
+        <div class="fail">
+          <h3>代码跑不通</h3>
+          <p>需求对齐了，代码还是烂，问题出在反馈回路。它看不到代码实际怎么跑，就是在盲飞。解法是类型、浏览器和自动化测试，再加先红后绿的节奏。</p>
+          <blockquote>“Always take small, deliberate steps. The rate of feedback is your speed limit. Never take on a task that’s too big.”<cite>《程序员修炼之道》</cite></blockquote>
+          <p><a class="sk" href="#skill/tdd">/tdd</a> <a class="sk" href="#skill/diagnosing-bugs">/diagnosing-bugs</a></p>
+        </div>
+        <div class="fail">
+          <h3>堆出一团烂泥</h3>
+          <p>Agent 让写代码变快，也让代码变乱得更快。解法是在乎代码设计：spec 阶段就问你要动哪些模块，平时定期体检。</p>
+          <blockquote>“The best modules are deep. They allow a lot of functionality to be accessed through a simple interface.”<cite>John Ousterhout，《软件设计的哲学》</cite></blockquote>
+          <p><a class="sk" href="#skill/to-spec">/to-spec</a> <a class="sk" href="#skill/improve-codebase-architecture">/improve-codebase-architecture</a> <a class="sk" href="#skill/codebase-design">/codebase-design</a></p>
+        </div>
+      </div>
+
+      <div class="split">
+        <div>
+          <h3>你敲的（user-invoked）：插件里 14 个</h3>
+          <p class="muted small">负责编排流程。只有你敲名字才会触发，Agent 不会自己用。</p>
+          <div class="chips" data-list="user"></div>
+        </div>
+        <div>
+          <h3>Agent 也会自己用的（model-invoked）：插件里 11 个</h3>
+          <p class="muted small">装的是可复用的做事方法。任务合适时 Agent 会自己调用，你也可以手动敲。</p>
+          <div class="chips" data-list="model"></div>
+        </div>
+      </div>
+      <p class="prose" style="margin-top:var(--s5)">一条硬规则：你敲的 Skill 可以调用 Agent 用的 Skill，但不能调用另一个你敲的 Skill。所以 <a class="sk" href="#skill/implement">/implement</a> 能自己跑 <a class="sk" href="#skill/tdd">/tdd</a> 和 <a class="sk" href="#skill/code-review">/code-review</a>，<a class="sk" href="#skill/grill-with-docs">/grill-with-docs</a> 能调用 <a class="sk" href="#skill/grilling">/grilling</a> 和 <a class="sk" href="#skill/domain-modeling">/domain-modeling</a>，但它们都不能替你敲 <a class="sk" href="#skill/to-spec">/to-spec</a>。</p>
+      <p class="muted small">出处：README「Reference」一节、.agents/invocation.md。</p>
+    </section>
+
+    <section class="section" id="terms" aria-labelledby="h-terms">
+      <h2 id="h-terms">概念词典</h2>
+      <p class="sec-intro">Skill 原文里反复出现的词。先认得它们，读 Matt 的文章和 Agent 的输出会轻松很多。</p>
+      <div class="gloss">
+        <div>
+          <h3>对齐</h3>
+          <dl>
+            <dt>追问<span class="en">grilling</span></dt>
+            <dd>让 Agent 一轮轮问你，直到设计树上每个分支都有答案，双方确认想法一致才动手。</dd>
+            <dt>设计树和前沿<span class="en">design tree / frontier</span></dt>
+            <dd>每个决定下面挂着依赖它的决定。前沿是前提都已定好、现在就能问的问题，一轮问完，再根据你的回答算下一轮。</dd>
+            <dt>事实归 Agent，决定归你<span class="en">facts vs decisions</span></dt>
+            <dd>能从环境里查到的事实，Agent 派子 agent 去查，不问你；决定一定交给你，等你回答。</dd>
+            <dt>共享语言<span class="en">ubiquitous language / CONTEXT.md</span></dt>
+            <dd>项目里的叫法和它们的准确含义，写进 CONTEXT.md，人和 Agent 用同一套词。</dd>
+            <dt>架构决策记录<span class="en">ADR</span></dt>
+            <dd>把难以回头的决定和当时的理由记下来，放在 docs/adr/。</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>拆活</h3>
+          <dl>
+            <dt>示踪弹式切片<span class="en">tracer bullet / vertical slice</span></dt>
+            <dd>每张单是一条窄而完整的路径，穿过所有层（数据结构、接口、界面、测试），单独做完就能演示或验证，大小装得进一个新会话。反面是只做某一层的横切。</dd>
+            <dt>阻塞边<span class="en">blocking edges</span></dt>
+            <dd>每张单写明被哪些单挡着。本地文件里写成文字；真追踪器上变成原生的阻塞关系，挡它的单都完成了，它就能开工。</dd>
+            <dt>决策单<span class="en">decision ticket</span></dt>
+            <dd>wayfinder 地图上的单，装的是一个待定的问题，解决它得到的是一个决定，不是一段交付。</dd>
+            <dt>需要人在场 / Agent 独立完成<span class="en">HITL / AFK</span></dt>
+            <dd>追问、原型这类单只能在和你的来回里解决；调研这类单 Agent 自己就能做完。</dd>
+            <dt>先扩后收<span class="en">expand–contract</span></dt>
+            <dd>大范围机械改动（比如改一个列名）的拆法：先让新旧写法并存，再分批迁移调用点，最后删掉旧写法，每一批都保持 CI 通过。</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>设计和验证</h3>
+          <dl>
+            <dt>模块和接口<span class="en">module / interface</span></dt>
+            <dd>模块是任何有接口和实现的东西，大小不限。接口是调用方用对它必须知道的一切：类型签名，还有不变量、调用顺序、出错方式、所需配置、性能特征。</dd>
+            <dt>深模块<span class="en">deep module</span></dt>
+            <dd>小接口后面藏着大量行为。调用方学一点就能用很多（杠杆），改动和 bug 集中在一处（局部性）。反面是浅模块：接口几乎和实现一样复杂。</dd>
+            <dt>接缝<span class="en">seam</span></dt>
+            <dd>不改那处代码就能改变行为的位置，也就是接口所在的地方。只有一个适配器时接缝只是假设，有两个才是真的。</dd>
+            <dt>红→绿<span class="en">red-green</span></dt>
+            <dd>先写一条会失败的测试，再写刚好让它通过的实现。1.1.0 起重构这一步挪到了审查阶段。</dd>
+            <dt>反馈回路<span class="en">feedback loop</span></dt>
+            <dd>能快速告诉 Agent 代码到底对不对的东西：类型检查、浏览器、测试、一条能复现 bug 的命令。</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>会话</h3>
+          <dl>
+            <dt>聪明区<span class="en">smart zone</span></dt>
+            <dd>模型还能想清楚的上下文长度，Matt 估计最先进的模型约 15 万 token。</dd>
+            <dt>阶段和阶段交界<span class="en">phase / phase boundary</span></dt>
+            <dd>会话里的一段活（追问、实现、验收）。两段之间是决定换不换会话的唯一时机。</dd>
+            <dt>一手和二手资料<span class="en">primary / secondary source</span></dt>
+            <dd>原样的会话是一手资料；/compact、/handoff 产出的摘要是二手的，有损失但干净。</dd>
+            <dt>你敲的和 Agent 用的<span class="en">user-invoked / model-invoked</span></dt>
+            <dd>前者只有你敲名字才触发，负责编排；后者 Agent 会自己调用，装的是做事方法。</dd>
+            <dt>引导词<span class="en">leading word</span></dt>
+            <dd>模型本来就懂的一个词，比如 grill、wait what，放在 Skill 名字或描述里，用它带出整套行为，比写一长串规则管用。</dd>
+          </dl>
+        </div>
+      </div>
+      <p class="muted small" style="margin-top:var(--s5)">出处：grilling、codebase-design、to-tickets、domain-modeling 原文，ask-matt 与 PHASE-BOUNDARIES.md，CONTEXT.md，CHANGELOG。</p>
+    </section>
+    <section class="section" id="matt" aria-labelledby="h-matt">
+      <h2 id="h-matt">Matt 公开怎么说</h2>
+      <p class="sec-intro">仓库、文章、教程页、演讲和播客里的原话。每条标了出处和核实程度：「已打开原文」是调研时真的读到了原文；「仅见于搜索摘要」是原页打不开（x.com 要付费），只看到搜索引擎给的片段。</p>
+      <ul class="quotes">
+        <li>
+          <p class="en">“My agent skills that I use every day to do real engineering - not vibe coding.”</p>
+          <p class="zh">我每天真正做工程用的 Agent Skill，不是凭感觉写代码。</p>
+          <p class="meta">仓库 README，已核对原文</p>
+        </li>
+        <li>
+          <p class="en">“These skills are designed to be small, easy to adapt, and composable. They work with any model.”</p>
+          <p class="zh">这些 Skill 故意做得小、好改、能拼着用，不挑模型。</p>
+          <p class="meta">仓库 README，已核对原文</p>
+        </li>
+        <li>
+          <p class="en">“You have access to a fleet of middling to good engineers that you can deploy at any time. But these engineers have a critical flaw: they have no memory.”</p>
+          <p class="zh">你随时能调动一支中等到不错的工程师队伍，但他们有个要命的缺陷：没有记忆。</p>
+          <p class="meta"><a href="https://www.aihero.dev/5-agent-skills-i-use-every-day">《5 Agent Skills I Use Every Day》</a>，2026-03-16，已打开原文</p>
+        </li>
+        <li>
+          <p class="en">“AI has a natural inclination to sycophancy... it wants to produce complete solutions all at once. It doesn't stop to validate assumptions or get feedback.”</p>
+          <p class="zh">AI 天生爱讨好，总想一口气交出完整方案，不会停下来验证假设、要反馈。</p>
+          <p class="meta"><a href="https://www.aihero.dev/tracer-bullets">《Tracer Bullets: Keeping AI Slop Under Control》</a>，2026-01-22，已打开原文</p>
+        </li>
+        <li>
+          <p class="en">“The principles apply harder to AI than they ever did to humans. Context window constraints make the discipline non-negotiable.”</p>
+          <p class="zh">这些工程原则放在 AI 身上比放在人身上更要紧，上下文窗口的限制让这份纪律没得商量。</p>
+          <p class="meta">同上一篇，已打开原文</p>
+        </li>
+        <li>
+          <p class="en">“The glossary is the point. Domain language is the thing this skill is actually building.”</p>
+          <p class="zh">词汇表才是重点，这个 Skill 真正在建的是领域语言。</p>
+          <p class="meta"><a href="https://www.aihero.dev/skills-grill-with-docs">grill-with-docs 教程页</a>，与本地 docs 原文一致</p>
+        </li>
+        <li>
+          <p class="en">“No instruction makes an agent comply 100% of the time... the loop is worth running even when it is not followed strictly, because the results are still better overall.”</p>
+          <p class="zh">没有哪条指令能让 Agent 百分之百照做；就算没严格执行，这套红绿循环的整体结果仍然更好。</p>
+          <p class="meta"><a href="https://www.aihero.dev/skills-tdd">tdd 教程页</a>，与本地 docs 原文一致</p>
+        </li>
+        <li>
+          <p class="en">“GOOD: Ubiquitous Language / Bounded Contexts / ADR's. BAD: Entities / Value Objects / Aggregates / Domain Events”</p>
+          <p class="zh">领域驱动设计里他要共享语言、限界上下文和 ADR，不要实体、值对象、聚合、领域事件：用它记录应用，不用它规定应用长什么样。</p>
+          <p class="meta"><a href="https://x.com/mattpocockuk/status/2045090172451057985">X @mattpocockuk</a>，仅见于搜索摘要</p>
+        </li>
+      </ul>
+
+      <h3 style="margin-top:var(--s7)">他在不同场合推荐的顺序</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">出处</th><th scope="col">顺序</th><th scope="col">核实程度</th></tr></thead>
+          <tbody>
+            <tr><td>仓库 ask-matt（最新、最权威）</td><td>就是本页的线路图：追问 → 需要时原型绕行 → spec → 拆单 → 实现（内含 tdd 和审查）</td><td>已核对原文</td></tr>
+            <tr><td>《5 Agent Skills I Use Every Day》，2026-03-16</td><td><a class="sk" href="#skill/grill-me">/grill-me</a> → <a class="sk" href="#skill/to-spec">/to-spec</a> → <a class="sk" href="#skill/to-tickets">/to-tickets</a> → <a class="sk" href="#skill/tdd">/tdd</a> → <a class="sk" href="#skill/improve-codebase-architecture">/improve-codebase-architecture</a>（每周一次或开发量猛增之后）。名字按调研时页面上的写法</td><td>已打开原文</td></tr>
+            <tr><td>AI Engineer 大会工作坊《Full Walkthrough: Workflow for AI Coding》，2026 年 4 月</td><td>人和 Agent 对谈消除产品歧义 → 组织成带依赖的垂直切片 → TDD 自动实现 → 自动审查；架构方向、产品判断和质量把关始终在人手里</td><td>会议官方摘要，不是逐字稿</td></tr>
+            <tr><td>Unhandled Exception Podcast 第 88 期，2026-07-31</td><td><a class="sk" href="#skill/grill-me">/grill-me</a> 连续追问，防止 AI 仓促动手 → <a class="sk" href="#skill/wayfinder">/wayfinder</a> 把大工作拆成决策单，用「迷雾」标出没定的部分 → <a class="sk" href="#skill/handoff">/handoff</a> 交给新 agent，不打断当前会话</td><td>仅节目简介</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:var(--s6)">去哪看、去哪听</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">标题</th><th scope="col">类型</th><th scope="col">时间</th><th scope="col">核实程度</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://www.aihero.dev/5-agent-skills-i-use-every-day">5 Agent Skills I Use Every Day</a></td><td>文章</td><td>2026-03-16</td><td>已打开原文</td></tr>
+            <tr><td><a href="https://www.aihero.dev/tracer-bullets">Tracer Bullets: Keeping AI Slop Under Control</a></td><td>文章</td><td>2026-01-22</td><td>已打开原文</td></tr>
+            <tr><td><a href="https://www.aihero.dev/skills-grill-with-docs">每个主力 Skill 的教程页（aihero.dev/skills-名字）</a></td><td>教程</td><td>持续更新</td><td>和本地 docs 原文一致，本页每张卡都附了链接</td></tr>
+            <tr><td><a href="https://www.youtube.com/watch?v=v4F1gFy-hqg">It Ain't Broke: Why Software Fundamentals Matter More Than Ever</a></td><td>演讲，18 分钟</td><td>2026-04-09，AI Engineer Europe</td><td>大会官网列出</td></tr>
+            <tr><td><a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko">Full Walkthrough: Workflow for AI Coding</a></td><td>工作坊，约 1.5 小时</td><td>2026 年 4 月，AI Engineer Europe</td><td>大会官网列出</td></tr>
+            <tr><td><a href="https://www.youtube.com/watch?v=UNzCG3lw6O0">Building Great Agent Skills: The Missing Manual</a></td><td>演讲，21 分钟，讲怎么写 Skill</td><td>2026 年，具体日期未核实</td><td>内容只看到第三方转述</td></tr>
+            <tr><td><a href="https://newsletter.pragmaticengineer.com/p/ai-skills-with-matt-pocock">AI Skills with Matt Pocock</a>（The Pragmatic Engineer）</td><td>播客和文章</td><td>2026-09-17</td><td>标题和链接已核</td></tr>
+            <tr><td><a href="https://unhandledexceptionpodcast.com/posts/0088-mattpocock/">Unhandled Exception Podcast 第 88 期</a></td><td>播客</td><td>2026-07-31</td><td>仅节目简介</td></tr>
+            <tr><td><a href="https://www.aihero.dev/s/skills-newsletter">Skills newsletter</a></td><td>邮件订阅，Skill 更新会发在这里</td><td>持续</td><td>README 自称约 6 万人订阅</td></tr>
+            <tr><td><a href="https://github.com/mattpocock/skills">GitHub：mattpocock/skills</a></td><td>源码</td><td>2026-02-03 建，最近推送 09-24</td><td>用 gh 查询</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose small muted">数字：GitHub 270,125 个 star、22,752 个 fork（2026-09-26 用 gh 查）。skills.sh 列出 54 个条目（含改名前的旧条目），累计安装 2470 万次，其中 grill-me 约 120 万次（调研员 09-26 打开页面所见）。网上文章里的 star 数从 5.4 万到 16 万各说各的，本页不采用。</p>
+    </section>
+
+    <section class="section" id="history" aria-labelledby="h-history">
+      <h2 id="h-history">版本和改名</h2>
+      <p class="sec-intro">Matt 改名、合并、删除得很勤。看他早期的视频和文章时，用下面的对照表把旧名字换成现在的。日期来自 GitHub 上各版本标签的提交时间。</p>
+      <ol class="timeline">
+        <li><p class="when">2026-02-03 仓库建立</p></li>
+        <li>
+          <p class="when">2026-06-17<span class="ver">v1.0.0 和 v1.0.1</span></p>
+          <ul>
+            <li>加入问路的 <a class="sk" href="#skill/ask-matt">/ask-matt</a></li>
+            <li>新增两个共用词汇 Skill：<a class="sk" href="#skill/codebase-design">/codebase-design</a>、<a class="sk" href="#skill/domain-modeling">/domain-modeling</a>，并把 <a class="sk" href="#skill/grilling">/grilling</a> 单独拿出来当可复用的内核</li>
+            <li>diagnose 改名 diagnosing-bugs；write-a-skill 换成 writing-great-skills；删掉 caveman、zoom-out</li>
+            <li>分类从 Commands / Skills 改叫「你敲的 / Agent 用的」；teach 改成优先复用已有组件</li>
+          </ul>
+        </li>
+        <li>
+          <p class="when">2026-07-08<span class="ver">v1.1.0</span></p>
+          <ul>
+            <li>to-prd 改名 <a class="sk" href="#skill/to-spec">/to-spec</a>；to-plan 和 to-issues 合并成 <a class="sk" href="#skill/to-tickets">/to-tickets</a></li>
+            <li>review 转正为 <a class="sk" href="#skill/code-review">/code-review</a>，加上 Fowler 的 12 种代码坏味道做基线</li>
+            <li>decision-mapping 改名 <a class="sk" href="#skill/wayfinder">/wayfinder</a> 并转正；新增 <a class="sk" href="#skill/research">/research</a></li>
+            <li>grilling 加「你确认前不动手」，并分开事实和决定；tdd 只讲红→绿，重构挪到审查</li>
+          </ul>
+        </li>
+        <li>
+          <p class="when">2026-08-05<span class="ver">v1.2.0 和 v1.2.2</span></p>
+          <ul>
+            <li>做成 Claude Code 插件，当天进入官方插件市场；同时补上 Codex 需要的元数据</li>
+            <li>新增 <a class="sk" href="#skill/wait-what">/wait-what</a>；<a class="sk" href="#skill/to-questionnaire">/to-questionnaire</a>、<a class="sk" href="#skill/wizard">/wizard</a> 转正</li>
+            <li>grilling 从一次一问改成一轮问一组；prototype 改成一个能分享的 HTML 文件，原型留在 prototype/名字 分支</li>
+            <li>writing-great-skills 改名 <a class="sk" href="#skill/writing-for-agents">/writing-for-agents</a>；删掉 6 个旧 Skill（见下表）</li>
+          </ul>
+        </li>
+        <li>
+          <p class="when">2026-08-06<span class="ver">v1.2.3</span>（你装的就是这一版）</p>
+          <ul>
+            <li>diagnosing-bugs 要求给密钥和敏感输出打码；派子 agent 的写法不再绑定 Claude Code 的工具名；wizard 去掉时间估算</li>
+          </ul>
+        </li>
+        <li>
+          <p class="when">2026-09-17 上游新增测试版 <a class="sk" href="#skill/pr">/pr</a>（还没发版）</p>
+        </li>
+        <li><p class="when">2026-09-24 最近一次推送</p></li>
+      </ol>
+
+      <h3 style="margin-top:var(--s5)">旧名字对照</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">旧名字</th><th scope="col">现在</th><th scope="col">哪一版</th></tr></thead>
+          <tbody>
+            <tr><td>diagnose</td><td><a class="sk" href="#skill/diagnosing-bugs">/diagnosing-bugs</a></td><td>1.0.0</td></tr>
+            <tr><td>write-a-skill、writing-great-skills</td><td><a class="sk" href="#skill/writing-for-agents">/writing-for-agents</a></td><td>1.0.0、1.2.0</td></tr>
+            <tr><td>to-prd</td><td><a class="sk" href="#skill/to-spec">/to-spec</a></td><td>1.1.0</td></tr>
+            <tr><td>to-plan、to-issues</td><td><a class="sk" href="#skill/to-tickets">/to-tickets</a></td><td>1.1.0</td></tr>
+            <tr><td>review</td><td><a class="sk" href="#skill/code-review">/code-review</a></td><td>1.1.0</td></tr>
+            <tr><td>decision-mapping</td><td><a class="sk" href="#skill/wayfinder">/wayfinder</a></td><td>1.1.0</td></tr>
+            <tr><td>ubiquitous-language</td><td>并入 <a class="sk" href="#skill/domain-modeling">/domain-modeling</a></td><td>1.2.0</td></tr>
+            <tr><td>design-an-interface</td><td>并入 <a class="sk" href="#skill/codebase-design">/codebase-design</a>（设计两次的方法在它的 DESIGN-IT-TWICE.md）</td><td>1.2.0</td></tr>
+            <tr><td>qa</td><td>并入 <a class="sk" href="#skill/triage">/triage</a> 和 <a class="sk" href="#skill/to-tickets">/to-tickets</a></td><td>1.2.0</td></tr>
+            <tr><td>request-refactor-plan</td><td>并入 <a class="sk" href="#skill/to-spec">/to-spec</a> 和 <a class="sk" href="#skill/improve-codebase-architecture">/improve-codebase-architecture</a></td><td>1.2.0</td></tr>
+            <tr><td>caveman、zoom-out</td><td>删除</td><td>1.0.0</td></tr>
+            <tr><td>edit-article、obsidian-vault</td><td>删除（Matt 自己机器上用的）</td><td>1.2.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">出处：插件内 CHANGELOG.md；版本日期用 gh 查标签提交时间。</p>
+    </section>
+    <section class="section" id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">来源和说明</h2>
+      <ul class="env-list">
+        <li>内容整理自 mattpocock/skills（MIT License），仓库地址 <a href="https://github.com/mattpocock/skills" rel="noopener">https://github.com/mattpocock/skills</a>。</li>
+        <li>Skill 原文：插件缓存 1.2.3（每个 SKILL.md、参考文件、docs 教程页、CHANGELOG、ADR），加上 GitHub main（09-26 用 gh 查：版本号同为 1.2.3，最近推送 09-24，比插件多一个测试版 pr）。</li>
+        <li>讲解卡：按原文逐条翻译整理，每张卡底部列出读过的文件。docs 教程页和 SKILL.md 说法不一致时以 SKILL.md 为准，卡里另有注明。</li>
+        <li>公开发言：见「Matt 公开怎么说」的核实程度一栏。没核实到的：X 推文原文（x.com 要付费）、演讲逐字稿、第三方文章里互相矛盾的 star 数。</li>
+        <li>本页整理于 2026-09-26，个人信息已脱敏，欢迎转发。</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" tabindex="-1">
+  <div class="d-bar">
+    <button class="btn" type="button" id="d-close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>关闭</button>
+    <button class="btn" type="button" id="d-copy"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>复制命令</span></button>
+  </div>
+  <div class="d-head">
+    <h2 id="d-title"></h2>
+    <div class="d-meta" id="d-meta"></div>
+    <p class="d-one" id="d-one"></p>
+  </div>
+  <div class="d-body" id="d-body"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="application/json" id="skills-data">{"cards":[{"name":"ask-matt","bucket":"engineering","invocation":"user","command":"/ask-matt","oneLiner":"不知道用哪个 Skill 时问它，它告诉你该敲哪个命令","whatItDoes":["你描述当前处境，它给出该用哪个 Skill，或者该走哪条流程（flow）。","只推荐、不动手：不会自己去 grilling、写 spec 或调用别的 Skill。","是作者手写的技能地图，只认这个仓库自带的 Skill，不会扫描你自己装的其他 Skill。"],"whenToUse":["有个想法，不知道从哪下手","外部涌入一堆 bug 和需求，不知道怎么处理","两个 Skill 看起来功能重叠，分不清该用哪个","一个会话跑很久了，不确定该 /clear、/compact 还是 /handoff"],"whenNotToUse":["已经确定要用哪个 Skill 了，直接调用它就行，不用先问 ask-matt"],"howItWorks":["你用自然语言说出处境，它对照仓库里手写的技能地图匹配","分四类：主线流程、上车点（on-ramp）、独立工具、底层词汇","给你一条 flow 里的具体位置，并说明该在哪清空/压缩上下文","要确认别的 Skill 具体行为时，会先去读那个 Skill 的 SKILL.md 再回答","回答完就停，不会自己继续往下执行"],"outputs":[],"tips":["它可能说某个 Skill「没装」，其实是该 Skill 设了 disable-model-invocation，不出现在技能列表里；别信这个判断，直接敲命令试试，或查 .claude-plugin/plugin.json","它对另一个 Skill 的行为下判断时，要求它先打开那个 Skill 的 SKILL.md 再确认，它自己不会主动这么做","想要精简版答案就直接说「给我步骤顺序就行」，它会压缩成清单","它认的是自己仓库里手写的地图，不会读你本地装的其他技能"],"workingIf":["它给完建议就停，不会自己动手开始做","给的路线里会提到在哪清空/压缩上下文、哪里需要你自己审查，不是干巴巴一串技能名","两个技能很像的时候，它会说清楚选哪个、为什么另一个不适合你","它对别的技能下的判断，能在过程记录里看到它真的打开读过那个技能的 SKILL.md","你在它的回答里能认出自己的处境，而不是一个泛泛的通用场景"],"pairsWith":["grill-with-docs","triage","wayfinder","improve-codebase-architecture","to-spec","to-tickets","implement","setup-matt-pocock-skills"],"faq":[{"q":"它推荐的技能名跟我装的对不上怎么办","a":"先查改名记录：to-prd 变成了 to-spec，pathfinder 变成了 wayfinder，四个旧技能被合并掉了，不一定是真的没有。"},{"q":"能不能让它认我自己写的 Skill","a":"不能，它是这个仓库作者手写的地图，不扫描你本地装的其他 Skill。"}],"keyTerms":[{"term":"flow","zh":"流程，一条穿过多个 Skill 的路径，不是单个 Skill"},{"term":"on-ramp","zh":"上车点，会产生工作、之后并入主线流程的起点"},{"term":"phase boundary","zh":"阶段边界，一个阶段做完后决定这段上下文怎么处理的节点"},{"term":"smart zone","zh":"模型推理仍然清醒的上下文窗口范围，约 15 万 token"}],"quote":{"en":"You don't remember every skill, so ask.","from":"skills/engineering/ask-matt/SKILL.md"},"sources":["skills/engineering/ask-matt/SKILL.md","skills/engineering/ask-matt/PHASE-BOUNDARIES.md","docs/engineering/ask-matt.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-ask-matt","flows":[{"name":"主线流程：从想法到上线","when":"在一个工作目录里，有一个想法要做成东西","steps":["/grill-with-docs","/to-spec","/to-tickets","/implement","/code-review"],"note":"讨论解决不了的问题就用 /handoff 转去 /prototype 再转回来；一次会话能搞定就跳过 to-spec/to-tickets，直接 /implement。"},{"name":"上车点：外部 bug 和需求堆积","when":"issue tracker 里堆了很多别人提的原始报告","steps":["/triage","/implement"],"note":"triage 只处理不是你自己创建的问题单；/to-tickets 产出的工单已经 agent-ready，不要再 triage。"},{"name":"上车点：疑难 bug","when":"一时看不出原因的 bug、间歇性抽风、两个正常状态之间冒出来的回归","steps":["/diagnosing-bugs","/improve-codebase-architecture"],"note":"复盘发现是没有好的接缝钉住这个 bug 时，会转向 improve-codebase-architecture。"},{"name":"上车点：特别大、看不清全貌的项目","when":"全新项目或大功能，一个会话装不下，路线还看不清楚","steps":["/wayfinder","/to-spec","/to-tickets","/implement"],"note":"wayfinder 出的是决策地图不是交付物，地图走完后在 /to-spec 汇入主线。"},{"name":"代码库保养","when":"有空的时候，想让代码库对 Agent 更友好","steps":["/improve-codebase-architecture","/grill-with-docs"],"note":"它只找候选项，选中候选后生成的想法再带去主线的 /grill-with-docs 继续。"},{"name":"阶段边界：这段上下文接下来怎么处理","when":"一个阶段（grilling、实现、QA）做完，要决定下一步","steps":["Continue（不动）","/clear","/handoff","Subagent","/compact"],"note":"从上到下问，第一个满足条件的「是」就用它；/compact 是兜底默认项，不是先想到的那个。"}]},{"name":"claude-handoff","bucket":"in-progress","invocation":"user","command":"/claude-handoff","oneLiner":"把当前对话交给一个新的后台 Agent，立刻接着干","whatItDoes":["把当前对话浓缩成摘要当提示词，用 claude --bg 拉起后台 Agent 立刻干活","后台 Agent 在当前工作目录启动，命令立刻返回，用 claude agents 管理这个后台任务"],"whenToUse":["想让当前对话的进展立刻由一个新的后台 Agent 接手继续做","想给这个后台任务起一个好认的名字，方便在任务列表里认出来"],"whenNotToUse":[],"howItWorks":["把当前对话写成一份交接摘要，不重复已经写好的 spec、issue、commit，只引用路径","摘要里加一节建议调用的 skill，告诉后台 Agent 接下来该调用哪些","写之前把密钥、密码等敏感信息去掉，因为摘要会直接变成新 Agent 的提示词","用 claude --bg 加上 --name 和一个好认的名字，再加交接摘要文本，拉起后台 Agent","带了参数说明下一段要做什么，摘要要按这个说明来写"],"outputs":["一个后台运行的新 Agent 任务（用 claude agents 管理）"],"tips":["一定要带 --name 并起一个描述性的名字，会显示在任务列表和终端标题上","跟 handoff 一样，已经写好的文档只引用路径，不要重复抄一遍","摘要会直接变成新 Agent 的提示词，敏感信息务必先去掉"],"workingIf":["跑完命令立刻拿到返回，能在 claude agents 里看到这个新任务在当前工作目录下运行（推断）"],"pairsWith":[],"faq":[],"keyTerms":[{"term":"claude --bg","zh":"以后台模式拉起一个新 Agent 任务的命令"}],"quote":{"en":"Instead of saving it, launch a background agent seeded with the summary as its prompt.","from":"skills/in-progress/claude-handoff/SKILL.md"},"sources":["skills/in-progress/claude-handoff/SKILL.md"],"publicUrl":null},{"name":"code-review","bucket":"engineering","invocation":"model","command":"/code-review","oneLiner":"从规范和需求两条互不干扰的轴并行审查代码改动","whatItDoes":["对比 HEAD 和你指定的一个基准点（commit、分支、tag）之间的改动，从两条轴分别审查","Standards 轴查代码符不符合仓库自己的编码规范，Spec 轴查代码是不是真的做对了当初的需求","两条轴各用独立子 Agent 审查，互不看对方推理，最后并排展示，绝不合并重排出总名次"],"whenToUse":["想审查一个分支、一个 PR，或者手头正在做的改动","想同时知道一段 diff 是不是做对了、又是不是做得对（两件事分开确认）","用户说 review since X 这种要看某个点之后所有改动的场景"],"whenNotToUse":["想找的是 diff 里的具体 bug，比如空指针、竞态条件、差一错误，这个 Skill 查的是规范和需求吻合度，原文建议改用 Claude Code 自带的 code-review","还没写代码、想按测试先行的方式从头做，这种情况该用 tdd 而不是这个"],"howItWorks":["先定基准点：commit、分支或 tag，没说清楚就先问；再确认能被 git 解析、diff 不是空的","找需求看：commit 引用的 issue、用户给的路径、docs/specs 文件；都没有就问，真没有跳过 Spec","找规范来源：仓库自己的规范文档；没写规范就兜底用 12 种 Fowler 坏味道基线，仓库规定始终优先","同时派两个并行子 Agent：一个只看 Standards，一个只看 Spec，各自出报告，限 400 词","两份报告原样或稍整理，分别放在 Standards、Spec 标题下，绝不合并总排名，最后各轴给一句最严重问题"],"outputs":["一份分两块的审查报告：## Standards 和 ## Spec 各自独立","每条发现都带引用出处：规范文件加具体规则，或坏味道名称加对应代码片段，或需求文档的具体一行"],"tips":["必须自己指定基准点，不指定它会先问；基准点解析不出来或 diff 是空的，会在派子 Agent 之前就先报错","它比对的是三点 diff，从合并基准算起，不包含还没提交的改动，想让它看到最新代码就先 commit 再审查","子 Agent 给出的发现是假设不是证据，每条都要求带引用来源，拿到结果后自己去对应文件核实一下再采纳","这个 Skill 跟 Claude Code 自带的同名 /code-review 会冲突，装了这个之后谁生效取决于安装方式，原文没有干净解法，实用做法是干脆卸载内置的那个","每次重新跑都可能又找出新问题，这是正常的，不用指望跑到一次通过就再没问题"],"workingIf":["遇到解析不出来的基准点或空 diff，它会直接报错拒绝开始，而不是硬着头皮派子 Agent","结果分两块展示在 ## Standards 和 ## Spec 下面，不是合成一份榜单","每条 Standards 发现都能对应到仓库某个文件里的规则，或 12 种坏味道之一并带上代码片段；每条 Spec 发现都能对应需求文档里的具体一行","结尾总结里两条轴各给一个最严重问题，不会跨轴选出一个总冠军","没有需求文档可查时，Spec 那块会直接说没有可用的需求文档，不会自己脑补需求再打分"],"pairsWith":["implement","to-spec","to-tickets","improve-codebase-architecture","tdd"],"faq":[{"q":"跟 Claude Code 自带的 /code-review 是什么关系？","a":"两者做的事不一样，这个查规范和需求吻合度，内置的查 bug，但名字冲突，谁生效看安装方式，原文没有干净方案，卸载内置版最省心。"},{"q":"要在写代码的同一个会话里跑审查吗？","a":"不建议，最好开一个新会话跑。同一个会话审查自己刚写的代码，等于带着写代码时的全部假设去审查，起不到独立复核的作用。"},{"q":"它审查的是我还没 commit 的改动吗？","a":"不会。它比对三点 diff，从合并基准点算起，不包含暂存区和工作区里还没提交的改动，想让它看到最新代码要先提交。"}],"keyTerms":[{"term":"Standards axis","zh":"查代码是否符合本仓库编码规范的那条独立审查线"},{"term":"Spec axis","zh":"查代码是否做对了原始需求的那条独立审查线"},{"term":"smell baseline","zh":"来自《重构》的 12 种代码坏味道，规范缺失时的兜底检查"}],"quote":{"en":"A change can pass one axis and fail the other:","from":"skills/engineering/code-review/SKILL.md"},"sources":["skills/engineering/code-review/SKILL.md","docs/engineering/code-review.md"],"publicUrl":"https://aihero.dev/skills-code-review"},{"name":"codebase-design","bucket":"engineering","invocation":"model","command":"/codebase-design","oneLiner":"设计深模块的共同词汇：接口小、功能藏在后面","whatItDoes":["统一模块设计词汇，如 module、interface、seam，禁用 component 替代词","核心追求是深模块：一个很小的接口后面藏着大量功能，调用者和测试都只通过这个接口打交道","它是一份参考词汇表，不是一套流程：没有循环要跑，也不会自己产出文件，只在需要设计词汇时用"],"whenToUse":["已经知道要改哪块代码，需要想清楚它的接口该多小、缝该放哪","要判断某次代码抽取值不值：用删除测试法，删掉这个模块，复杂度是消失了还是转移到调用方","想为一个模块设计几种完全不同的接口方案再比较，用 DESIGN-IT-TWICE 那套并行子 Agent 打法","团队在争论一个词到底是什么意思，需要靠这套词汇表定分歧"],"whenNotToUse":["还不知道该改哪个模块，这种先找候选目标的活该用 improve-codebase-architecture","只是单纯调用它、说去改吧，它本身没有停下来提问的机制，容易被当成能自己跑的流程来误用（原文明确指出这是常见误用，issue #449）"],"howItWorks":["先统一用词：module 不分大小（函数/类/包都算），interface 包含类型签名之外的不变量、顺序、报错方式等","用深浅判断模块设计好不好：深模块是小接口背后一堆功能；浅模块是接口几乎和内部一样复杂，要尽量避免","遇到这次抽取值不值的问题，套用删除测试：想象删掉这个模块，复杂度是消失了还是冒到了各个调用方","只有第二个 adapter 出现（比如生产版和测试版）才值得开 seam，只有一个 adapter 说明多绕了一圈","依赖分四类：进程内直接测，有本地替身用替身测，自有远程服务走 Ports & Adapters，外部服务用 Mock","接口方案比较：用 DESIGN-IT-TWICE，给 3 个以上子 Agent 各一种取向并行设计，再比深度和局部性"],"outputs":[],"tips":["这只是一份词汇参考，不是会自己往下跑的流程；如果 Agent 拿到这个 Skill 名字就开始大范围读代码、动手重构，说明它把参考当成驱动流程用了，得叫别的驱动型 Skill 带着它","判断一个抽取值不值，直接问删掉它复杂度去哪了，这个删除测试比感觉更可靠","一个 seam 配几个 adapter 是判断它是不是真实存在的缝的硬指标：只有一个 adapter，多半是多余的一层包装","这套词汇故意保持很小，好处是大家能真正统一使用；想加新概念，社区已经提过但都还没被采纳（issue #180、#303）","DESIGN-IT-TWICE 这套并行子 Agent 打法依赖 Claude Code 的 Agent 工具，换其他 Agent 环境不一定能照搬（issue #564）"],"workingIf":["讨论设计时大家开始说 module、interface、seam，不再说 component、service、boundary","有人能直接指着一处抽取说它过不过删除测试，不用犹豫","提出一个新 seam 时，第二个 adapter 也一起被点名，不是只有第一个","讨论接口时聊的是不变量、顺序约束、出错方式，不只是类型签名","光调用这个 Skill 不会启动一次会话；如果 Agent 一叫它就开始读文件、提重构方案，说明它把参考词汇当成了流程"],"pairsWith":["domain-modeling","improve-codebase-architecture","tdd"],"faq":[{"q":"定义完深模块该怎么落到代码上、怎么防止被绕过？","a":"原文承认没回答。可选方案：包一层 class/IIFE、放进 monorepo 独立包，或用 dependency-cruiser 拦截绕过接口的引用。"},{"q":"我让它继续设计，结果它自己读了一堆代码还重构了没让它碰的东西？","a":"已知（issue #449）：它是词汇参考不是流程，被当流程调用会抓着 DESIGN-IT-TWICE 这类内容自己跑，解法是让驱动型 Skill 带着用。"},{"q":"这是不是在规定文件夹结构？","a":"不是。原文反复强调深模块跟文件系统长什么样是两回事，模块故意定义成跟规模无关，文件结构很扁平也可能设计出深模块，反之亦然。"}],"keyTerms":[{"term":"deep module","zh":"一个很小的接口背后装着大量功能的模块"},{"term":"seam","zh":"不改动某处代码就能替换其行为的位置，即接口所在处"},{"term":"interface","zh":"调用者要正确使用模块所需知道的一切，不只是类型签名"},{"term":"DESIGN-IT-TWICE","zh":"让多个子 Agent 并行设计出几种不同接口方案再对比"}],"quote":{"en":"Design deep modules: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface.","from":"skills/engineering/codebase-design/SKILL.md"},"sources":["skills/engineering/codebase-design/SKILL.md","skills/engineering/codebase-design/DEEPENING.md","skills/engineering/codebase-design/DESIGN-IT-TWICE.md","docs/engineering/codebase-design.md"],"publicUrl":"https://aihero.dev/skills-codebase-design"},{"name":"diagnosing-bugs","bucket":"engineering","invocation":"model","command":"/diagnosing-bugs","oneLiner":"六阶段流程，逼你先做出能变红的反馈回路再修 bug","whatItDoes":["遇到难缠的 bug 或性能问题，用六个阶段一步步逼近根因，而不是靠读代码猜","核心规则：拿不出一个能在这个 bug 上变红、修好后变绿的命令之前，不许开始猜原因","从建反馈回路、复现并最小化、列假设、埋点、修复写回归测试，到清理收尾，一步都不能跳过"],"whenToUse":["用户说帮我 debug、诊断这个，或报告某个功能报错、失败、变慢","一个偶发的、复现不稳定的 flaky bug","两个已知好坏版本之间出现的性能或行为回归","一个具体、能描述清楚症状的缺陷，而不是随便审查一下系统哪里有问题"],"whenNotToUse":["没有具体症状，只是想审查代码库哪里可能有性能瓶颈，这个 Skill 不做审计，只诊断一个已知失败","只是想快速要一个直接答案的简单问题，硬套这个流程会小题大做（原文承认这是最常被反馈的问题）"],"howItWorks":["第一阶段是重点：不惜代价先做出一条已跑过、能在这个 bug 上报红、修好转绿的紧凑反馈回路命令，没有它不往下走","构造优先级：失败测试、curl/HTTP、CLI 快照、无头浏览器、回放抓包、模糊/二分/差异脚本，最后用人工介入脚本","把回路调紧：要够快（秒级）、够稳定（每次结果一样）、够精准（只认这个症状，不是没崩就算过）","复现并最小化：跑到报红后一次只删一点输入或步骤，删到剩下的每一部分都是删了就不报红的必要部分","列出 3-5 个排好序、可证伪的假设，说清如果是 X 原因、改 Y 就该消失，测试前先给用户看这份清单","埋点：排查日志打唯一标签如 [DEBUG-a4f2]，最后一次 grep 清除；性能问题先测基线再二分，不靠日志","有正确的测试缝就先写回归测试再修复；没有缝就如实说明，把这个当成发现本身交给下一步处理"],"outputs":["一条可重复运行、能红能绿的诊断命令或脚本","修复代码，加对应的回归测试，或明确写明没有合适测试缝的说明","commit/PR 信息里写清楚最后验证对的是哪个假设","需要人工配合时用到的 hitl-loop.template.sh 脚本"],"tips":["拿到 bug 报告先别读代码猜原因，没有能报红的命令之前就去读代码建立理论，正是这个 Skill 要拦住的错误","排查日志一律打统一前缀标签，收尾靠一次 grep 清干净，别留下没标记的日志","假设列表给用户看一眼，用户常常一句话就能帮你排除某个方向；用户不在就按自己排的顺序继续，不用等","如果它对着一句简单描述就小题大做地开始诊断，直接说别诊断了、直接回答更快","涉及命令输出、密钥、日志一律先脱敏成 \u003cREDACTED>，这是原文要求但没有强制兜底，脱敏责任在自己"],"workingIf":["在给出任何猜测之前，先给你看一条命令和它报红的输出；如果先讲道理后有命令，说明流程没走对","复现出来的失败就是你报告的那个问题，不是顺手碰到的别的问题","开始猜测前先把复现缩到最小，还能说清楚剩下的每一部分为什么必须留着","测试任何假设前，先给你看 3-5 个排好序、能证伪的假设列表","每条新加的排查日志都带 [DEBUG-a4f2] 这样的标签，收尾时搜这个标签应该什么都搜不到","commit 或 PR 说明里写清楚最后是哪个假设成立","实在锁不住这个 bug 时会直接说锁不住，而不是硬写一个不靠谱的测试"],"pairsWith":["improve-codebase-architecture","triage","prototype","tdd"],"faq":[{"q":"它一碰到简单问题就小题大做地开始建复现场景，怎么办？","a":"这是最常被反馈的问题（issue #578），目前没修，明说别诊断、直接回答，或者在配置里关掉它的自动触发。"},{"q":"它会不会在写修复之前先跟我确认一下根因？","a":"不会。只有第三阶段的假设清单会给你看一眼，之后到写修复之间没有停下来确认的环节，想要这一步就在调用时明说。"},{"q":"会不会把密钥之类的敏感信息带出来？","a":"有这个风险。原文要求脱敏成 \u003cREDACTED>，但没有强制兜底机制（issue #674 未解决），公开分享前自己再检查一遍。"}],"keyTerms":[{"term":"tight feedback loop","zh":"又快又稳又精准、能自动跑的红绿判定信号，是这个 Skill 的核心"},{"term":"red-capable","zh":"这个 bug 存在时能报红、修好后能转绿的能力"},{"term":"human-in-the-loop (HITL)","zh":"最后手段：用脚本引导人一步步操作，把结果传回给 Agent"}],"quote":{"en":"If you have a tight pass/fail signal for the bug (one that goes red on this bug), you will find the cause.","from":"skills/engineering/diagnosing-bugs/SKILL.md"},"sources":["skills/engineering/diagnosing-bugs/SKILL.md","skills/engineering/diagnosing-bugs/scripts/hitl-loop.template.sh","docs/engineering/diagnosing-bugs.md"],"publicUrl":"https://aihero.dev/skills-diagnosing-bugs"},{"name":"domain-modeling","bucket":"engineering","invocation":"model","command":"/domain-modeling","oneLiner":"边设计边统一业务术语，定下来的词和决定随手存档","whatItDoes":["在讨论设计的同时主动挑战术语：有人用词跟已有词汇表冲突就当场指出来","把含糊的词逼成精确的词，比如分清 account 到底指 Customer 还是 User","术语一旦敲定，立刻写进 CONTEXT.md，而不是攒到最后一次性整理","只有满足难以撤销、没有背景会让人看不懂、经过真实取舍这三个条件时，才提议记一条 ADR"],"whenToUse":["讨论中发现同一个词大家理解得不一样，比如两个人对取消的定义不同","要新建或编辑项目的 CONTEXT.md 词汇表","需要记录或修改一条架构决策记录 ADR","刚做完一个很难反悔的架构选择，想留个记录给以后的人看"],"whenNotToUse":["只是想查一下 CONTEXT.md 里某个词是什么意思，这种只读不改的用法不算这个 Skill，直接打开文件看就行"],"howItWorks":["先判断结构：单项目用根 CONTEXT.md；有 CONTEXT-MAP.md 就是多子域，术语写到对应子目录","术语跟已有词汇表冲突时当场指出来：你的词汇表把取消定义成 X，但你现在说的好像是 Y，到底是哪个","用词含糊或一词多义时，提出一个更精确的说法，逼用户选清楚","用具体场景压一压边界，尤其是难以在纸面上想清楚的边缘情况","用户描述业务逻辑时去代码里对照一下，发现矛盾就当面指出来","术语敲定立刻按 CONTEXT-FORMAT.md 写进 CONTEXT.md，不攒到最后；它只放词汇定义，不放实现细节","同时满足难以撤销、没背景会困惑、经过真实取舍三条，才按 ADR-FORMAT.md 提议写一条 ADR，少一条不写"],"outputs":["CONTEXT.md，多子域时是 CONTEXT-MAP.md 加各子域 CONTEXT.md","docs/adr/ 下按编号命名的 ADR 文件，例如 0001-slug.md"],"tips":["CONTEXT.md 的铁律：它只是一本词汇表，不是需求文档、不是草稿纸，一旦开始塞实现细节就变味了，这是最常出问题的地方","ADR 三个条件必须同时成立才写：改起来代价大、没有背景会让人疑惑、真的经过了权衡取舍，少一条就不用写","这个 Skill 只会对照代码和已经写进 CONTEXT.md、ADR 里的内容，不会翻 issue 系统，几个月前吵清楚的命名问题还是会被当成新问题提出来","发现 CONTEXT.md 已经涨到几百上千行，先让 Agent 直接精简、去掉实现细节，而不是急着拆成多个文件","自动触发这块目前偏弱：grill-with-docs 或 wayfinder 说要调用它时，模型经常只调了 grilling 漏掉这个，一轮 grilling 结束 CONTEXT.md 没动就手动点名再叫一次"],"workingIf":["它会在你说到一半时打断你，问你到底指的是哪个意思，而不是自己挑一个继续往下走","CONTEXT.md 是在对话进行中被改动的，不是攒到最后一次性改完","遇到一个明天就能反悔的决定，它会拒绝写 ADR，并说清楚是三条里的哪一条没达标","新写进去的词条都是这是什么的一两句话定义，并在 _Avoid_ 里列出放弃使用的其他说法","你的话和代码对不上时，它会把代码原样引用出来跟你对质","CONTEXT.md 有时候会变短，不是只会越写越长"],"pairsWith":["grill-with-docs","wayfinder","triage","improve-codebase-architecture","codebase-design"],"faq":[{"q":"跟只是打开 CONTEXT.md 看一眼有什么区别？","a":"只读词汇是任何 Skill 都能做的一句话动作，不算这个 Skill；只有主动挑战术语、编场景压边界、当场改词表这种改动才算在用这个 Skill。"},{"q":"CONTEXT.md 已经几千行了怎么办？","a":"先别急着拆文件，让 Agent 把 CONTEXT.md 精简、去掉实现细节；文件够精简后仍横跨两个明显领域，再考虑拆成 CONTEXT-MAP.md。"},{"q":"能不能保留这套词汇管理但换成自己的 ADR 格式？","a":"目前没法干净拆开，词汇表和 ADR 是同一个 Skill 的两半，想用自己格式只能改本地副本，或在项目 agent 文档里覆盖 ADR 约定。"}],"keyTerms":[{"term":"ubiquitous language","zh":"团队和代码统一使用的一套业务词汇，出自领域驱动设计"},{"term":"CONTEXT.md","zh":"项目词汇表文件，只放术语定义，不放实现细节"},{"term":"ADR","zh":"架构决策记录，记一次难以撤销、经过真实取舍的决定"}],"quote":{"en":"This is the active discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise.","from":"skills/engineering/domain-modeling/SKILL.md"},"sources":["skills/engineering/domain-modeling/SKILL.md","skills/engineering/domain-modeling/ADR-FORMAT.md","skills/engineering/domain-modeling/CONTEXT-FORMAT.md","docs/engineering/domain-modeling.md"],"publicUrl":"https://aihero.dev/skills-domain-modeling"},{"name":"git-guardrails-claude-code","bucket":"misc","invocation":"model","command":"/git-guardrails-claude-code","oneLiner":"给 Claude Code 装一个钩子，拦掉危险的 git 命令","whatItDoes":["装一个钩子，拦下 git push、reset --hard 等危险命令，不让 Claude 真的执行","拦截后 Claude 会收到一条消息，告诉它没有权限执行这些命令"],"whenToUse":["想防止 Claude Code 不小心跑出 git push、reset --hard 这类不可逆命令","想给自己或团队加一层硬性的 git 安全网，而不是靠嘴上提醒"],"whenNotToUse":[],"howItWorks":["先问装在这个项目（.claude/settings.json）还是所有项目（~/.claude/settings.json）","把仓库自带的拦截脚本复制到目标位置，设成可执行","把脚本挂进 settings.json 的 hooks.PreToolUse 数组，已有配置要合并不要整个覆盖","问要不要增删拦截的命令模式，按需改脚本","用一条模拟的 git push 命令测试，应该报错退出并打印 BLOCKED"],"outputs":[".claude/hooks/block-dangerous-git.sh 或 ~/.claude/hooks/block-dangerous-git.sh","settings.json 里新增的 PreToolUse 钩子配置"],"tips":["默认拦 git push（含 --force）、reset --hard、clean -f/-fd、branch -D、checkout .、restore .","已有 settings.json 一定要合并写入，不要整份覆盖，不然会冲掉别的设置","装完务必用文档给的测试命令验证一下真的会被拦、会退出码 2"],"workingIf":["跑一条模拟的 git push 命令，脚本退出码是 2，并且打印了 BLOCKED（推断）"],"pairsWith":[],"faq":[],"keyTerms":[{"term":"PreToolUse hook","zh":"工具执行前钩子：Claude 真正跑某个工具之前会先经过的检查点"}],"quote":{"en":"When blocked, Claude sees a message telling it that it does not have authority to access these commands.","from":"skills/misc/git-guardrails-claude-code/SKILL.md"},"sources":["skills/misc/git-guardrails-claude-code/SKILL.md","skills/misc/git-guardrails-claude-code/scripts/block-dangerous-git.sh"],"publicUrl":null},{"name":"grill-me","bucket":"productivity","invocation":"user","command":"/grill-me","oneLiner":"就一个想法连环追问你，把它逼到能拍板为止","whatItDoes":["拿一个还没想清楚的想法，用一轮一轮的问题把它问到你能拍板","不写任何文件，不留工作区，问完只是让你脑子里的想法变清楚","每一轮只问当前能问的问题（前提都已经有答案的问题），不会问依赖还没答案的问题","是 grilling 追问机制的用户入口，本身只有一句话：调用 grilling"],"whenToUse":["有一个值得认真对待的想法（功能、产品方向、生意决定、一段文字），但还没想清楚细节","想在开工前先和 Agent 对齐，避免做出来的东西不是你要的","不在某个项目仓库里、讨论的东西甚至不是代码，也能用","已经跟 Agent 讨论出一个方案、准备写 spec 之前，检查有没有漏想的分支"],"whenNotToUse":["事情已经能精确说清楚，不必再问"],"howItWorks":["输入 /grill-me 启动，最好开一个全新对话，不要接在已有方案后面","Agent 把要讨论的事画成一棵决策树，一层层往下问","每一轮只问前提都已具备的问题，一次性问完，每题带编号和推荐答案","你回答后，答案会解锁下一轮新的问题，如此反复","遇到说不清楚、只能靠实际看一眼才能回答的问题，停下来用 prototype 做个能看的版本再回来答","问到没有问题可问才算完，还要等你明确说懂了才会真正动手","你要主动把关：有不同意见就说出来，模糊的问题可以要求问细一点，不知道就说不知道"],"outputs":[],"tips":["换一个新对话开始，别在已经讨论出方案的对话里接着追问","想一次只问一题，就在全局 CLAUDE.md 里加一行「When grilling, ask one question at a time」","遇到答不上来的问题，直接说不知道，这是有效答案","讨论完不用开新对话写 spec，直接把这个对话交给 to-spec，好处是不丢上下文","这个 skill 很吃模型能力，用你能用的最好的模型来问"],"workingIf":["过程中你对某个问题有不同意见（完全没有反对意见的追问，可能是你不需要的）","问题分几轮出现，不是一次性问一长串，后面的问题明显接着前面的答案问","结束时你到了一个自己都没想到的地方，因为某个问题挖出了一个你本来在暗中默认的决定","结束后你能跟没参与讨论的人讲清楚每个选择的理由"],"pairsWith":["grilling","grill-with-docs","wayfinder","prototype","to-spec","ask-matt"],"faq":[{"q":"问题问太久太多怎么办？","a":"数轮数不数问题数，几十个问题分四轮很正常；问了两百个基本是范围太大，先拆小再分别问。"},{"q":"讨论完要不要开新对话写 spec？","a":"不用，直接把这轮讨论交给 to-spec，新开对话会丢掉刚建立的上下文。"},{"q":"能不能一次只问一题？","a":"能，在全局 CLAUDE.md 加一句「When grilling, ask one question at a time」。"}],"keyTerms":[{"term":"frontier","zh":"前沿：当前所有前提都已经有答案、可以马上问的问题集合"},{"term":"stateless","zh":"无状态：不写文件、不留工作区，问完就结束"},{"term":"design tree","zh":"决策树：把一件事拆成一层层互相依赖的决策"}],"quote":{"en":"Vagueness is not a reason to wait; it is the thing the session eats.","from":"docs/productivity/grill-me.md"},"sources":["skills/productivity/grill-me/SKILL.md","docs/productivity/grill-me.md"],"publicUrl":"https://aihero.dev/skills-grill-me"},{"name":"grill-with-docs","bucket":"engineering","invocation":"user","command":"/grill-with-docs","oneLiner":"对着你的想法连环追问，边问边把黑话和硬决定写进项目文档","whatItDoes":["跟 /grill-me 是同一套追问，但结果会落地到这个仓库的文件里，不只留在对话里。","确定下来的名词马上写进 CONTEXT.md，不是攒到最后一起写。","碰到难逆转、有意外、有真实取舍的硬决定，就写成 ADR。","SKILL.md 只有一行：调用 grilling 和 domain-modeling 两个技能。"],"whenToUse":["在一个项目目录里，要做的改动想法还很模糊、说法还没统一","想给一个完全没有文档的旧仓库补上 CONTEXT.md","一次会话能搞定的改动（跨多会话的大工程该用 wayfinder）"],"whenNotToUse":["不在任何工作目录里，比如只是想理清一个方案或一段文字，用 /grill-me","工作量大到一个会话装不下，用 /wayfinder"],"howItWorks":["SKILL.md 只一句话：调用 grilling 和 domain-modeling 两个技能","grilling 管一轮轮追问，domain-modeling 管边聊边记词条和决定","名词一讲清楚就写进 CONTEXT.md（多 context 项目按各自的写）","决定要同时满足难逆转、意外、真取舍三条，才写成 docs/adr/ 下的 ADR","CONTEXT.md 和 docs/adr/ 都不预建，第一次真的有内容要写时才创建"],"outputs":["CONTEXT.md","docs/adr/ 下的 ADR 文件"],"tips":["跑完没有 CONTEXT.md 变化也没有 ADR 很正常，可能这次真的没有新名词、没有值得写的硬决定","如果它一次性抛一堆问题、完全不提 CONTEXT.md，说明没加载 grilling+domain-modeling 这两个依赖，问问它到底加载了哪些技能","聊天里定下的其他决定不会自动留痕，想留住就紧接着在同一个会话里跑 /to-spec","会话结束后不知道下一步干嘛是正常现象：多数情况接 /to-spec，改动小就直接 /implement"],"workingIf":["CONTEXT.md 是在会话过程中一个词一个词地改，不是最后一次性甩出一大段","CONTEXT.md 里全是纯词汇表，没有实现细节和 spec 式的长句","代码库能查到答案的问题，它会自己去读代码，不会来问你","ADR 很少甚至没有，出现的都是你不想再吵一遍的决定","你用过的某个词如果跟已有词汇表定义不一样，它会来挑战你"],"pairsWith":["grilling","domain-modeling","to-spec","implement","wayfinder","grill-me","improve-codebase-architecture"],"faq":[{"q":"该用这个还是 wayfinder","a":"看能不能一个会话搞定：能就用这个，装不下就用 wayfinder，它更慢更重，别在小功能上用。"},{"q":"会话结束后该干嘛","a":"多数情况接着在同一个会话跑 /to-spec；改动小到可以直接写代码就跳到 /implement。"}],"keyTerms":[{"term":"stateful","zh":"有状态，指结果会落地成磁盘上的真实文件，不只存在对话里"},{"term":"ADR","zh":"架构决策记录，记一条难逆转的硬决定"},{"term":"CONTEXT.md","zh":"项目的词汇表文件，只放业务黑话定义，不放实现细节"}],"quote":{"en":"A term gets resolved and it lands in CONTEXT.md the moment it resolves, not batched at the end.","from":"docs/engineering/grill-with-docs.md"},"sources":["skills/engineering/grill-with-docs/SKILL.md","docs/engineering/grill-with-docs.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-grill-with-docs"},{"name":"grilling","bucket":"productivity","invocation":"model","command":"/grilling","oneLiner":"逼问用户想清楚一个计划或决定，直到没有遗漏","whatItDoes":["把一个计划、决定或想法拆成一棵决策树，一个决定牵出下面挂着的更多决定","按轮来问：每一轮只问所有前提已经具备的问题，一次性问完这一轮","需要查的事实自己派子任务去找，不问用户；只有真正要用户拿主意的事才问用户","是 grill-me、grill-with-docs 等好几个 skill 背后共用的追问引擎"],"whenToUse":["你自己写的 skill 需要一段追问逻辑时，直接调用这个 skill，不要自己再写一套","想单独试一下最原始的追问体验，可以直接输入 /grilling","正常情况下不用专门去用它，它是被 grill-me 等 skill 在背后调用的"],"whenNotToUse":[],"howItWorks":["把要讨论的事画成决策树：每个决定下面还挂着别的决定","算出前沿：所有前提都已经确定、现在就能问的问题","一轮里把前沿上的问题一次性问完，格式固定：编号加标题的问题，推荐答案单独一行","需要查事实时自己派子任务去查，不打断这一轮里其他不依赖它的问题","用户答完一轮，重新算前沿，问下一轮，如此反复","前沿空了不代表结束，还要等用户确认理解一致，才可以真正动手"],"outputs":[],"tips":["想改成一次只问一题，在全局 CLAUDE.md 加一句「When grilling, ask one question at a time」","如果 Agent 自己把决定也替用户做了，这是执行出错，不是可以接受的灵活处理","推荐答案有时其实是反对问题本身的，同意推荐答案时要写清楚「同意，所以这题答否」","想限制问题数量是不支持的，嫌问太久就直接说先按这样定、收尾"],"workingIf":["一轮问题是编号列表，每题带一行推荐答案，可以直接按编号回答一整轮","同一轮里没有一题需要靠另一题的答案才能回答","后面几轮问的问题，是前面几轮根本问不出来的","遇到能自己查的事实，它会自己去查（读文件、派子任务），不问用户","后台查资料不会卡住整轮提问，只有真正依赖它的问题会等","问完不会自己开始动手，会先等确认共识已经达成","问题总数可以很多，但轮数保持很少"],"pairsWith":["grill-me","grill-with-docs","wayfinder","triage","improve-codebase-architecture","prototype","domain-modeling","ask-matt"],"faq":[{"q":"为什么大部分人不会直接输入 /grilling？","a":"因为它是被 grill-me、grill-with-docs 等 skill 在背后调用的引擎，直接打只能拿到没加料的纯追问。"},{"q":"一轮问好几个问题，会不会漏掉该问的后续问题？","a":"不会漏在同一轮，因为同轮问题互不依赖；下一轮会根据答案重新计算，该出现的会在后面出现。"},{"q":"能不能设置问题数量上限？","a":"不能，故意不支持，问题多少取决于计划本身，嫌太长可以直接叫它收尾。"}],"keyTerms":[{"term":"round","zh":"轮：一次性问完当前所有能问的问题，再等回答"},{"term":"frontier","zh":"前沿：前提都已具备、现在就能问的那些问题"},{"term":"design tree","zh":"决策树：一件事拆出的一层层互相依赖的决定"},{"term":"sub-agent","zh":"子任务：派去查事实用的，不代替用户做决定"}],"quote":{"en":"An agent running grilling that answers its own decisions has broken the skill, not interpreted it liberally.","from":"docs/productivity/grilling.md"},"sources":["skills/productivity/grilling/SKILL.md","docs/productivity/grilling.md"],"publicUrl":"https://aihero.dev/skills-grilling"},{"name":"handoff","bucket":"productivity","invocation":"user","command":"/handoff","oneLiner":"把当前对话打包成交接文档，让新对话接着做","whatItDoes":["把当前对话的进展写成一份交接文档，存到系统临时目录，不放进项目仓库","文档里包含建议后续该调用哪些 skill 的清单","已经写过的东西（spec、计划、ADR、issue、commit、diff）只引用路径，不重复抄一遍","敏感信息（密钥、密码、个人信息）会被去掉"],"whenToUse":["要换到别的 Agent 工具继续做（比如从 Claude 换到 Codex）","要挪到别的目录或仓库继续做","要把工作交给同事，对方需要一份能读的说明","讨论中途冒出一个分支任务，想让另一个 Agent 去做，自己继续手头的事"],"whenNotToUse":["还在同一个工具、同一个目录里自己继续做，用 /compact 就够，不需要 handoff"],"howItWorks":["输入 /handoff，可以带一句话说明下一段对话要干什么","把当前对话浓缩成交接文档，写到系统临时目录（不是项目目录）","文档里带上建议调用的 skill 清单，给下一个 Agent 指路","已经存在别处的内容只写路径或链接，不整段复制","写之前会把密钥、密码等敏感信息去掉"],"outputs":["一份 markdown 交接文档（存在系统临时目录）"],"tips":["拿到文档路径后先记下来或转存，临时目录可能在换会话、重启后被清空","交给下一个 Agent 时直接给它文件路径去读，别把摘要整段贴进命令行，特殊符号可能被截断","只是留在同一个工具、同一个目录继续干活，优先用 /compact 而不是这个","交接文档只记录做到哪了，不一定记录为什么这么做，交接前自己再读一遍，把只是猜测的内容降级说明"],"workingIf":["文档篇幅明显小于原对话，spec、issue、diff 都是路径或链接，不是整段抄进去","不用打开原对话，光看这份文档就知道接下来要做什么","新 Agent 拿到就能直接开工，不用再回头问你要设置说明","分支任务用法里，你原来的对话原封不动还在那里","建议 skill 那一节列的正好是你自己也会想到要用的 skill","文档里没有任何密钥、token 或密码"],"pairsWith":["prototype","ask-matt"],"faq":[{"q":"handoff 和 /compact 该选哪个？","a":"没有东西要搬走就用 /compact；要换工具、换目录、换人接手才用 handoff。"},{"q":"交接文档不见了怎么办？","a":"有些环境（如 Codex）重启会清空临时目录，不是马上接着用，写完就自己转存到别处。"},{"q":"这跟内置的会话 fork 是一回事吗？","a":"不完全是，fork 原样复制整个上下文，handoff 是针对下一步要做什么专门压缩出的一份文件，能去 fork 去不了的地方。"}],"keyTerms":[{"term":"handoff document","zh":"交接文档：写给下一个 Agent 看的进展说明"},{"term":"primary source / secondary source","zh":"一手来源／二手来源：原始对话是一手，摘要是二手"}],"quote":{"en":"What it buys is portability, not compression.","from":"docs/productivity/handoff.md"},"sources":["skills/productivity/handoff/SKILL.md","docs/productivity/handoff.md"],"publicUrl":"https://aihero.dev/skills-handoff"},{"name":"implement-spec","bucket":"in-progress","invocation":"user","command":"/implement-spec","oneLiner":"按任务图并发跑多个子 Agent，把一份 spec 实现成一个 PR","whatItDoes":["把 spec 配套的工单当成任务图，而不是从头到尾的清单，一直找出当前能做的那批工单","派多个实现子 Agent 各自在自己的 worktree、自己的分支上并发实现，做完合并进同一个 PR 分支"],"whenToUse":["有一份 spec 和配套工单，想尽量并发地把它们全部实现完，最终落成一个 PR","工单之间有阻塞关系，想按能做的先做，而不是死板排队"],"whenNotToUse":[],"howItWorks":["读 spec 和工单，摸清整个任务图（可选：派探索子 Agent 先查代码和文档）","建分支和关联 spec、工单的草稿 PR","对能做的工单各派一个实现子 Agent，各自在独立 worktree、独立分支上并发干活","完成的工单由合并子 Agent 并入 PR；解锁新工单就继续派新的实现子 Agent","全部完成后跑 /code-review 修完问题，PR 转可评审，清理所有 worktree"],"outputs":["一个草稿 PR（最终转为可评审状态）","多个临时 worktree 和分支（完成后清理）","探索子 Agent 的笔记文件（存在仓库外）"],"tips":["子 Agent 之间要少交流，主要靠指向 spec、工单、研究笔记、之前 commit 的指针沟通","实现子 Agent 尽量放到后台跑，才能真正做到并发","每个实现子 Agent 独立 worktree、独立分支，避免互相踩脚"],"workingIf":["工单按任务图并发推进而不是排队等待，最终产出一个包含全部工单改动的 PR（推断）"],"pairsWith":["code-review"],"faq":[],"keyTerms":[{"term":"task graph","zh":"任务图：工单之间带阻塞关系的图，而不是一份顺序清单"},{"term":"frontier","zh":"前沿：当前所有阻塞条件都已解除、可以马上做的工单集合"},{"term":"implementer / merger subagent","zh":"实现子 Agent／合并子 Agent：分别负责写代码和把成果并入主分支"}],"quote":{"en":"The tickets are not a list of steps. They are a task graph with blocking relationships between them.","from":"skills/in-progress/implement-spec/SKILL.md"},"sources":["skills/in-progress/implement-spec/SKILL.md"],"publicUrl":null},{"name":"implement","bucket":"engineering","invocation":"user","command":"/implement","oneLiner":"照着已经定好的 spec 或工单直接写代码，测试、审查、提交一条龙","whatItDoes":["只干活不重新讨论方案，也不会提议换个做法，给它什么就照着建。","在事先谈好的接缝上用 /tdd 一红一绿地写。","边写边跑类型检查和单个测试文件，最后跑一次完整测试套件。","结束前跑一次 /code-review，然后直接提交到当前分支。"],"whenToUse":["手上有一个 tracker 上的工单，一个工单开一个新会话","有 spec 但还没切工单，而且活儿不大，可以直接对着 spec 做","方案就在刚才的对话里，而且不大，当场就地实现"],"whenNotToUse":["方案还没写下来，先去 /grill-with-docs 或 /grill-me","只是想针对一个具体行为写测试驱动的代码，没有 spec，直接用 /tdd 就好","代码已经写完了只是想检查一下，直接用 /code-review，不用重新走 implement"],"howItWorks":["读工单或 spec，搞清楚要在哪些接缝上做（谈接缝不是它的活）","在这些接缝上用 /tdd 一次一个红绿切片地推进","过程中经常跑类型检查和单个测试文件","全部完成后跑一次完整测试套件，再跑 /code-review","提交到当前所在分支，不会自己建分支也不会问"],"outputs":["代码改动（提交到当前分支的一个 commit）","测试文件","/code-review 的审查结果"],"tips":["它不会自己关闭工单或勾选验收标准，跑完要自己去改工单状态，不然依赖它的下一张工单永远不会显示解锁","一次只认一个工单，别在同一个工作目录里开好几个 /implement 会话并行跑，共享同一个 git 索引会互相搞坏对方的 commit/stash，要并行就用 git worktree","SKILL.md 原文说的是「spec or tickets」，如果方案只在当前对话里没写成文件，调用时要明确说清楚，不然它会去找一个不存在的文件","它默认直接 commit 到当前分支不会开 PR，想要 PR 就在调用时明确说「提交到分支后开个 PR」","/code-review 审查的是已提交的 diff，implement 还没提交就跑审查会看到空 diff，要先有一次提交再审查","一个工单动辄烧掉十万 token 属于正常，如果频繁爆掉，说明该去 /to-tickets 把工单切得更小"],"workingIf":["会话一开始就复述「我要做什么」，而不是反问你要做什么","过程记录里能看到真的调用了 /tdd，不是代码直接凭空出现在 diff 里","过程中反复跑类型检查和单个测试文件，最后跑一次完整套件","跑到底会有一次提交到当前分支，不用你催","diff 只是一张工单的量，是贯穿所有层的一条切片，不是好几张工单混在一起"],"pairsWith":["tdd","code-review","to-tickets","to-spec","setup-matt-pocock-skills"],"faq":[{"q":"跑完为什么工单还是开着、验收框也没打勾","a":"implement 没有收尾这一步，这是设计如此，要自己去关工单、勾验收标准。"},{"q":"能不能一次跑多个工单/并行跑","a":"不行，一次一个工单；共享同一个工作目录并行跑很危险，有真实事故案例，要并行得自己用 git worktree 搭。"}],"keyTerms":[{"term":"pre-agreed seam","zh":"谈接缝不是 implement 的活，是 spec 阶段或 /tdd 该做的"}],"quote":{"en":"It never reopens the plan.","from":"docs/engineering/implement.md"},"sources":["skills/engineering/implement/SKILL.md","docs/engineering/implement.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-implement"},{"name":"improve-codebase-architecture","bucket":"engineering","invocation":"user","command":"/improve-codebase-architecture","oneLiner":"扫代码库找值得「加深」的模块，出一份可视化 HTML 报告，你选一个再深聊","whatItDoes":["从最近改得多的代码开始找浅模块：接口跟实现一样复杂的地方。","每个候选都要过删除测试：删掉它是让复杂度集中，还是只是挪了个地方，只有前者算数。","结果写成一份自包含的 HTML 报告，扔到系统临时目录，不进仓库，也不改一行代码。","你选中一个候选之后，才用 grilling 陪你把这个改法聊透。"],"whenToUse":["隔几天做一次代码库保养，防止结构慢慢烂掉","准备做一个大改动之前，问它怎么让这个改动变得容易","接手一个杂乱无章的老代码库，想知道现状到底什么样","想给遗留代码补测试，先找出缺的接缝在哪"],"whenNotToUse":["已经选定要设计的模块了，直接用 /codebase-design 这张设计台，不用再扫一遍","整个工作量大到一个会话装不下，那是 /wayfinder 的事","具体某个东西坏了要修，那是 /diagnosing-bugs 的事"],"howItWorks":["先定方向：你指定就看你指定的，没指定就翻 git log 找最近改得多的热点","读 CONTEXT.md 和相关 ADR，派子 agent 去代码库里逛，找摩擦点","候选要过删除测试：删掉是让复杂度集中，还是只是挪地方","写成 HTML 卡片：文件、问题、方案、收益（locality/leverage）、前后对比图、强度","报告结尾给出最推荐先做哪个，然后停下问你要探索哪一个，此时代码还没动","选定候选后用 grilling 走一遍决策树，站得住的拒绝理由会提议记成 ADR"],"outputs":["系统临时目录下的 architecture-review-\u003ctimestamp>.html 报告","CONTEXT.md 更新（grilling 阶段）","ADR（可选）"],"tips":["报告只在临时目录，跑完这次就该趁热选一个候选往下走，不然下次运行又是一份新文件","一个会话只处理一个候选，别想着一口气聊完报告里的所有候选，上下文会被挤爆","如果它一上来就抓着第一个想法连环追问、不肯先出报告，明确说「别问我，先出报告」","报告要联网加载 Tailwind 和 Mermaid 的 CDN，离线或锁网环境会打不开，这时要求它改用内联 CSS 和手绘 SVG","带着下一步要做的大改动去问它「怎么让这个改动变容易」，比空手跑效果好得多"],"workingIf":["候选说的是你项目里的业务名词，不是它自己编的类名","候选集中在你最近改过的文件，不是仓库里没人碰的犄角旮旯","跑完之后代码一行没变，只多了临时目录里那份 HTML","出完报告就停下来问你要选哪个，不会自己接着往下做","每张卡片用 locality、leverage 这些词说收益，而不是一句「这样更干净」","拒绝一个候选如果理由站得住，它会主动提议记成 ADR"],"pairsWith":["codebase-design","grilling","domain-modeling","grill-with-docs","to-spec","diagnosing-bugs"],"faq":[{"q":"能不能让它别 grilling，只看报告","a":"能，调用时直接说「别问我，先出报告就行」。"},{"q":"报告打开是没样式的裸 HTML 咋办","a":"多半是 CDN 被挡了，让它改成内联 CSS/手绘 SVG，不依赖网络。"}],"keyTerms":[{"term":"deepening opportunity","zh":"加深机会，把浅模块变成深模块的重构候选"},{"term":"deletion test","zh":"删除测试，判断删掉这段代码是让复杂度集中还是只是挪地方"},{"term":"locality / leverage","zh":"局部性/杠杆率，判断收益的两个词：bug 是否集中好找、一个接口能撬动多少调用点"}],"quote":{"en":"It is a survey, not a rescue: on a genuinely old codebase it will find real candidates, but it won't untangle the mud for you.","from":"README.md"},"sources":["skills/engineering/improve-codebase-architecture/SKILL.md","skills/engineering/improve-codebase-architecture/HTML-REPORT.md","docs/engineering/improve-codebase-architecture.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-improve-codebase-architecture"},{"name":"loop-me","bucket":"in-progress","invocation":"user","command":"/loop-me","oneLiner":"追问出生活里能交给自动化的重复流程，写成规格","whatItDoes":["用 grilling 的方式追问，把生活里反复出现的模式问成一份 workflow 规格","当前目录是持续维护的工作区，规格存在 workflows/*.md 里，可新建改删"],"whenToUse":["想找出自己生活或工作里其实很有规律、值得交给自动化的重复活动","已经想到一个具体想做成自动化流程的事，想把细节问清楚到能直接实现"],"whenNotToUse":[],"howItWorks":["NOTES.md 是空的或很单薄时，先追问工作环境、常用工具和你自己的说法","用 loop 的视角找值得拆出来的重复模式，也主动提出你没意识到的候选","按 grilling 的规矩追问一个 workflow：触发方式、要不要检查点、要不要用 AI，不预设结构","尽量把需要人工确认的点往后推，让人只在信息备齐后被问一次、看一份精炼摘要","追问到实现者不需要再问任何问题就能照做，才算这份规格完成"],"outputs":["workflows/*.md（每个自动化流程一份规格）","NOTES.md（记录工作环境和常用说法）"],"tips":["不要在没有追问出需要的情况下，强行给 workflow 加检查点、加 AI、加固定时间表","核心原则是把需要人工确认的点尽量往后推，让人只在最后被问一次","判断规格写完没有，就看一个没参与讨论的实现者能不能直接照做"],"workingIf":["实现者拿着某一份规格，不需要再问你任何问题就能把它做出来（推断）"],"pairsWith":["grilling"],"faq":[],"keyTerms":[{"term":"loop","zh":"循环：生活或工作里反复出现的一个活动模式"},{"term":"workflow","zh":"工作流：把一个 loop 具体落成的可执行规格"},{"term":"push right","zh":"往右推：把需要人工确认的点尽量后移，让人被问得更少、更晚、信息更全"},{"term":"brief","zh":"摘要简报：呈现给人做确认时看的精炼总结，不是原始输出"}],"quote":{"en":"A workflow spec is done when an implementer agent could build it without asking a single question.","from":"skills/in-progress/loop-me/SKILL.md"},"sources":["skills/in-progress/loop-me/SKILL.md"],"publicUrl":null},{"name":"migrate-to-shoehorn","bucket":"misc","invocation":"model","command":"/migrate-to-shoehorn","oneLiner":"把测试代码里的 as 类型断言换成 shoehorn 库","whatItDoes":["把测试文件里的 as 断言，换成 shoehorn 提供的类型安全写法","只用在测试代码里，明确不允许用进生产代码"],"whenToUse":["测试里大对象只用到其中一两个字段，却要 as 出整个类型","测试里需要故意传一个类型不对的数据来测错误处理"],"whenNotToUse":["生产代码不适用，正文写明只用于测试代码，绝不用于生产代码"],"howItWorks":["先问清楚哪些测试文件有 as 断言，是不是大对象只用得到几个字段，要不要故意传错类型数据","安装 @total-typescript/shoehorn","用 grep 找出测试文件里的 as 断言","把 as Type 换成 fromPartial()，把 as unknown as Type 换成 fromAny()","加上 import，跑一遍类型检查确认没问题"],"outputs":["改写后的测试文件（as 断言换成 fromPartial()/fromAny()）","package.json 新增 @total-typescript/shoehorn 依赖"],"tips":["fromPartial() 用来传部分数据但要过类型检查，fromAny() 用来传故意错误的数据","只改测试文件，生产代码里出现 as 不归这个 skill 管"],"workingIf":["跑一遍类型检查能通过，测试文件里看不到裸的 as Type 或 as unknown as Type（推断）"],"pairsWith":[],"faq":[],"keyTerms":[{"term":"fromPartial()","zh":"传部分字段也能通过类型检查的写法"},{"term":"fromAny()","zh":"故意传类型不对的数据、同时保留自动补全的写法"}],"quote":{"en":"shoehorn lets you pass partial data in tests while keeping TypeScript happy.","from":"skills/misc/migrate-to-shoehorn/SKILL.md"},"sources":["skills/misc/migrate-to-shoehorn/SKILL.md"],"publicUrl":null},{"name":"pr","bucket":"in-progress","invocation":"model","command":"/pr","oneLiner":"按固定模板写 PR 描述，让审阅的人很快看懂","whatItDoes":["给 PR 描述固定三段：摘要（Summary）、证据（Evidence）、合并风险（Merge Danger）","摘要用最小的一张图讲清改动：伪代码、调用树、组件树、文件树、Mermaid 或 diff 草图"],"whenToUse":["要写或改一个 PR 的描述时","想让审阅的人不读完 diff，也知道改了什么、证据够不够、敢不敢合"],"whenNotToUse":[],"howItWorks":["摘要：挑最小的一种图示讲清要点，图紧挨着它说明的那句话，只留回答当前问题需要的调用、文件、状态","证据：给改动前后对照。界面改动截图最好，其次是测试结果或控制台输出，并用伪代码写出那条先失败后通过的测试","合并风险：先判断是单向门还是双向门（能不能低成本退回），再写影响范围，比如布局抖动、下游使用方出错、手机适配","全程不写开场白，文字从简，用 CONTEXT.md 里的领域语言"],"outputs":["PR 描述正文（Summary / Evidence / Merge Danger 三段）"],"tips":["截图是最硬的证据（原文叫 S 级），测试和输出次之（A 级）","能退回的改动风险低；涉及删除、难以撤回的决定就是单向门，要写明","图示选一种或几种就够，原文提醒别一次全用上把人淹没"],"workingIf":["审阅的人只看描述就能判断改了什么、证据够不够、合并风险多大（推断）"],"pairsWith":[],"faq":[],"keyTerms":[{"term":"one-way / two-way door","zh":"单向门 / 双向门：这次改动能不能低成本退回"},{"term":"blast radius","zh":"影响范围：合并后可能波及的地方"}],"quote":{"en":"You can walk back through two-way doors, but not one-way doors.","from":"skills/in-progress/pr/SKILL.md（GitHub main）"},"sources":["GitHub main: skills/in-progress/pr/SKILL.md","GitHub main: skills/in-progress/README.md"],"publicUrl":null,"note":"插件缓存 1.2.3 里没有这个 Skill。它在 2026-09-17 加入上游 main（PR #1092），改编自 Humanlayer 的 Dex Horthy 写的 show-me skill。"},{"name":"prototype","bucket":"engineering","invocation":"model","command":"/prototype","oneLiner":"快速搭一次性原型，回答「这样设计对不对」的问题","whatItDoes":["写「用完就扔」的代码来回答一个具体设计问题：状态模型对不对，或界面该长什么样","问题决定原型形状：逻辑问题做单文件 HTML 演示，界面问题做同一页面上可切换的几个版本","原型本身不再要求删除，验证完后连同答案一起存档到独立分支，留证据给下一个接手的人"],"whenToUse":["说不清一个状态机能不能处理某个边界情况，靠讨论说不清楚","想在动手写正式代码前，先看看一个页面几种布局哪个更好","连续追问（grilling）已经追问到设计细节还是定不下来，卡在到底该怎么做","已经在用 wayfinder 排大计划，遇到一张 prototype 决策卡片"],"whenNotToUse":["已经通过讨论确定了要做什么，这时该用 /implement，不该再原型","想把整个产品先做成一个完整原型再给客户演示，这不是这个 Skill 的用法：它只服务一个具体问题，整套 App 没有自然的收尾点"],"howItWorks":["先判断问题类型：问「逻辑/状态对不对」走 LOGIC 分支，问「长什么样」走 UI 分支，分支选错整个原型就白做","逻辑分支：把核心逻辑写成一个干净的纯模块（reducer、状态机或纯函数），不碰 DOM，方便以后直接搬进正式代码","逻辑分支：做成单个可双击打开的 HTML 文件，有状态面板、自由点击按钮，还有分标签页的场景走查","UI 分支：默认在已有页面加 ?variant= 切 3 个结构不同的版本，最多 5 个，优先挂在真实页面，不新建路由","UI 分支：做一个页面底部悬浮的切换条，左右箭头切换版本，标注当前是第几版","全程不写测试、不接正式数据库、不做任何以后可能用得上的抽象，只求快速看到答案","拍板后：结论并入正式代码，原型整体提交到独立 throwaway 分支（不合并入 main），工单留指向该分支的指针"],"outputs":["逻辑原型：单个自包含 HTML 文件","UI 原型：同一路由下的多个可切换界面版本，加悬浮切换控件","存档在独立 throwaway 分支上的原型代码，加上工单里指向该分支的记录"],"tips":["原型不再要求删除：验证完把原型提交到 prototype/\u003cname> 分支留档，而不是直接扔掉","一次原型只答一个问题，答完当场就能一句话说出结论；如果做了一天还没答完，说明问题拆得不够小","判断标准之一：有人看完说「等等，这不该发生」或「我以为 X 会不一样」，这才是原型真正的价值","UI 版本之间必须在布局、信息结构上明显不同，只是换个颜色或文案不算数","如果不确定走哪个分支又找不到人问，就参考旁边现有代码类型（后端模块选逻辑分支，页面组件选 UI 分支），并把这个假设写在原型开头"],"workingIf":["能一句话说清楚这个原型要回答什么问题，而且这句话写在演示文件最上面，不是只在脑子里","不懂代码的人也能自己点着走查逻辑演示，并用自己的话说出他看到了什么","有人说「等等，这不该发生」或「我以为 X 会不一样」，这正是发现了想法里的 bug，就是原型的意义所在","UI 几个版本在布局和信息结构上明显不同，收到的反馈是「我要 B 的头部配 C 的侧栏」这种","一次坐下就能做完；如果隔天还在做，说明问题太大，该拆开","结束后 main 分支只留下最终决定，原型代码都在那条独立分支上，工单指向它"],"pairsWith":["wayfinder","grill-me","grill-with-docs","to-spec","diagnosing-bugs","handoff"],"faq":[{"q":"原型做完是不是应该删掉？","a":"现在不用删。验证完把它提交到一个独立的 throwaway 分支，main 分支只留最终决定，方便以后回头看当时为什么这样定。"},{"q":"已经讨论清楚该做什么了，Agent 还是跳去做原型怎么办？","a":"这是命名问题：如果设计已经谈妥，下一步应该是 /implement，只有真的还没决定、讨论解决不了时才用原型。"},{"q":"要不要先做一个完整 App 原型给客户看？","a":"不建议。这个 Skill 只服务一个具体问题，整套 App 没有自然的收尾点，很容易变成正式产品但没做该有的测试和错误处理。"}],"keyTerms":[{"term":"primary source","zh":"一手证据来源；这里指原型代码本身要留档保存，当成决策依据"},{"term":"guided walkthrough","zh":"逻辑原型里按标签页组织的场景演练，每步是一个可点的按钮"},{"term":"variant switcher","zh":"UI 原型页面底部悬浮的切换控件，用左右箭头切换几个界面版本"}],"quote":{"en":"A prototype is throwaway code that answers a question.","from":"skills/engineering/prototype/SKILL.md"},"sources":["skills/engineering/prototype/SKILL.md","skills/engineering/prototype/LOGIC.md","skills/engineering/prototype/UI.md","docs/engineering/prototype.md"],"publicUrl":"https://aihero.dev/skills-prototype"},{"name":"research","bucket":"engineering","invocation":"model","command":"/research","oneLiner":"派后台 Agent 查一手资料并写成带引用的笔记","whatItDoes":["派一个后台 Agent 去调查一个具体问题，你可以继续手头的工作不用等它","只信一手资料：官方文档、源码、规范、官方 API 本身，不采信别人写的转述文章","把结论写成一份带引用来源的 Markdown 文件，存到仓库里记笔记的地方"],"whenToUse":["决策卡在一个外部事实上，比如这个第三方 API 到底是怎么表现的","想确认某个版本声明、某条规范条文是不是真的这么写的","要把查资料读文档这种体力活甩给后台去做，不占用当前对话","wayfinder 排大计划时生成的 research 决策卡片，需要单独去查"],"whenNotToUse":["需要跟你一起讨论做出一个决定而不是查事实，那是 grilling 该做的事","只是个很小的问题，两行提示词直接让 Agent 去读文档就够了，不必正式跑这个 Skill"],"howItWorks":["以后台 Agent 的方式启动，不占用当前会话，你可以继续做别的事","只查一手来源：官方文档、源代码、规范、官方 API 本身，顺着每条结论一路查到它真正的出处","把发现写成一份 Markdown 文件，每条结论都标好来源链接","文件存放位置跟着仓库已有的笔记习惯放；仓库没有这个习惯，就找个合理的位置存放并说明放在哪"],"outputs":["一份带引用来源的 Markdown 研究笔记文件，存在仓库里","文件路径会被明确告知"],"tips":["已知的坑：这个 Skill 有时会自己再派出第二个后台 Agent 重复干同一件事（issue #530，未修复），派完去看一眼后台任务列表，发现重复的手动停掉","问题问得越窄越好：一个 API、一个行为、一条版本声明，比笼统的一句研究 X 效果好得多","查完抽查两三条引用，点进去看是不是真的落在官方文档或源码上，而不是别人写的介绍文章，这是唯一的质量把关手段","这份文件不会被以后的会话自动读取，要靠自己后续把它喂给 grilling、spec 或工单，它才真正起作用","如果全局规则禁止 Agent 自己再派子 Agent，这个 Skill 可能因为拿不到后台执行能力而什么都不做，需要留意"],"workingIf":["自己这边的会话没有被卡住、可以继续往下做别的事；如果在干等着它读完，说明没有真正派到后台","只多出一个新的后台任务；如果出现第二个名字很像的，就是那个重复派发的老毛病","仓库里多出一份新的 Markdown 文件，放在仓库已有的笔记目录下，Agent 会告诉你路径","文件里每条结论都带一个链接，随手点开两三个能落在官方文档、规范或源码上","光靠这份文件本身，你就能做出原来卡住的那个决定，不用再回头自己查一遍"],"pairsWith":["wayfinder","grilling","grill-with-docs","to-spec"],"faq":[{"q":"它自己又派了一个一模一样的后台任务，是不是正常的？","a":"不是，这是已知未修的 bug（issue #530）。多花时间多花钱，发现重复的直接手动停掉那个多出来的任务。"},{"q":"查完的这份文件要不要提交进 Git？","a":"原文没规定，社区习惯是 ADR 留着，研究笔记类文件用完就归档或删掉，放太久容易过期反而误导以后的会话。"},{"q":"什么才算高可信一手来源，谁来判断？","a":"由模型自己判断，原文没有给白名单也没有验证环节，唯一的把关手段是自己抽查引用链接是不是真的指向官方文档或源码。"}],"keyTerms":[{"term":"primary source","zh":"官方文档、源代码、规范或官方 API 本身，而非他人转述"},{"term":"background agent","zh":"独立于当前对话运行的子任务执行者，不用干等着它"}],"quote":{"en":"Investigate the question against primary sources (official docs, source code, specs, first-party APIs), not a secondary write-up of them.","from":"skills/engineering/research/SKILL.md"},"sources":["skills/engineering/research/SKILL.md","docs/engineering/research.md"],"publicUrl":"https://aihero.dev/skills-research"},{"name":"resolving-merge-conflicts","bucket":"engineering","invocation":"model","command":"/resolving-merge-conflicts","oneLiner":"按双方原始意图逐块解决冲突，绝不用 --abort","whatItDoes":["处理正在进行中的 git merge 或 rebase 冲突，一块一块地解决，而不是当成纯文本问题","解决每处冲突前，先去 commit 信息、PR、原始 issue 里搞清楚双方各自当初为什么这么改","收尾前会跑一遍项目自己的自动检查（类型检查、测试、格式化），修好合并过程带来的问题，再完成提交"],"whenToUse":["正在 merge 或 rebase 途中，代码里出现了冲突标记","想避免那种随手选 --ours 或 --theirs、冲突标记消失了但悄悄丢了别人特意做的改动的做法"],"whenNotToUse":["合并已经完成、代码却开始出问题，这种合并完之后才发现的诡异行为该用 diagnosing-bugs，不是这个","想规划怎么拆分工作、减少分支之间冲突的可能性，原文说这个不属于任何一个 Skill，真正该做的是把大重构提前做掉"],"howItWorks":["先看清楚当前 merge/rebase 处于什么状态：检查 git 历史和所有冲突文件","针对每一处冲突，去找双方各自的一手依据：commit 信息、对应的 PR、原始 issue，搞懂两边各自真正想做的是什么","逐块解决：尽量保留双方意图；两边不兼容时选跟合并目标一致的一边，写清楚舍弃了什么、为什么，绝不凭空编新行为","找到项目自己的自动化检查（通常是类型检查、测试、格式化）并跑一遍，修掉合并过程中弄坏的东西","完成合并/变基：改动 stage 好并提交；rebase 就把剩下 commit 过一遍，中途绝不 --abort"],"outputs":["冲突全部解决、已提交的干净工作区","rebase 场景下会是完整走完的一整条 commit 序列"],"tips":["铁律是绝不 --abort：这个 Skill 假定这次合并终究要完成，如果决定这次合并根本不该发生，那是调用它之前就该做的决定","判断它有没有真的在做这件事：它会引用 commit 信息、PR 或 issue 内容跟你对话，而不是只盯着 diff 块本身说话","收尾前一定要跑类型检查、测试、格式化，而且要在提交之前跑绿，不是等事后发现问题","想省事按文件给不同并行任务分工来避免冲突，多数情况下不值得，唯一值得坚持的是把大规模重命名或重构提前做完","几个并行 worktree 各自做完一张工单要合并回主线时，最好由写这个改动的会话自己来合并，因为它才真正知道原始意图"],"workingIf":["解决过程中 Agent 会引用 commit 信息、PR 或 issue 跟你对话，不是只对着 diff 块说话","每一块冲突最后要么两边的行为都保留了，要么明确写清楚舍弃了哪一边、为什么","最终结果里不会出现任何一边原来都没有的新行为","提交之前，类型检查、测试、格式化都已经找到并跑绿了，不是提交后才发现漏跑","收尾时工作区是干净的，操作已经完成，多提交的 rebase 也是每个 commit 都走完了"],"pairsWith":["diagnosing-bugs"],"faq":[{"q":"Claude Code 自己处理冲突处理得也不错，为什么还需要这个 Skill？","a":"价值在于逼着 Agent 做两件容易被跳过的事：先去查双方原始意图、解决完再跑一遍自动检查。原文也承认模型能力越强，这个 Skill 的增量价值会越薄。"},{"q":"为什么绝对不能用 --abort？","a":"--abort 只是把冲突原样退回去，扔掉刚才做的解决工作，下次遇到还是同一个问题；如果本来就该放弃这次合并，那是调用之前该做的决定。"},{"q":"要不要提前按文件给不同任务分工来避免冲突？","a":"大多数情况不值得，Agent 处理合并冲突的能力已经足够好；唯一真正划算的做法是把大规模重构提前做完，避免它落在很多分支已经分叉出去之后。"}],"keyTerms":[{"term":"primary source","zh":"commit、PR、原始 issue，弄清冲突双方真实意图的依据"},{"term":"hunk","zh":"合并冲突里被标记出来、需要逐块处理的一段改动"}],"quote":{"en":"Preserve both intents where possible. Where incompatible, pick the one matching the merge's stated goal and note the trade-off.","from":"skills/engineering/resolving-merge-conflicts/SKILL.md"},"sources":["skills/engineering/resolving-merge-conflicts/SKILL.md","docs/engineering/resolving-merge-conflicts.md"],"publicUrl":"https://aihero.dev/skills-resolving-merge-conflicts"},{"name":"retro","bucket":"in-progress","invocation":"user","command":"/retro","oneLiner":"复盘一次编程会话，给环境提改进建议（草案阶段，还不能用）","whatItDoes":["复盘一次编程会话，从能不能少走弯路的角度，给 Agent 的工作环境提出具体改进建议","官方标注是 STUB：目前只有设计笔记，还没有真正能跑的功能"],"whenToUse":["想在一次编程会话结束后，系统性回顾哪里能让下次的 Agent 跑得更顺","会话里出现了导航找文件很久、犯了本该被检查拦住的错、或引导文件越堆越大这类情况"],"whenNotToUse":["官方标注为 STUB（设计草案，尚未实现），指望它直接产出可用结果之前先确认能不能跑"],"howItWorks":["先调用 writing-for-agents，拿到写作风格参照","读指定会话的原始记录，不指定就默认当前这次","从导航、自动化检查、编码规范、AGENTS.md、工具效率、空指令、信息可获取性几个类别里找改进候选","把候选按严重程度排序，交给用户"],"outputs":["按严重程度排序的改进建议清单（呈现在对话里，不写入文件）"],"tips":["这是 STUB（设计草案），用之前先确认你的环境里它是否已经真正可以跑","机械性的错误（固定语法、禁用 API、文件位置规则）应该优先做成自动化检查，不是写成一条规范","只在某个类别真的在这次会话里拖了后腿时才展开检查，比如卡壳很久才值得查导航问题"],"workingIf":[],"pairsWith":["writing-for-agents"],"faq":[],"keyTerms":[{"term":"STUB","zh":"占位草案：只有设计说明，功能还没真正实现"},{"term":"navigation pointer","zh":"导航指针：帮 Agent 更快找到该看哪个文件的一句指路说明"},{"term":"guardrail","zh":"护栏：预提交钩子或 CI 里跑的自动检查"}],"quote":{"en":"The review agent has the least context pressure - it receives a diff, so no exploration needed.","from":"skills/in-progress/retro/SKILL.md"},"sources":["skills/in-progress/retro/SKILL.md","skills/in-progress/README.md"],"publicUrl":null},{"name":"scaffold-exercises","bucket":"misc","invocation":"model","command":"/scaffold-exercises","oneLiner":"按规范批量搭建课程练习的目录结构","whatItDoes":["按规则批量建练习目录，每个练习下建标准子目录","建完自动跑 lint 检查，通过后再提交 git commit"],"whenToUse":["要按一份教学计划批量新建一批课程练习的目录骨架","要给练习改编号或挪位置"],"whenNotToUse":[],"howItWorks":["解析计划文本，提取每一章、每个练习的名字和需要哪些子目录","用 mkdir -p 建出对应目录结构，不指定类型默认只建 explainer/","每个子目录下建一个不为空、有标题的 readme.md 占位","跑 pnpm ai-hero-cli internal lint 校验","按报错逐条修，直到 lint 通过"],"outputs":["exercises/\u003c章节>/\u003c练习>/{problem,solution,explainer}/ 目录及 readme.md 占位文件"],"tips":["挪动或改编号一定用 git mv 而不是 mv，不然会丢 git 历史","只有 readme 的练习是允许的，一旦子目录里放了代码，就必须配一个超过一行的 main.ts"],"workingIf":["跑 pnpm ai-hero-cli internal lint 没有报错（推断）"],"pairsWith":[],"faq":[],"keyTerms":[],"quote":{"en":"Create exercise directory structures that pass pnpm ai-hero-cli internal lint, then commit with git commit.","from":"skills/misc/scaffold-exercises/SKILL.md"},"sources":["skills/misc/scaffold-exercises/SKILL.md"],"publicUrl":null},{"name":"setup-matt-pocock-skills","bucket":"engineering","invocation":"user","command":"/setup-matt-pocock-skills","oneLiner":"每个仓库开工前先跑一次，配好问题单存哪、标签叫什么、文档放哪","whatItDoes":["回答三件事：issue tracker 用哪个、triage 标签叫什么、文档放哪。","答案写成 docs/agents/ 下的文件，其他技能运行时照着读，不用改技能本身。","是问答式的，不是死板脚本：先探查仓库现状，提出建议，等你确认才写。"],"whenToUse":["一个仓库第一次用这套工程技能之前，先跑一遍","triage / to-spec / to-tickets / wayfinder 开始瞎猜问题单存哪、乱打标签，说明还没配","想换 issue tracker，或者想推倒重来"],"whenNotToUse":["已经跑过一次，只是想临时改改用词偏好：直接编辑 CLAUDE.md/AGENTS.md 或调用时说清楚就行，不用重新跑"],"howItWorks":["先探查现状：git remote、CLAUDE.md/AGENTS.md、是否 monorepo","tracker 一节：按 remote 猜 GitHub/GitLab，也可选本地 markdown","triage 标签一节：只有装了 triage 才问，默认用五个标准角色名","domain 文档一节：默认单一 CONTEXT.md，探到 monorepo 迹象才提多上下文","写前给你看草稿；CLAUDE.md 存在就改它，没有才改 AGENTS.md，两个都没有才问你","写完告知配置完成，以后只有换 tracker 或推倒重来才需要重新跑"],"outputs":["docs/agents/issue-tracker.md","docs/agents/domain.md","docs/agents/triage-labels.md（仅装了 triage 时）","CLAUDE.md 或 AGENTS.md 里新增的 ## Agent skills 小节"],"tips":["它只是把标签字符串记下来做映射，不会帮你在 tracker 里真的创建标签，GitHub 新仓库要自己先 gh label create 建好","本地 markdown 是正式选项不是退而求其次，没有远程仓库的独立项目完全可以只用它，但和 GitHub 是二选一别混用","选「其他」（Jira/Linear 等）时描述清楚工作流程，它会把这段话原样记进 issue-tracker.md，后面的技能照这段话执行","同时存在 CLAUDE.md 和 AGENTS.md 时，它认「已经存在的那个」，不是按你用的 harness 挑，Codex 用户要留意","wayfinder 用到的 wayfinder:map、wayfinder:\u003ctype> 标签也不会自动建，第一次跑 wayfinder 前要自己在 GitHub 建好"],"workingIf":["docs/agents/issue-tracker.md 和 domain.md 都已存在，装了 triage 的话 triage-labels.md 也在","你的 harness 真正会读的那个文件里出现了 ## Agent skills 小节","它猜的 tracker 跟你真实在用的一致，标签字符串跟 tracker 里真实存在的标签对得上","跑完之后 /to-tickets 发布时不会再问你 issue 存哪，/triage 打的是真实存在的标签","跑完之后没有任何 SKILL.md 文件被改动过"],"pairsWith":["triage","to-spec","to-tickets","wayfinder","domain-modeling"],"faq":[{"q":"必须用 GitHub 吗","a":"不用，GitHub、GitLab、本地 markdown 都是现成模板，其他系统用「其他」选项照样能配。"},{"q":"能不能把配置放全局共用，不用每个仓库配一次","a":"目前不行，每个仓库都要有自己的一份 docs/agents/。"}],"keyTerms":[{"term":"issue tracker","zh":"问题单存放的地方，比如 GitHub Issues 或本地 markdown"},{"term":"single-context / multi-context","zh":"单一/多上下文，决定 CONTEXT.md 是根目录一份，还是按子系统各放一份"}],"quote":{"en":"Config is death.","from":"docs/engineering/setup-matt-pocock-skills.md"},"sources":["skills/engineering/setup-matt-pocock-skills/SKILL.md","skills/engineering/setup-matt-pocock-skills/domain.md","skills/engineering/setup-matt-pocock-skills/issue-tracker-github.md","skills/engineering/setup-matt-pocock-skills/issue-tracker-gitlab.md","skills/engineering/setup-matt-pocock-skills/issue-tracker-local.md","skills/engineering/setup-matt-pocock-skills/triage-labels.md","docs/engineering/setup-matt-pocock-skills.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-setup-matt-pocock-skills"},{"name":"setup-pre-commit","bucket":"misc","invocation":"model","command":"/setup-pre-commit","oneLiner":"给仓库装 Husky 预提交钩子，自动格式化、类型检查、跑测试","whatItDoes":["装 Husky、lint-staged、Prettier 三件套，自动跑提交前格式化","顺带在预提交钩子里跑 typecheck 和 test 脚本（仓库里有的话）"],"whenToUse":["想让每次提交前自动做格式化、类型检查和测试，而不是靠人手动跑","团队还没有统一的提交前检查机制"],"whenNotToUse":[],"howItWorks":["检测包管理器（npm/pnpm/yarn/bun），都没有就默认 npm","装 husky、lint-staged、prettier 为开发依赖，跑 npx husky init","写 .husky/pre-commit：先跑 lint-staged，再跑 typecheck 和 test","写 .lintstagedrc 和 .prettierrc（原本没有才新建），核对钩子可执行，跑一次验证","把改动加入暂存区并提交，一次真实提交顺便测试钩子是否生效"],"outputs":[".husky/pre-commit",".lintstagedrc",".prettierrc（原本没有才新建）","package.json 里的 prepare 脚本和新增依赖"],"tips":["Husky v9 以后钩子文件不需要写 shebang","仓库没有 typecheck 或 test 脚本，要把对应那行从钩子里去掉，并告诉用户少了这两项","最后一步直接提交一次改动，正好用真实提交测出钩子是否生效"],"workingIf":["跑 npx lint-staged 能正常执行，正式提交时格式化、类型检查、测试依次跑起来（推断）"],"pairsWith":[],"faq":[],"keyTerms":[{"term":"lint-staged","zh":"只对本次暂存的文件跑检查，比全仓库跑快"}],"quote":{"en":"The pre-commit runs lint-staged first (fast, staged-only), then full typecheck and tests.","from":"skills/misc/setup-pre-commit/SKILL.md"},"sources":["skills/misc/setup-pre-commit/SKILL.md"],"publicUrl":null},{"name":"setup-ts-deep-modules","bucket":"in-progress","invocation":"user","command":"/setup-ts-deep-modules","oneLiner":"给 TypeScript 仓库装边界检查，只能从入口文件访问包","whatItDoes":["装 dependency-cruiser，让每个包只有根目录文件能被外部 import","装完会做一次埋雷验证：故意加一个违规的深层 import，确认规则真的会报错，再撤回恢复正常"],"whenToUse":["想让 TypeScript 项目里的每个包变成深模块：对外接口很小，但背后能做很多事","已经用 codebase-design 讨论过深模块该怎么划分，想把结论用代码约束落地"],"whenNotToUse":[],"howItWorks":["检测包管理器、包目录位置，已有配置只合并不覆盖","装 dependency-cruiser，把仓库自带的配置复制过去并设好 PACKAGES_ROOT","加 lint:boundaries 脚本并入统一检查命令；建一个示例包演示入口文件加隐藏实现的结构","跑 lint:boundaries 应该通过；故意加一行深层 import 再跑，必须报错；撤回后再跑必须恢复通过","写包目录下的 README.md 说明约定，并在 CLAUDE.md/AGENTS.md 里加一行指路"],"outputs":[".dependency-cruiser.cjs（边界规则配置）","lint:boundaries 脚本","\u003cpackages-root>/example/ 示例包","\u003cpackages-root>/README.md","CLAUDE.md 或 AGENTS.md 里新增的一行指路说明"],"tips":["装完必须真的验证一遍故意违规会报错、撤回后恢复正常，只装不验证等于没装","不鼓励用一个大的 index.ts 重新导出所有东西，一个包可以有好几个小入口文件","这套规则不关心哪个包可以依赖哪个包，只关心能不能跳过入口直接进子目录"],"workingIf":["干净的示例包跑 lint:boundaries 能通过","故意在测试里加一行深层 import 后再跑，会报 tests-through-entrypoints 错误","撤回这行深层 import 后再跑一次，重新恢复通过"],"pairsWith":["codebase-design"],"faq":[],"keyTerms":[{"term":"deep module","zh":"深模块：对外接口很小，但背后藏着很多实现的模块"},{"term":"entry point","zh":"入口文件：包根目录下的文件，是外部唯一能 import 的东西"},{"term":"barrel file","zh":"桶文件：用来重新导出整个子树的 index 文件，这里不鼓励用"}],"quote":{"en":"This is the completion criterion for the whole skill: a config that doesn't fail on a violation is worthless.","from":"skills/in-progress/setup-ts-deep-modules/SKILL.md"},"sources":["skills/in-progress/setup-ts-deep-modules/SKILL.md"],"publicUrl":null},{"name":"tdd","bucket":"engineering","invocation":"model","command":"/tdd","oneLiner":"测试先行的红绿循环，规定测试写在哪、怎么写才算好","whatItDoes":["按红灯到绿灯的顺序开发：先写一个失败的测试，再写刚好够用的代码让它通过，一次做一个行为切片","规定什么是好测试、测试该打在哪个缝上、Mock 该怎么用，以及三种要避免的坏测试写法","这是一份贯穿始终要遵守的规范，不是走完就完事的流程；每一轮循环前后都要对照它"],"whenToUse":["要做一个有明确输入输出的行为：一段业务逻辑、一个接口契约、一次数据转换、一次校验","用户提到红绿重构，或明确要求测试先行","要写集成测试，验证多个部分接在一起真的能用"],"whenNotToUse":["行为本身还没定清楚是什么，这种情况该先用 to-spec 把测试缝定下来，而不是直接开始写测试","只是配置、接线、类型标注、纯粹的 CRUD 转发这类没有独立判断依据的改动，原文承认这是一个尚未解决的空白（issue #746）"],"howItWorks":["开工前先列出打算测试的公开接口（缝），跟用户确认清楚，没确认过的缝不写测试","接口形状本身还没想清楚时，先叫 codebase-design 这个 Skill 借用深模块、接口、缝这套词把设计谈清楚","一次只做一个缝、一个测试：先写一个会失败的测试（红），不要提前预判下一个测试要什么","只写刚好够让这个测试通过的最少代码（绿），不要多做、不要先做后面才需要的功能","测试要验证通过公开接口能做到什么，不能靠 mock 内部对象、测私有方法或绕过接口直接查数据库来验证","断言的期望值必须来自独立的已知来源（写死的字面量、算好的例子、需求文档），不能用代码自己算一遍再拿来跟自己比对","这个循环里没有重构这一步，重构放到 code-review 阶段去做，不要在红绿循环里顺手重构"],"outputs":["按接口/缝组织、逐步增加的测试文件","对应的最小实现代码"],"tips":["测试铁律：没有事先商量好的缝，就不许写测试，这条是绝对的","一次只出一个测试再出一份实现，不要先批量写完所有测试再一次性实现，那样测出来的是想象中的行为","检查一个测试好不好很简单：改个内部函数名字、行为没变，这个测试应该完全不受影响","Mock 只用在系统边界上（外部 API、时间、随机数），自己写的模块之间不要互相 mock","如果 Agent 让你选测试缝但没说清每种缝分别测得到什么、漏掉什么，直接追问，原文承认这是最常被吐槽的地方（issue #607）"],"workingIf":["写任何测试文件之前，Agent 先停下来说清楚打算测哪些缝，等你确认","出现的是一个一个测试：报红、补最少代码、转绿，再出下一个，不是一批测试后面跟一批实现","测试名字读起来像是在描述一种能力，比如用户能用有效购物车结账，不是在描述内部怎么实现的","断言里的期望值是能对照到需求文档上的字面量，不是代码自己算出来又拿来跟自己比","改一个内部函数名字，整个测试套件不会因此报错","Mock 只出现在外部边界，比如支付接口、时钟，不会出现在包住自己模块的地方"],"pairsWith":["codebase-design","to-spec","implement","code-review"],"faq":[{"q":"它怎么不做重构了，描述里明明写着红绿重构？","a":"重构在 2026 年 6 月被拿掉，因为 Agent 几乎不主动重构；这处不一致是已知问题（issue #589），重构现归 code-review 管。"},{"q":"它让我选测试缝，我完全不知道该选哪个怎么办？","a":"先让 Agent 说清楚每个候选缝各自测得到什么、测不到什么、跑起来多慢，再做选择，这是原文推荐的临时解法，issue #607 尚未修复。"},{"q":"纯配置、接线这种没有判断依据的改动也要走这个流程吗？","a":"原文承认这是个空白：这个 Skill 只管测试缝该放哪，不管这次改动值不值得走测试循环，判断权在你自己或你的 CLAUDE.md。"}],"keyTerms":[{"term":"seam","zh":"能观察行为又不用深入内部的公开边界，测试只能打在这里"},{"term":"red-green","zh":"先写一个跑不过的测试，再写刚好够用的代码让它通过"},{"term":"vertical slice","zh":"一次只做一个缝、一个测试、一份最小实现，逐步推进"},{"term":"tracer bullet","zh":"第一轮循环，用来先打通一条端到端的完整路径"}],"quote":{"en":"Tests verify behavior through public interfaces, not implementation details.","from":"skills/engineering/tdd/SKILL.md"},"sources":["skills/engineering/tdd/SKILL.md","skills/engineering/tdd/mocking.md","skills/engineering/tdd/tests.md","docs/engineering/tdd.md"],"publicUrl":"https://aihero.dev/skills-tdd"},{"name":"teach","bucket":"productivity","invocation":"user","command":"/teach","oneLiner":"把当前目录变成教学工作区，跨多次对话教你一个主题","whatItDoes":["把运行它的目录变成一个持续存在的教学工作区，用一节节 HTML 课件跨多个会话教你一个主题","不靠模型自己记的知识讲课，先去找靠谱资料存进 RESOURCES.md，每节课都要引用来源","目标、资料、课件和学习记录都存成目录里的文件，下次对话直接接着教，不靠聊天记忆"],"whenToUse":["要系统学一个东西，会持续好几周：一门语言、一个框架、刚接手的代码库、瑜伽、认证考试","想搞清楚为什么学、学到什么程度算够（配合 MISSION.md）","讨论到一半想学点新东西但不想打断当前讨论，可以先 handoff 出去，到专门目录再用 teach"],"whenNotToUse":["只是想让 Agent 顺手解释一下当前对话里的一个概念，直接问就行","只是想让上一句话讲得更明白，用 wait-what","只是想理清自己已经有的想法，不是学新东西，用 grill-me"],"howItWorks":["输入 /teach 启动，目录里还没有 MISSION.md 的话，第一件事是反过来追问你为什么要学这个","先找可信资料，记进 RESOURCES.md（分知识类和社群类两块），课件里引用这些来源","结合 MISSION.md 和之前的 learning-records，判断你现在跳一跳够得着的难度，定下一课教什么","写一节课：一个独立 HTML 文件放进 lessons/，短、给一个能带走的收获，链接一个推荐资料","可复用部分（样式、小测验组件）放进 assets/，写新课先看这个目录里已经有什么，能复用就不重写","你确实学会了某个非平凡的东西，就记一条 learning-record，作为以后决定教什么的依据","遇到需要实战经验才能回答的问题，先试着答，但更建议去找一个靠谱社群验证"],"outputs":["MISSION.md","RESOURCES.md","lessons/*.html 课件","reference/*.html 速查表","learning-records/*.md 学习记录","assets/* 可复用组件","NOTES.md"],"tips":["第一节课出来的位置可能不对（已知 bug：有的路径会解析到 skill 安装目录），先确认课件到底存在哪","想要词汇表 GLOSSARY.md 目前要主动开口要，SKILL.md 正文已经不会自动生成","小测验正确答案总是排在第一个选项，这是已知未修复的问题，先别靠选项顺序猜答案","它会默认你已经懂一些东西，第一条消息里主动说清楚你会什么、卡在哪，能少走弯路","换一个推理力度更高的模型，课件质量差异很大，做出来太单薄就先换模型再改提示词"],"workingIf":["在空目录第一次跑，它先追问你为什么想学，而不是直接甩一节课出来","RESOURCES.md 比课件先填满，每节课都指定一个值得你自己去读的资料","课件里的说法都能点出处，没有引用的课件等于是在凭记忆瞎讲","一节课一次能上完，上完之后你确实多会了一件事","在同一个目录开新对话说下一课，能接着上，不会从头再来","learning-records 会越来越多，证明学会的东西不会被重复教","课件看起来像同一门课，比如共用同一份样式表","需要经验判断的问题，会指向一个论坛、社群或课程，而不是给一个孤立答案"],"pairsWith":["handoff","wait-what","grill-me","research"],"faq":[{"q":"学到一半发现需要查权威资料怎么办？","a":"它本身就要求先找资料存进 RESOURCES.md，不靠模型自己记的东西讲课，但最终对错还是要你自己核实。"},{"q":"一定要每节课都开新会话吗？","a":"不用，接着上、重新开 /teach、或在同一目录开新会话都可以，连续性靠目录里的文件，不靠对话本身。"},{"q":"只适合学代码类的东西吗？","a":"不是，实际用得更多的是非代码类，比如语言、乐器、考证，代码类里最常见的用法是熟悉一个新代码库。"}],"keyTerms":[{"term":"storage strength / fluency","zh":"长期记忆强度／流畅度：前者是真记住，后者是当下看着熟但很快忘"},{"term":"zone of proximal development","zh":"最近发展区：比现在水平高一点、跳一跳能够到的难度"},{"term":"MISSION.md","zh":"任务文档：记录学这个东西的真实目的，决定教什么"}],"quote":{"en":"It does not teach from what the model already knows.","from":"docs/productivity/teach.md"},"sources":["skills/productivity/teach/SKILL.md","docs/productivity/teach.md","skills/productivity/teach/GLOSSARY-FORMAT.md","skills/productivity/teach/LEARNING-RECORD-FORMAT.md","skills/productivity/teach/MISSION-FORMAT.md","skills/productivity/teach/RESOURCES-FORMAT.md"],"publicUrl":"https://aihero.dev/skills-teach"},{"name":"to-questionnaire","bucket":"productivity","invocation":"user","command":"/to-questionnaire","oneLiner":"把只有别人才答得出的问题，做成一份问卷发给他","whatItDoes":["把你自己回答不了、只有某个人才知道答案的问题，整理成一份 Markdown 问卷","只追问你关于怎么发出去的问题（发给谁、需要拿回什么），不追问问题本身的内容","写好后存成文件、告诉你路径，发送方式（邮件、群聊、当面开会）你自己决定"],"whenToUse":["一个决定卡在只有某个人（客户、领域专家、老板、别的团队同事）脑子里的信息上","追问进行到一半，发现有些问题不是你能答的，想先打包发出去，再回来接着讨论","好几个问题分别只有不同的人能答，需要针对每个人各生成一份"],"whenNotToUse":["答案其实就在你自己脑子里，只是还没理清楚，这种用 grill-me","答案在代码库里，这种用 grill-with-docs"],"howItWorks":["第一轮只问一件事：这份问卷发给谁（角色、专业背景、跟你的关系），定语气和要交代多少背景","第二轮只问一件事：你需要拿回什么，也就是你自己解决不了、必须靠这个人给答案的清单","按最重要的问题排最前面、同类问题归到一个二级标题下的结构起草问卷","每个问题只问一件事，下面留一个空的作答框，容易被误解的问题才加一句为什么问这个","明确允许对方回答不知道或部分知道，好过让对方硬编一个像事实的答案","存成 to-questionnaire-\u003cslug>.md，放在当前目录，并把路径告诉你"],"outputs":["to-questionnaire-\u003cslug>.md（问卷文件，存在当前目录）"],"tips":["收信人不止一个、每人只知道一部分答案时，一人一份分别生成，不要指望一份文件分段处理","不会帮你把生成的问卷自动发出去，发送渠道自己安排","拿到别人填完的问卷，可以直接作为下一轮 grilling、grill-with-docs 或 to-spec 的输入材料","想在追问后接着生成问卷，要在同一个会话里跑，不然问卷不知道你在问什么"],"workingIf":["它只问发给谁和需要拿回什么这两件事，一旦开始追问问题本身，说明跑偏了","第二步说的每一项需要拿回的东西，在文件里都能找到对应的问题","问题读起来是冲着收件人知道什么去的，不是把你自己没想明白的问题原样搬过去","没参与讨论的人拿到这份文件，也能看懂为什么发给他、什么时候要回","收到的回复能直接用来开一轮新的 grilling，而不是又生出一堆新问题"],"pairsWith":["grill-me","grill-with-docs","to-spec","prototype","ask-matt"],"faq":[{"q":"会自动从我的 grilling 讨论里提取问题吗？","a":"不会主动提取，但如果在同一个对话里接着跑，起草时能借上下文；换新对话要重新交代主题。"},{"q":"能不能做成带分支的问卷？","a":"不能，故意做成不分支的静态清单，因为模型没法一次性想清楚每种分支后面该问什么。"},{"q":"是不是就是 grill-me 的批量版？","a":"不是，grill-me 问的是你自己脑子里的答案，这个问的是别人脑子里的答案，是两件事。"}],"keyTerms":[{"term":"discovery questionnaire","zh":"摸底问卷：默认你缺背景、对方有背景的问卷框架"},{"term":"gap","zh":"信息差：你需要知道的和对方已经知道的之间的差距，问题都冲着这个差距问"}],"quote":{"en":"Grill the send, not the subject.","from":"skills/productivity/to-questionnaire/SKILL.md"},"sources":["skills/productivity/to-questionnaire/SKILL.md","docs/productivity/to-questionnaire.md"],"publicUrl":"https://aihero.dev/skills-to-questionnaire"},{"name":"to-spec","bucket":"engineering","invocation":"user","command":"/to-spec","oneLiner":"不追问，直接把刚才聊出来的结论整理成一份 spec 发到问题单系统","whatItDoes":["不面试你，只是把这轮对话、代码库现状、CONTEXT.md/ADR 里定下的东西整理成文档。","写之前先跟你确认要在哪些接缝测试这个功能，能用旧接缝就不开新的，越少越好。","写完发布成 tracker 上的 issue，打上 ready-for-agent 标签。"],"whenToUse":["该聊的都聊完了，这个改动要跨好几个会话才能做完","一个 wayfinder 地图走完了，要把散落的决定收拢成一份可执行文档"],"whenNotToUse":["什么都还没决定，先去跑 /grill-with-docs","决定完了但工作量一个会话就能搞定，直接 /implement，不用多写这一步"],"howItWorks":["先探索代码库搞清楚现状（没探索过的话），全程用项目黑话，尊重相关 ADR","画出功能要测试的接缝，优先用旧接缝，能少开新接缝就少开，理想只有一个","跟你核对这些接缝符不符合预期","按模板写 spec：问题、方案、用户故事、实现决定、测试决定、不做范围、补充说明","写完发布到 tracker，打 ready-for-agent 标签，不用再走一遍 triage","模板规定不写具体文件路径和代码片段，除非是 prototype 产出的关键片段"],"outputs":["issue tracker 上的一份 spec（issue）","ready-for-agent 标签"],"tips":["别在 grilling 和 to-spec 之间清空或压缩上下文，同一个窗口里连着跑，不然会漏掉刚聊出来的东西","spec 打 ready-for-agent 标签只是说不用再 triage，不代表能让 AFK agent 直接照整份 spec 开工，跑批量 agent 要单独排除掉 spec 本身","重点看接缝和不做的范围这两节，这是最容易出错、也最容易在这里挡住问题的地方","spec 写完不会保持同步，实现过程中学到的新东西要记的话进 CONTEXT.md 或 ADR，别指望回头改 spec","如果是重构或模块边界调整而不是新功能，用户故事那节会很别扭，靠实现决定和测试决定那两节撑住就行"],"workingIf":["它一上来就开始写，不会又问你一轮新问题","写之前先把接缝方案摆给你看，而且提的接缝越少越好","写出来的东西用的是你项目自己的名词，不是通用产品文档的套话","里面每条决定你都记得自己确实说过，没有凭空补的内容","不做的范围里写的都是真实拒绝过的东西，不是走过场"],"pairsWith":["grill-with-docs","to-tickets","wayfinder","implement","tdd","code-review"],"faq":[{"q":"以前的 /to-prd 去哪了","a":"v1.1 改名叫 to-spec 了，是同一个技能。"},{"q":"能不能跳过 to-spec 直接 to-tickets","a":"工作量小到一个会话能做完就该跳过，直接 grilling 完接 /implement；只有跨会话的大活儿才值得多写这一步。"}],"keyTerms":[{"term":"seam","zh":"接缝，测试观察行为的公开边界，不深入内部实现"},{"term":"spec","zh":"规格文档，记录已经定下的决定，供后续会话不用你重新解释就能接手"}],"quote":{"en":"The spec is a record of decisions already made, not a place where new ones get made.","from":"docs/engineering/to-spec.md"},"sources":["skills/engineering/to-spec/SKILL.md","docs/engineering/to-spec.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-to-spec"},{"name":"to-tickets","bucket":"engineering","invocation":"user","command":"/to-tickets","oneLiner":"把方案/spec 切成一张张能独立验证的工单，标好谁卡谁","whatItDoes":["把方案、spec 或当前对话，切成一张张示踪弹式切片工单。","每张工单纵向打通所有层（数据库、接口、界面、测试），能单独跑通、单独验证，不是先切一层。","每张标好被谁卡住，没人卡的工单可以马上开始。","大范围机械式改动（改字段名、换类型）不这么切，改用扩张-迁移-收缩三步走。"],"whenToUse":["已经有 spec 或方案，这个工程要跨好几个会话才能做完","方案只存在对话里还没写成文档，也可以直接从对话切"],"whenNotToUse":["整个改动一个会话就能做完，不用切工单，直接 /implement","工单是它自己切出来的，不要拿去跑 /triage，那是给外面提的东西用的"],"howItWorks":["收集上下文：吃当前对话，或者你给的 spec 路径/issue 编号","没探索过就先探索代码库，顺便找能让后面改动变容易的预处理","按纵向切片草拟工单：贯穿所有层、能单独验证、装得进一个新会话","遇到大范围机械改动就换成扩张、迁移、收缩三段","列编号清单问你粒度和依赖对不对，改到你满意为止","发布到 tracker：本地一张工单一个文件，真实 tracker 按依赖顺序发 issue 并打标签"],"outputs":[".scratch/\u003cfeature>/issues/\u003cNN>-\u003cslug>.md（本地模式）","issue tracker 上按依赖顺序发布的一批 issue"],"tips":["如果切出一堆按层分的工单（全部 schema 一张、全部接口一张），确认阶段问自己每张「这个做完能演示什么」，答不上来就是切错了","切太碎（三行改动切出十二张工单）是最常被吐槽的问题，确认阶段直接说「合并」就行；一个会话装得下的活根本不用切","别在 /to-spec 和 /to-tickets 之间清空或压缩上下文，不然它读 spec 会读不全甚至读不完","GitHub 上工单目前不会自动建成 spec 的子 issue，也不一定用原生 blocking link，发布完最好自己补一下","它发布完就不管了，不会帮你在工单做完后打勾或关闭，状态要自己维护"],"workingIf":["每张工单都能答上「做完能演示什么」，而且答案是一个行为，不是某一层的代码","发布前会先给你看编号列表，每张都写着被谁卡住","排第一的工单没有任何依赖，可以立刻开始","工单里没有文件路径和行号，除非是 prototype 产出的代码片段","每张工单读起来像是一个全新会话不用你在场也能做完的事","找到的预处理工作排在最前面，不是混在功能工单里"],"pairsWith":["to-spec","implement","tdd","code-review","triage","wayfinder"],"faq":[{"q":"读 spec 老是读不全/截断怎么办","a":"别在 to-spec 和 to-tickets 之间清空或压缩上下文，两个技能在同一个窗口里连着跑就不用重新去 tracker 取。"},{"q":"验收标准写完发现有的一开始就通过了","a":"说明切片不够纵向，要逐条确认「这条不通过时该观察到什么」，并核实这个观察在起点确实是假的。"}],"keyTerms":[{"term":"tracer bullet","zh":"示踪弹式切片，贯穿所有层但很窄的一条完整路径，能单独演示"},{"term":"blocking edge","zh":"阻塞边，工单之间谁必须先完成的依赖关系"},{"term":"wide refactor / expand-contract","zh":"大范围重构的扩张-收缩法，先加新形态、按批迁移、最后删旧形态"}],"quote":{"en":"Make the change easy, then make the easy change.","from":"skills/engineering/to-tickets/SKILL.md"},"sources":["skills/engineering/to-tickets/SKILL.md","docs/engineering/to-tickets.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-to-tickets"},{"name":"triage","bucket":"engineering","invocation":"user","command":"/triage","oneLiner":"把别人提的 bug/需求过一遍状态机，核实后写成能开工的说明","whatItDoes":["只处理不是你自己创建的问题：外部 bug 报告、需求、意外冒出来的 PR。","先核实是不是真的（复现 bug、跑 PR 的 diff），再给分类建议，等你拍板才动手。","定下来要给 agent 干的，写一份耐久的 agent brief，不写文件路径和行号。","被拒绝的需求写进 .out-of-scope/，下次类似需求来了能直接翻旧账。"],"whenToUse":["issue tracker 里堆了一堆外部提的原始报告","有人提了个 PR，需要判断要不要把外部 PR 当需求来源处理","想看看现在有哪些问题单需要你处理"],"whenNotToUse":["问题单是 /to-tickets 自己生成的，那些已经是 agent-ready，不用再 triage","已确认的 bug 需要真的去找根因而不是贴个标签，这种用 /diagnosing-bugs"],"howItWorks":["列三类给你挑，从旧到新：未打标、needs-triage、needs-info 有新回复","挑中一个后读完整 issue/PR，探索代码库，查是否已实现或以前被拒绝过","把分类和状态建议连同理由说给你听，等你点头才继续","要细化时调用 grilling 和 domain-modeling，一轮轮问，边问边更新 CONTEXT.md/ADR","收尾：定了就发 agent brief 或提问清单，拒绝按三种情况分别处理","每条评论必须以「这是 triage 期间由 AI 生成」的免责声明开头"],"outputs":["agent brief 评论","triage 标签变更",".out-of-scope/ 下的文件","needs-info 提问评论"],"tips":["已经跑过 /to-spec、/to-tickets 的工单不要再 triage，那是给外部来的东西用的","先建好五个状态标签和两个分类标签，不然 gh 会报标签不存在（已知 bug，setup 不会帮你建标签）","别一次扔给它二十个 issue 扫，它会偷懒只看正文不看评论，明确要求「每条都要看评论」再批量跑","GitHub 模板里外部 PR 筛选命令用了 gh 不支持的 authorAssociation 字段，会直接跑不通（issue #468，未修）"],"workingIf":["每条处理过的都刚好有一个分类角色和一个状态角色，不会是零个或冲突的两个","它给建议加理由然后停下来，不是打完标签就自己往下走","进 ready-for-agent 之前，bug 真的被复现过，或者 PR 真的被拉下来跑过","写的 brief 里只讲类型和行为约定，没有文件路径和行号","半年前被拒过的需求又来了，它能认出来并引用当年拒绝的理由","它发的每条评论都以那句 AI 生成免责声明开头"],"pairsWith":["setup-matt-pocock-skills","grilling","domain-modeling","implement","to-tickets","diagnosing-bugs"],"faq":[{"q":"triage 完的东西谁来做","a":"打上 ready-for-agent 之后，/implement 会像捡 /to-tickets 产出的工单一样把它捡走。"},{"q":"5 个状态不够用，能加 blocked/deferred 吗","a":"官方还没做，社区一般在分类标签旁边自己加一个仓库专属标签顶替。"}],"keyTerms":[{"term":"triage role","zh":"三态角色，issue 在状态机里的当前角色，一次只占一个分类加一个状态"},{"term":"agent brief","zh":"发到 issue 上的结构化说明，是 agent 干活时唯一权威的合同"},{"term":".out-of-scope/","zh":"记录被拒需求的知识库，一个概念一个文件，不是一个 issue 一个文件"}],"quote":{"en":"A PR is an issue with attached code.","from":"docs/engineering/triage.md"},"sources":["skills/engineering/triage/SKILL.md","skills/engineering/triage/AGENT-BRIEF.md","skills/engineering/triage/OUT-OF-SCOPE.md","docs/engineering/triage.md","skills/engineering/setup-matt-pocock-skills/issue-tracker-github.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-triage"},{"name":"wait-what","bucket":"productivity","invocation":"user","command":"/wait-what","oneLiner":"一句话让 Agent 用大白话把刚才没听懂的话再讲一遍","whatItDoes":["你没跟上 Agent 刚才说的话时喊一声，它会重讲一遍，补上你缺的背景，改用大白话","全文只有三行，故意做得这么短，因为篇幅长的说人话 skill 照样治不好啰嗦","会顺带套用项目 CONTEXT.md 里已经定好的说法，不再用它自己发明的黑话"],"whenToUse":["发现自己在跳着看、没真的在读 Agent 说的话","Agent 突然冒出自造的黑话、堆了一堆缩写，或说了一个你没看到前提的结论"],"whenNotToUse":["想从根上避免以后一直出现黑话，用 grill-with-docs 提前把共同语言定好更省事"],"howItWorks":["输入 /wait-what，不用具体说哪句没听懂，Agent 自己判断要往回倒多少","Agent 用简化技术英语的风格重讲一遍，对应中文就是尽量短句、常用词","重讲时套用项目 CONTEXT.md 里的说法，不再用生造词"],"outputs":[],"tips":["关键在 wait 这个词本身：说的是我没跟上，不是你说简洁点，后者会让模型讲得更短更生硬","效果好不好看两点：讲得更短的同时有没有补上你缺的前提，而不是单纯删字","可以连续用好几次，不会越用越言简意赅到看不懂"],"workingIf":["重讲之后的话更短也更清楚，不是更短但更生硬","补上了你之前缺的前提，不是单纯删掉了几个词","冒出来的词换成了项目 CONTEXT.md 定义过的说法，不再是临时生造的词","连续喊两次也不会退化成干巴巴的短句"],"pairsWith":["grill-with-docs","domain-modeling","ask-matt"],"faq":[{"q":"没有 CONTEXT.md 还能用吗？","a":"能，只是少了套用项目黑话这部分效果，大白话重讲照样有效。"},{"q":"跟直接说说简单点有什么区别？","a":"说简单点冲着输出去，模型靠删词变短但更难懂；wait-what 冲着我没跟上去，模型会往回补前提。"}],"keyTerms":[{"term":"leading word","zh":"带头词：一个词就能带出一整套行为，这里指 wait 这个词本身"},{"term":"ubiquitous language","zh":"通用语言：项目里 CONTEXT.md 定下的统一说法"}],"quote":{"en":"Wait is about your state. It says comprehension failed here.","from":"docs/productivity/wait-what.md"},"sources":["skills/productivity/wait-what/SKILL.md","docs/productivity/wait-what.md"],"publicUrl":"https://aihero.dev/skills-wait-what"},{"name":"wayfinder","bucket":"engineering","invocation":"user","command":"/wayfinder","oneLiner":"把一个会话装不下的大工程，切成一张地图，一次只解决一个决策","whatItDoes":["适用于知道终点但看不清路线的大工程，先把工程切成一张决策地图。","地图上每张工单是一个待决定的问题，不是要执行的建活；地图走完只剩决定，不剩代码。","地图挂在 issue tracker 上，一次只解决一张工单（研究类可以并行）。","地图走完不会自己写代码，而是把收拢好的决定交给 /to-spec。"],"whenToUse":["全新项目或大功能，一个会话装不下，路线也还没看清楚","旧代码库要摸清楚现在到底是什么样子，这也算大量待决定的问题","手上会话已经长到装不下了，想把它转成一张地图接着走"],"whenNotToUse":["功能范围明确，一次会话能聊完，用 /grill-with-docs 就够，别用这个又慢又重的","对话里其实已经决定完了，直接去 /to-spec，不用绕地图这一圈"],"howItWorks":["先定终点（destination）：地图最终要抵达什么","广度优先过一遍问题域，能定的问题变工单，定不了的记入雾区","没有雾就不需要地图，直接停下问你怎么走","建地图 issue 贴 wayfinder:map 标签，能定的工单建成子工单","补齐工单间的依赖关系；research 工单派子 agent 并行去查","解决前先认领工单，解决后写结案评论、关闭工单、地图补一行摘要","雾区变清楚就毕业成新工单；超出终点范围就归为不在范围内"],"outputs":["issue tracker 上标 wayfinder:map 的地图 issue","地图下的子工单（决策工单）","结案评论加地图上的进度摘要行"],"tips":["地图只是索引不是存储：细节永远只放在工单里，地图上只留一行摘要加链接","一张工单只有四种类型：grilling（默认，靠聊）、prototype（靠一个粗糙的可运行东西）、research（靠子 agent 查资料，唯一能并行的类型）、task（只是解锁决定的体力活）","地图的 Notes 里可以写「这张地图也包含执行」来打破默认的只规划不动手，但这是自己给自己开的豁免条款，最容易被滥用，别人建的地图先看一眼 Notes 再动手","地图别摊得太大，范围收在一个明确的小目标上，比规划整个大版本效果好得多，配合大量用 /prototype 把不确定性提前压掉","地图走完不代表 spec 和工单已经有了，还得再跑一遍 /to-spec 收拢成文档，除非这件事其实小到能直接跳去 /implement","本地 markdown 存地图会让规划文件永远留在仓库里，不建议默认这么干，除非是不想把 AI 生成的规划工单摊在公开 issue 里的开源维护者"],"workingIf":["建第一张工单之前，终点已经写下来并且双方都认可","地图上开着的每张工单读起来都是一个问句，写成祈使句的要么类型标错了，要么该挪到地图下游去","不用打开地图，光看 tracker 界面就能看出哪些工单现在能领，因为用的是原生依赖关系在渲染","一个会话只解决一张工单，贴结案评论、关闭、在地图上补一行，然后就停","雾区会越来越薄，一块雾毕业成工单后就从雾区里消失，不会两边同时存在","地图收尾时把你引向一份 spec，而不是直接甩出一个 PR"],"pairsWith":["grilling","domain-modeling","prototype","research","handoff","to-spec","setup-matt-pocock-skills"],"faq":[{"q":"跟 grill-with-docs 怎么选","a":"看能不能一个会话装下：能装下用 grill-with-docs，装不下才用 wayfinder，别拿它规划一个本来就不大的功能。"},{"q":"地图走完是不是就等于有 spec 和工单了","a":"不是，地图全是已关闭的决策工单，还得再跑 /to-spec 收拢成文档，再跑 /to-tickets 切实现工单。"},{"q":"能不能同时解决好几张工单","a":"官方允许但不建议，两人同时开两张 grilling 工单会被问到刚在另一个会话回答过的问题，因为两个会话互相看不到对方的上下文。"}],"keyTerms":[{"term":"destination","zh":"终点，地图最终要抵达的东西，先定终点才能划定范围"},{"term":"decision ticket","zh":"决策工单，地图下面的子工单，装的是待解决的问题而不是要执行的建活"},{"term":"fog of war","zh":"雾区，隐约感觉会出现但现在还问不出精确问题的区域，不硬切成工单"},{"term":"frontier","zh":"前沿，当前没被卡住、没人认领、可以马上领走的工单集合"}],"quote":{"en":"Wayfinding is about finding that way, not charging at the destination.","from":"skills/engineering/wayfinder/SKILL.md"},"sources":["skills/engineering/wayfinder/SKILL.md","docs/engineering/wayfinder.md","skills/engineering/setup-matt-pocock-skills/issue-tracker-github.md","README.md","CONTEXT.md",".agents/invocation.md"],"publicUrl":"https://aihero.dev/skills-wayfinder"},{"name":"wizard","bucket":"engineering","invocation":"model","command":"/wizard","oneLiner":"生成交互式 bash 向导，带人一步步走完人工操作","whatItDoes":["生成 bash 脚本，带人一步步走完只有人能做的繁琐操作：配置服务、跑一次性迁移、切换项目状态","脚本自动打开每步的网址，说清点哪复制什么，值存到该存之处，如 .env、GitHub secrets","Agent 只负责写这个脚本，从不自己运行它；脚本要打开浏览器、等人输入，必须由你自己在自己电脑上跑"],"whenToUse":["要配置基础设施、申请密钥或设置 CI 密钥这类必须人工登录网页操作的步骤","要走一遍陌生的第三方后台面板，一步步带你完成","要做一次性的迁移或系统切换","正准备把一串操作步骤写进 README 里，写成能跑的脚本比写成文字更不容易过期"],"whenNotToUse":["Agent 自己就能做的步骤，不要叫这个 Skill 来做，这是原文 frontmatter 明确写的边界","想决定到底该做什么，这不是它的活，那该用 grill-with-docs 或 to-spec"],"howItWorks":["先摸清步骤和每步的值：翻 .env*、CI workflow 的 secrets/vars；迁移则理清目标和不可逆动作","把整理出来的步骤顺序给用户看一遍，确认要不要增删或调整顺序","给每步写清具体路径，如后台点某菜单点某按钮复制某值；不知道界面就问用户或查文档，绝不凭空编步骤","复制 template.sh，每步写一个 stage，用 open_url、ask_secret 等库函数；线以上不手改","值存哪要想清楚：本地写 .env，CI 用且敏感设 secret，不敏感设 variable，也可能两处都要","写完用 bash -n 查语法，有 shellcheck 就跑一遍，chmod +x；不自己跑脚本，改用静态检查确认落地","告诉用户怎么运行；如果这是以后还会重复用到的配置流程，就提交进仓库并在 README 里链接"],"outputs":["一个可执行的 bash 向导脚本，基于 template.sh 的公共库加你写的 stage","脚本运行后写入的 .env 值和 GitHub secrets/variables"],"tips":["脚本运行时密钥是盲输入不回显，Agent 本身不会运行脚本，所以密钥不会进到模型的对话上下文里，唯一例外是自己把密钥贴进了跟 Agent 的聊天","每个 stage 要控制在一屏内说完，脚本每进一个新阶段会清屏，写太长会让用户看不到已经滚走的重要信息","中途填错了没有返回上一步，只能 Ctrl-C 重新跑；好在已经写入 .env 的值会被当默认值提供，重跑时对的直接回车跳过","这是一次性用完就扔还是要长期维护的脚本，取决于以后还会不会有人再做一遍：一次性的存到 scratch 或 scripts/ 用完删掉","已知一个小 bug：输入框里按方向键会插入乱码字符而不是移动光标（issue #741），退格删除是正常的，方向键先别用"],"workingIf":["脚本存在之前，已经先看到一份排好序的阶段清单和每步会拿到什么值，并被问过要不要确认","每个网址都是先打开、再问你要那页面上的值，不会让你贴一个还没被带去看过的东西","敏感信息输入时是盲打的，不会回显在终端记录里","每个阶段都能在一屏内看完，不会有还需要的信息被滚走","Ctrl-C 中断后重新跑，会从已经存过的地方接着走，把已存的值当默认值","最后一屏会列出写了什么，还单独列出哪些做不到、需要自己手动补"],"pairsWith":["setup-matt-pocock-skills","implement","grill-with-docs","to-spec"],"faq":[{"q":"我的密钥会不会被喂进模型的对话记录里？","a":"脚本运行阶段不会：Agent 只写脚本不运行，密钥由你在自己终端盲打输入，直接写进 .env 或 GitHub secret；唯一例外是你把密钥贴进了聊天。"},{"q":"中途发现前面填错了，能退回去改吗？","a":"不能实时回退，只能 Ctrl-C 中断重新跑；已经存过的值会被当默认值提供，重跑时对的直接回车、错的重新输入即可。"},{"q":"这个脚本用完要不要留着？","a":"看以后还会不会有人再做一次：只用一次的存到 scratch 或 scripts/ 用完删掉；以后还有人要配置同样的东西，就提交进仓库并在 README 链接。"}],"keyTerms":[{"term":"wizard","zh":"带人一步步走完一次只有人能做的操作的 bash 脚本"},{"term":"stage","zh":"向导脚本里一屏对应一个任务的步骤单元"}],"quote":{"en":"A wizard is a bash script that walks a human, step by step, through a manual procedure that's tedious to do by hand.","from":"skills/engineering/wizard/SKILL.md"},"sources":["skills/engineering/wizard/SKILL.md","skills/engineering/wizard/template.sh","docs/engineering/wizard.md"],"publicUrl":"https://aihero.dev/skills-wizard"},{"name":"writing-beats","bucket":"in-progress","invocation":"user","command":"/writing-beats","oneLiner":"拿着素材，一节一节把文章写成可以选路径的旅程","whatItDoes":["把已有的原始素材当矿场，一次只写一个节拍，写完再商量下一节拍往哪走，像选择你自己的冒险故事","每次给 2-3 个候选节拍供你挑，挑中一个才落笔写进文章文件，绝不提前写好几节"],"whenToUse":["已经有一堆原始素材（比如从 writing-fragments 收集出来的），想开始正式动笔串成文章","想边写边商量接下来往哪个方向发展，而不是一次性让 Agent 直接产出整篇"],"whenNotToUse":[],"howItWorks":["先跟你确认读者进来时已经懂哪些概念，这些是前提，从一开始就算数","从素材里挑 2-3 个候选开场节拍，每个是不同切入角度，都给你看，你选一个","只把选中的那一个节拍写进文章文件，写完就停，不多写","重新从磁盘读一遍文章文件（保留你的手动编辑），再给 2-3 个候选下一节拍","重复给候选、你选、只写一个、重读文件这个循环，直到文章自然收尾"],"outputs":["一篇正在生长的文章文件（逐节拍追加写入）"],"tips":["一个候选节拍只能用到已经落地的概念，不能提前用到后面才讲的东西","每次落笔前都要重新从磁盘读一遍文章文件，防止覆盖掉你自己做的修改","一个节拍长到要好几段加小标题，说明其实是两个节拍粘在一起，应该拆开"],"workingIf":["每次只看到一个节拍被写入文件，下一步的候选都建立在已经落地的概念之上（推断）"],"pairsWith":["writing-fragments"],"faq":[],"keyTerms":[{"term":"beat","zh":"节拍：文章里的一步动作，可能是一句话也可能是好几段"},{"term":"grounding","zh":"落地：一个概念要么读者本来就懂，要么已经在前面节拍讲过，才能被后面用到"},{"term":"exploit / explore","zh":"开采／探索：收集素材是探索，正式动笔组织成文是开采"}],"quote":{"en":"If a beat needs five paragraphs and three subheadings, it's not a beat; it's two beats glued together.","from":"skills/in-progress/writing-beats/SKILL.md"},"sources":["skills/in-progress/writing-beats/SKILL.md","skills/in-progress/README.md"],"publicUrl":null},{"name":"writing-for-agents","bucket":"productivity","invocation":"model","command":"/writing-for-agents","oneLiner":"教你怎么写 Agent 要读的文档，比如 skill、AGENTS.md","whatItDoes":["是写作参考：skill、AGENTS.md 等 Agent 要读的文档都按这套方法写","默认动作是删而不是解释：把模型本来就懂的东西又讲一遍，就是在浪费 token","skill 专属写法另收在同目录 SKILL-MECHANICS.md 里"],"whenToUse":["新建或修改一个 skill、AGENTS.md、CLAUDE.md 的时候，会被自动调用","手动调用它来审查你已经写好的文档、spec、工单、系统提示词等 Agent 会读的东西","判断标准就一句话：这份东西是不是 Agent 会读的？是的话不管以什么方式被它读到都算"],"whenNotToUse":["想搞清楚代码库里实际有什么、该怎么起名，这是 grill-with-docs 的事，这个 skill 只管文档怎么写"],"howItWorks":["判断一句话是不是模型标准情况下本来就会做的事，是的话删掉，这叫空指令（no-op）","决定每块内容放在信息层级的哪一级：正文步骤、正文参考，还是收进另一个文件靠指路才打开","每一步结尾要有清晰的完成标准，标准越含糊，Agent 越容易在还没做完时就以为做完了","找机会把反复出现的一长串描述，换成模型预训练里已经认识的一个词（带头词）","通读一遍找有没有同一件事在两个地方各说了一遍，有就只留一处","遇到不要做 X 这种禁止型的话，尽量改成正面说该做 Y，直接提 X 反而更容易让模型想到 X"],"outputs":[],"tips":["判断一句话该不该删，标准是删掉后模型行为会不会变，不是看起来长不长","要精简一份文档，先别急着整体删减，那样容易把功能一起删掉，应该逐句做空指令测试","一句话该不该删有争议，别靠嘴argue，直接跑一遍文档看行为变不变，让结果说话","不要为适配某个新模型重写整份文档，通常只是再做一遍空指令检查","用 Agent 从一次具体任务里总结出一个 skill，容易写得太具体，要刻意抽象成一类任务"],"workingIf":["文档越改越短，短到你自己都惊讶怎么删了这么多还能用","你能指出文档里的带头词，并且在不止一个地方看到它在起作用","没有任何一句话是换个说法重复了一遍","只有部分场景才用得到的参考内容，是被一句指路的话收进别的文件，而不是堆在正文里"],"pairsWith":["grill-with-docs","ask-matt"],"faq":[{"q":"是不是意味着让 Agent 自己写文档？","a":"反过来，你是作者，Agent 是读者，难点正是写给一个什么都读过的读者，解释是浪费，精确才是正事。"},{"q":"让 Agent 帮忙精简文档，结果把功能删掉了怎么办？","a":"空指令测试判断的是行为变没变，不是变没变短；没通过测试的一句话要整句删掉，不是删几个字。"},{"q":"这些内容该写进 CLAUDE.md 还是放别处？","a":"先问自己愿意付哪种代价，CLAUDE.md 每次对话都无条件加载，放别处靠一句话指路，用到才加载。"}],"keyTerms":[{"term":"context load / cognitive load","zh":"上下文负担／认知负担：前者是每轮都要读的成本，后者是人要记住有什么、何时用的成本"},{"term":"context pointer","zh":"上下文指针：正文里指向正文之外内容、并规定何时才去读的一句话"},{"term":"progressive disclosure","zh":"渐进展开：把只有部分场景需要的内容挪到别的文件，靠指针才打开"},{"term":"no-op","zh":"空指令：模型本来就会这么做，写不写它行为都一样的句子"}],"quote":{"en":"You are writing for a reader who has already read everything, so explanation is waste and precision is the entire job.","from":"docs/productivity/writing-for-agents.md"},"sources":["skills/productivity/writing-for-agents/SKILL.md","docs/productivity/writing-for-agents.md","skills/productivity/writing-for-agents/SKILL-MECHANICS.md"],"publicUrl":"https://aihero.dev/skills-writing-for-agents"},{"name":"writing-fragments","bucket":"in-progress","invocation":"user","command":"/writing-fragments","oneLiner":"追问式收集写作素材的碎片，先不管结构","whatItDoes":["纯探索阶段：不追求结构、不出大纲，只用追问的方式挖出各种能用得上的写作碎片","碎片不断追加进同一个 markdown 文件，用分隔线隔开，不加标题、不排序"],"whenToUse":["心里有想写的东西但还很散，想先倒出来，还不急着决定文章长什么样","准备用 writing-beats 或 writing-shape 正式组织成文章之前的素材收集阶段"],"whenNotToUse":["已经想清楚要写成什么结构了，这一步故意不整理结构，组织成文交给 writing-beats 或 writing-shape"],"howItWorks":["没说存到哪，先问一次路径，之后就记住不再问","从你说的第一句话开始就要收集碎片，包括最初提需求那句话","第一次写文件时，最上面加一个 H1 当作暂定标题，不加别的","追问过程中，随时把冒出来的碎片追加写进文件，用分隔线隔开","每次追加之前重新从磁盘读一遍文件，保留你之间可能做的手动编辑"],"outputs":["一份不断追加的 markdown 素材文件（碎片之间用分隔线隔开）"],"tips":["追加碎片不用每次都问你同不同意，顺嘴提一句加上了就行","碎片可以很随意，标准只是这句话写得不错，不要求能独立看懂","反复绕回同一个说法时，尽量提炼成一个词（带头词），这是碎片里最值钱的一种"],"workingIf":["文件从对话第一句话就开始积累碎片，碎片之间只用分隔线分开、没有标题和排序（推断）"],"pairsWith":["writing-beats","writing-shape"],"faq":[],"keyTerms":[{"term":"fragment","zh":"碎片：任何将来可能用进文章的一小段文字，不要求能独立看懂"},{"term":"leading word","zh":"带头词：一个词就能撑起整篇文章结构的说法，是碎片里最值钱的一种"}],"quote":{"en":"The novelist's diary is the model: years of unstructured noticings that later get mined for raw material.","from":"skills/in-progress/writing-fragments/SKILL.md"},"sources":["skills/in-progress/writing-fragments/SKILL.md","skills/in-progress/README.md"],"publicUrl":null},{"name":"writing-shape","bucket":"in-progress","invocation":"user","command":"/writing-shape","oneLiner":"把一堆素材逐段打磨成一篇正式文章","whatItDoes":["拿一份已有的素材文件，逐段跟你商量着写成一篇独立的文章","只读素材文件绝不改它，每敲定一段就立刻写进新文章文件，不会攒起来一次性给你"],"whenToUse":["已经有素材（比如用 writing-fragments 收集出来的碎片），想正式组织成一篇成稿","想要逐段被逼问这段到底想说什么的写作讨论，而不是让 Agent 一次成文"],"whenNotToUse":["素材文件本身不该被改动，这个 skill 明确不碰原始素材文件","不负责挖掘素材里没有的新内容，缺什么会直接说，让你补而不是自己编","不负责发布、排版成某个平台格式，或加你没要求的 frontmatter"],"howItWorks":["完整读一遍素材文件，搞清楚里面都有什么","跟你确认读者进门时已经懂哪些概念，也就是前提","给 2-3 个候选开头，每个暗示不同角度，你选一个或拼一个混合版","每写完一段就问读者接下来想听什么，从素材里找答案，并商量这段该用什么形式","商量定一段就立刻写进文章文件，重复这个过程直到你觉得写完了"],"outputs":["一篇独立的文章文件（不修改原始素材文件）"],"tips":["每次落笔前重新从磁盘读一遍文章文件，要整段重写就只改那一段，别的不动","素材不够用的地方要直接指出缺口，让你当场补例子或砍掉这部分，不能凭空编","挑呈现形式要把取舍摆到台面上说清楚，是用段落还是列表、要不要做提示框、要不要用表格"],"workingIf":["文章逐段生长，每段落地前都确认过用到的概念已经讲过，原始素材文件全程没被修改（推断）"],"pairsWith":["writing-fragments","writing-beats"],"faq":[],"keyTerms":[{"term":"grounding","zh":"落地：一个概念要么读者本来就懂，要么前面段落讲过，才能被后面用到"},{"term":"the pile","zh":"素材堆：原始素材文件，被当成矿场来挖，不是照抄的脚本"}],"quote":{"en":"The pile's job is to be mined; the article's job is to read as one voice.","from":"skills/in-progress/writing-shape/SKILL.md"},"sources":["skills/in-progress/writing-shape/SKILL.md","skills/in-progress/README.md"],"publicUrl":null}],"generated":"2026-09-26"}</script>
+<script>(() => {
+  'use strict';
+  const DATA = JSON.parse(document.getElementById('skills-data').textContent);
+  const CARDS = DATA.cards;
+  const BY = Object.fromEntries(CARDS.map((c) => [c.name, c]));
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const ORDER = {
+    engineering: ['ask-matt', 'grill-with-docs', 'triage', 'improve-codebase-architecture', 'setup-matt-pocock-skills', 'to-spec', 'to-tickets', 'implement', 'wayfinder', 'prototype', 'diagnosing-bugs', 'research', 'tdd', 'domain-modeling', 'codebase-design', 'code-review', 'resolving-merge-conflicts', 'wizard'],
+    productivity: ['grill-me', 'handoff', 'teach', 'to-questionnaire', 'wait-what', 'grilling', 'writing-for-agents'],
+    misc: ['git-guardrails-claude-code', 'migrate-to-shoehorn', 'scaffold-exercises', 'setup-pre-commit'],
+    'in-progress': ['claude-handoff', 'implement-spec', 'loop-me', 'pr', 'retro', 'setup-ts-deep-modules', 'writing-beats', 'writing-fragments', 'writing-shape'],
+  };
+  const BUCKET = {
+    engineering: { name: '工程', note: '日常写代码用。随插件安装。', plugin: true },
+    productivity: { name: '效率', note: '不限于代码的通用工作方式。随插件安装。', plugin: true },
+    misc: { name: '杂项', note: '留着但很少用，Matt 不推广。不随插件安装。', plugin: false },
+    'in-progress': { name: '测试版', note: '故意公开的测试版，Matt 想要反馈。不随插件安装，可以用 skills.sh 单个装。', plugin: false },
+  };
+  const LINE = {
+    'grill-with-docs': 'main', 'to-spec': 'main', 'to-tickets': 'main', implement: 'main', tdd: 'main', 'code-review': 'main', prototype: 'main',
+    wayfinder: 'way', triage: 'triage', 'diagnosing-bugs': 'bug', 'improve-codebase-architecture': 'health',
+    'domain-modeling': 'vocab', 'codebase-design': 'vocab',
+  };
+  const LINE_NAME = {
+    main: '主干线：想法到上线', way: '匝道：大到一个会话装不下', triage: '匝道：别人报的问题', bug: '匝道：出 bug 了',
+    health: '保养线：代码健康', vocab: '地下层：共用词汇', free: '独立站', off: '不在线路图上',
+  };
+  const STATION_NOTE = {
+    'setup-matt-pocock-skills': '起点站：每个仓库先跑一次',
+    prototype: '主干线的原型绕行，也能单独用',
+    handoff: '独立站，也用在原型绕行的两头',
+  };
+  const bucketOf = (c) => BUCKET[c.bucket] || { name: c.bucket, note: '', plugin: false };
+  const lineOf = (name) => {
+    if (LINE[name]) return LINE[name];
+    const c = BY[name];
+    return c && !bucketOf(c).plugin ? 'off' : 'free';
+  };
+  const stationOf = (name) => STATION_NOTE[name] || LINE_NAME[lineOf(name)];
+
+  const SCENARIOS = [
+    { group: '要做新东西', items: [
+      { id: 'small', label: '一个会话做得完的功能或改动', route: ['grill-with-docs', 'implement'], note: '追问和实现放在同一个会话里，实现时直接用追问时的原始推理。/implement 内部按事先商定的接缝跑 /tdd，最后跑 /code-review 再提交。' },
+      { id: 'multi', label: '要跨好几个会话的功能', route: ['grill-with-docs', 'to-spec', 'to-tickets', 'implement'], note: '前三步放在一个不压缩、不清空的会话里。之后每张单开一次 /implement，单与单之间 /clear；每张单自带上下文，上一张的会话可以丢。' },
+      { id: 'proto', label: '有个设计问题光靠聊说不清', route: ['handoff', 'prototype', 'handoff'], note: '状态、业务逻辑、要亲眼看的界面，都算。原型在单独的目录里做，所以 /handoff 出去，做完再 /handoff 回来，把结论接回原来的想法。原型代码留在 prototype/名字 分支上当一手资料。' },
+      { id: 'huge', label: '项目大到一个会话装不下，路还看不清', route: ['wayfinder', 'to-spec', 'to-tickets', 'implement'], note: 'wayfinder 只做决定、不做交付。地图清了就从 /to-spec 并回主干线，别直接跳去 /implement，除非最后发现活其实很小。它是最重的流程，普通功能别用。' },
+      { id: 'tdd', label: '只想先写测试、再实现一个具体行为', route: ['tdd'], note: '不需要完整 spec 的时候，单独用 /tdd，一次做一片红到绿。' },
+    ] },
+    { group: '有问题要处理', items: [
+      { id: 'bug', label: '难搞的 bug、偶发问题、性能回退', route: ['diagnosing-bugs'], note: '它先造出一条对这个 bug 稳定报错的命令，才开始猜原因；然后缩小范围、提假设、加观测点、修复、补回归测试。复盘发现没有好接缝锁住它时，转 /improve-codebase-architecture。' },
+      { id: 'triage', label: '别人报的 bug 和需求堆着', route: ['triage', 'implement'], note: '只分拣不是你自己建的单。/to-tickets 出来的单已经能直接交给 Agent，别再分拣。' },
+      { id: 'review', label: '要审一个分支或 PR', route: ['code-review'], note: '从一个固定点（提交、分支、标签）开始看 diff，两条轴并行审：合不合仓库规范，有没有忠实实现原始需求。' },
+      { id: 'merge', label: '合并或变基冲突卡住了', route: ['resolving-merge-conflicts'], note: '逐块按两边的原始意图解决，然后把合并或变基做完，从不 --abort。' },
+      { id: 'health', label: '代码越来越乱，想做保养', route: ['improve-codebase-architecture', 'grill-with-docs'], note: '它只负责找出能加深的模块。你挑中一个，就变成一个新想法，从 /grill-with-docs 回到主干线。' },
+    ] },
+    { group: '卡住了', items: [
+      { id: 'facts', label: '要查官方文档、API 或资料', route: ['research', 'grill-with-docs'], note: '/research 在后台对照一手资料去查，留下一份带出处的 Markdown，你照常干活。查到的东西带进 /grill-with-docs 用，它辅助思考，不替你思考。' },
+      { id: 'person', label: '答案在别人脑子里', route: ['to-questionnaire'], note: '它不问你题目本身，只问发给谁、要拿回什么，再生成问卷。对方填回来的内容带进 /grill-with-docs 或 /to-spec。' },
+      { id: 'human', label: '有些步骤只有人能做', route: ['wizard'], note: '开通基础设施、配密钥或 CI secrets、在陌生的第三方后台点来点去、一次性迁移。它生成一个交互式 bash 向导，逐步打开网址、收集值，写进 .env 和 GitHub secrets。Agent 自己能做的不用它。' },
+      { id: 'lost', label: 'Agent 刚说的话看不懂', route: ['wait-what'], note: '它补上你缺的上下文，用简化技术英语和 CONTEXT.md 里的词重讲一遍。治本是早点用 /grill-with-docs 定下共享语言。' },
+      { id: 'which', label: '不知道该用哪个', route: ['ask-matt'], note: '问路：按你的情况指到对应的 Skill 或路线。' },
+    ] },
+    { group: '想清楚、学习、写作', items: [
+      { id: 'norepo', label: '没有代码仓库，只想把一件事想清楚', route: ['grill-me'], note: '和 /grill-with-docs 同一套追问，但什么文件都不存。在仓库里时 Matt 建议用 /grill-with-docs，因为它会留下书面记录。' },
+      { id: 'learn', label: '想系统学一个新概念', route: ['teach'], note: '把当前目录当教学工作区，跨好几次会话记住你学到哪了。' },
+      { id: 'write', label: '要写 Skill、AGENTS.md 或 CLAUDE.md', route: ['writing-for-agents'], note: '给 Agent 读的文档怎么写：用引导词带行为，用指针把细节放到别处，逐句删掉不起作用的话。' },
+      { id: 'switch', label: '要换会话、换工具或交给同事', route: ['handoff'], note: '先看「换不换会话」那一节：能继续就继续。/handoff 只在东西要带走时用：换工具、换目录、交给同事、分出支线。' },
+    ] },
+  ];
+  const SCENARIO_BY = {};
+  SCENARIOS.forEach((g) => g.items.forEach((s) => { SCENARIO_BY[s.id] = s; }));
+
+  /* ---------- helpers ---------- */
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'text') n.textContent = v; else n.setAttribute(k, v === true ? '' : v);
+    }
+    for (const k of kids.flat(Infinity)) if (k != null && k !== false) n.append(k);
+    return n;
+  }
+  const hasItems = (a) => Array.isArray(a) && a.length > 0;
+  function chip(name) {
+    const n = String(name).replace(/^\//, '').trim();
+    if (!BY[n]) return el('code', { text: String(name) });
+    return el('a', { class: 'sk', href: '#skill/' + n, 'data-line': lineOf(n), text: '/' + n });
+  }
+  // 把一段文字里的 /skill-name 变成可点的站名
+  function richText(text) {
+    const frag = document.createDocumentFragment();
+    const re = /\/([a-z][a-z0-9-]+)/g;
+    let last = 0; let m;
+    const s = String(text);
+    while ((m = re.exec(s))) {
+      if (!BY[m[1]] || (m.index > 0 && /[\w./]/.test(s[m.index - 1]))) continue;
+      frag.append(s.slice(last, m.index), chip(m[1]));
+      last = m.index + m[0].length;
+    }
+    frag.append(s.slice(last));
+    return frag;
+  }
+  function annotate(root) {
+    $$('a.sk[href^="#skill/"]', root).forEach((a) => {
+      if (!a.dataset.line) a.dataset.line = lineOf(a.getAttribute('href').slice(7));
+    });
+  }
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+  }
+  function score(c, q) {
+    const name = c.name.toLowerCase();
+    if (name === q) return 100;
+    if (name.startsWith(q)) return 80;
+    if (name.includes(q)) return 60;
+    const hay = [c.oneLiner, ...(c.whatItDoes || []), ...(c.whenToUse || []), ...(c.keyTerms || []).map((t) => t.term + ' ' + t.zh)].join(' ').toLowerCase();
+    return hay.includes(q) ? 30 : 0;
+  }
+  const norm = (q) => q.trim().toLowerCase().replace(/^\//, '');
+
+  /* ---------- static chips ---------- */
+  annotate(document);
+  const PLUGIN = [...ORDER.engineering, ...ORDER.productivity].filter((n) => BY[n]);
+  $$('[data-list]').forEach((box) => {
+    PLUGIN.filter((n) => BY[n].invocation === box.dataset.list).forEach((n) => box.append(chip(n), ' '));
+  });
+
+  /* ---------- router ---------- */
+  const sitList = $('#sit-list');
+  const routeBox = $('#route');
+  function selectScenario(id) {
+    const s = SCENARIO_BY[id];
+    if (!s) return;
+    $$('.sit', sitList).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+    routeBox.textContent = '';
+    routeBox.append(
+      el('h3', { text: s.label }),
+      el('ol', { class: 'route-line', 'aria-label': '路线' }, s.route.map((n) => el('li', null, chip(n)))),
+      el('p', { class: 'note' }, richText(s.note)),
+      el('p', { class: 'src', text: '出处：ask-matt 与相关 Skill 原文。点站名看详解。' }),
+    );
+  }
+  SCENARIOS.forEach((g) => {
+    sitList.append(el('div', { class: 'sit-group' },
+      el('h3', { text: g.group }),
+      g.items.map((s) => {
+        const b = el('button', { class: 'sit', type: 'button', 'data-id': s.id, 'aria-pressed': 'false', text: s.label });
+        b.addEventListener('click', () => selectScenario(s.id));
+        return b;
+      })));
+  });
+  selectScenario('small');
+
+  /* ---------- catalog ---------- */
+  const state = { q: '', inv: 'all', inst: 'all' };
+  const groupsBox = $('#cat-groups');
+  function renderCatalog() {
+    groupsBox.textContent = '';
+    const q = norm(state.q);
+    let shown = 0;
+    for (const [bucket, names] of Object.entries(ORDER)) {
+      const b = BUCKET[bucket];
+      const rows = names.map((n) => BY[n]).filter(Boolean).filter((c) =>
+        (state.inv === 'all' || c.invocation === state.inv) &&
+        (state.inst === 'all' || (state.inst === 'plugin') === b.plugin) &&
+        (!q || score(c, q) > 0));
+      if (!rows.length) continue;
+      shown += rows.length;
+      groupsBox.append(el('div', { class: 'cat-group' },
+        el('h3', null, `${b.name}（${bucket}）`, el('span', { class: 'n', text: `${rows.length} 个` })),
+        el('p', { class: 'gnote', text: b.note }),
+        el('ul', { class: 'rows' }, rows.map((c) => el('li', { class: 'row' },
+          el('a', { href: '#skill/' + c.name, 'data-line': lineOf(c.name) },
+            el('span', { class: 'dot', 'aria-hidden': 'true' }),
+            el('span', { class: 'cmd', text: '/' + c.name }),
+            el('span', { class: 'tags' }, el('span', { class: 'tag', text: c.invocation === 'user' ? '你敲' : '自动' })),
+            el('span', { class: 'one', text: c.oneLiner || '' })))))));
+    }
+    $('#cat-count').textContent = `显示 ${shown} / ${CARDS.length} 个`;
+    if (!shown) {
+      const reset = el('button', { class: 'btn', type: 'button', text: '清空筛选' });
+      reset.addEventListener('click', () => {
+        state.q = ''; state.inv = 'all'; state.inst = 'all';
+        $('#cat-q').value = '';
+        syncSeg(); renderCatalog(); $('#cat-q').focus();
+      });
+      groupsBox.append(el('div', { class: 'empty-state' },
+        el('p', { text: '没有符合条件的 Skill。可以试试英文名（比如 tdd），或者清空筛选。' }), reset));
+    }
+  }
+  function syncSeg() {
+    $$('[data-inv]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.inv === state.inv)));
+    $$('[data-inst]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.inst === state.inst)));
+  }
+  $$('[data-inv]').forEach((b) => b.addEventListener('click', () => { state.inv = b.dataset.inv; syncSeg(); renderCatalog(); }));
+  $$('[data-inst]').forEach((b) => b.addEventListener('click', () => { state.inst = b.dataset.inst; syncSeg(); renderCatalog(); }));
+  $('#cat-q').addEventListener('input', (e) => { state.q = e.target.value; renderCatalog(); });
+  renderCatalog();
+
+  /* ---------- drawer ---------- */
+  const drawer = $('#drawer');
+  const scrim = $('#scrim');
+  let lastFocus = null;
+  let prevHash = '';
+  function sec(title, ...kids) {
+    return el('div', { class: 'd-sec' }, title ? el('h3', { text: title }) : null, kids);
+  }
+  function listSec(title, items, ordered) {
+    if (!hasItems(items)) return null;
+    return sec(title, el(ordered ? 'ol' : 'ul', null, items.map((t) => el('li', null, richText(t)))));
+  }
+  function renderDrawer(c) {
+    const b = bucketOf(c);
+    $('#d-title').textContent = c.command || '/' + c.name;
+    const meta = $('#d-meta');
+    meta.textContent = '';
+    meta.append(
+      el('span', { class: 'tag solid', text: c.invocation === 'user' ? '你敲的' : 'Agent 也会自己用' }),
+      el('span', { class: 'tag', text: `${b.name}（${c.bucket}）` }),
+      el('span', { class: 'tag', text: b.plugin ? '插件里有' : '要另装' }),
+      el('span', { class: 'tag', text: stationOf(c.name) }));
+    $('#d-one').textContent = c.oneLiner || '';
+    const body = $('#d-body');
+    body.textContent = '';
+    const parts = [];
+    if (c.note) parts.push(sec(null, el('p', { class: 'd-note' }, richText(c.note))));
+    parts.push(listSec('它做什么', c.whatItDoes));
+    parts.push(listSec('什么时候用', c.whenToUse));
+    parts.push(listSec('什么时候别用', c.whenNotToUse));
+    parts.push(listSec('怎么运作', c.howItWorks, true));
+    if (hasItems(c.flows)) {
+      parts.push(sec('它推荐的路线', c.flows.map((f) => el('div', { class: 'flow' },
+        el('h4', { text: f.name }),
+        f.when ? el('p', null, richText(f.when)) : null,
+        hasItems(f.steps) ? el('ol', { class: 'route-line' }, f.steps.map((s) => el('li', null, chip(s)))) : null,
+        f.note ? el('p', null, richText(f.note)) : null))));
+    }
+    parts.push(listSec('会产出', c.outputs));
+    parts.push(listSec('用出效果', c.tips));
+    parts.push(listSec('它在起作用的信号', c.workingIf));
+    if (hasItems(c.faq)) {
+      parts.push(sec('常见问题', c.faq.map((f) => el('details', { class: 'faq' },
+        el('summary', null, richText(f.q)), el('p', null, richText(f.a))))));
+    }
+    if (hasItems(c.keyTerms)) {
+      parts.push(sec('这个 Skill 里的词', el('dl', { class: 'd-terms' },
+        c.keyTerms.map((t) => [el('dt', { text: t.term }), el('dd', null, richText(t.zh))]))));
+    }
+    if (c.quote && c.quote.en) {
+      parts.push(sec('原文一句', el('blockquote', { class: 'd-quote' },
+        '“' + c.quote.en + '”', el('cite', { text: c.quote.from || '' }))));
+    }
+    const pairs = (c.pairsWith || []).filter((n) => BY[String(n).replace(/^\//, '')]);
+    if (pairs.length) parts.push(sec('常一起用', el('div', { class: 'chips' }, pairs.map((n) => [chip(n), ' ']))));
+    const inRoutes = [];
+    SCENARIOS.forEach((g) => g.items.forEach((s) => { if (s.route.includes(c.name)) inRoutes.push(s); }));
+    if (inRoutes.length) {
+      parts.push(sec('在「我现在要……」里', el('ul', null, inRoutes.map((s) => {
+        const a = el('a', { href: '#router', text: s.label });
+        a.addEventListener('click', () => { selectScenario(s.id); closeDrawer(true); });
+        return el('li', null, a);
+      }))));
+    }
+    const links = [];
+    if (c.publicUrl) links.push(el('li', null, el('a', { href: c.publicUrl, target: '_blank', rel: 'noopener', text: 'Matt 的教程页：' + c.publicUrl.replace(/^https?:\/\//, '') })));
+    links.push(el('li', null, el('a', { href: `https://github.com/mattpocock/skills/tree/main/skills/${c.bucket}/${c.name}`, target: '_blank', rel: 'noopener', text: 'GitHub 上的原文' })));
+    parts.push(sec('原文和教程', el('ul', null, links)));
+    if (hasItems(c.sources)) parts.push(sec('这张卡读过的文件', el('div', { class: 'd-src' }, el('ul', null, c.sources.map((s) => el('li', { text: s }))))));
+    parts.filter(Boolean).forEach((p) => body.append(p));
+    body.scrollTop = 0;
+  }
+  function openDrawer(name) {
+    const c = BY[name];
+    if (!c) return false;
+    if (!drawer.classList.contains('on')) lastFocus = document.activeElement;
+    renderDrawer(c);
+    drawer.classList.add('on');
+    scrim.classList.add('on');
+    document.documentElement.classList.add('lock');
+    $('#d-close').focus({ preventScroll: true });
+    return true;
+  }
+  function closeDrawer(keepHashNav) {
+    if (!drawer.classList.contains('on')) return;
+    drawer.classList.remove('on');
+    scrim.classList.remove('on');
+    document.documentElement.classList.remove('lock');
+    if (!keepHashNav && location.hash.startsWith('#skill/')) {
+      history.replaceState(null, '', prevHash || location.pathname + location.search);
+    }
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+  }
+  function fromHash(oldUrl) {
+    const h = decodeURIComponent(location.hash);
+    if (h.startsWith('#skill/')) {
+      if (oldUrl !== undefined) {
+        const i = oldUrl.indexOf('#');
+        const old = i >= 0 ? oldUrl.slice(i) : '';
+        if (!old.startsWith('#skill/')) prevHash = old;
+      }
+      if (!openDrawer(h.slice(7))) toast('没有找到这个 Skill');
+    } else {
+      closeDrawer(true);
+    }
+  }
+  window.addEventListener('hashchange', (e) => fromHash(e.oldURL));
+  $('#d-close').addEventListener('click', () => closeDrawer(false));
+  scrim.addEventListener('click', () => closeDrawer(false));
+  $('#d-copy').addEventListener('click', async () => {
+    const cmd = $('#d-title').textContent;
+    try {
+      await navigator.clipboard.writeText(cmd);
+      toast('已复制 ' + cmd);
+    } catch {
+      toast('浏览器没给剪贴板权限，请手动选中复制：' + cmd);
+    }
+  });
+  drawer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = $$('a[href], button:not([disabled]), summary, input', drawer).filter((x) => x.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0]; const last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  fromHash();
+
+  /* ---------- top search ---------- */
+  const qi = $('#qs-input');
+  const ql = $('#qs-list');
+  let hits = []; let active = -1;
+  function paintHits() {
+    ql.textContent = '';
+    if (!qi.value.trim()) { ql.classList.remove('on'); qi.setAttribute('aria-expanded', 'false'); return; }
+    if (!hits.length) {
+      ql.append(el('li', { class: 'empty', role: 'option', 'aria-disabled': 'true', text: '没有匹配的 Skill，试试英文名或换个词' }));
+    }
+    hits.forEach((c, i) => {
+      const li = el('li', { role: 'option', id: 'qs-' + c.name, 'aria-selected': String(i === active) },
+        el('span', { class: 'cmd', text: '/' + c.name }), el('span', { class: 'one', text: c.oneLiner || '' }));
+      li.addEventListener('mousedown', (e) => e.preventDefault());
+      li.addEventListener('click', () => pick(c));
+      ql.append(li);
+    });
+    ql.classList.add('on');
+    qi.setAttribute('aria-expanded', 'true');
+    if (active >= 0 && hits[active]) qi.setAttribute('aria-activedescendant', 'qs-' + hits[active].name);
+    else qi.removeAttribute('aria-activedescendant');
+  }
+  function pick(c) {
+    qi.value = ''; hits = []; active = -1; paintHits(); qi.blur();
+    location.hash = 'skill/' + c.name;
+  }
+  qi.addEventListener('input', () => {
+    const q = norm(qi.value);
+    hits = q ? CARDS.map((c) => [score(c, q), c]).filter((x) => x[0] > 0)
+      .sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name)).slice(0, 8).map((x) => x[1]) : [];
+    active = hits.length ? 0 : -1;
+    paintHits();
+  });
+  qi.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' && hits.length) { e.preventDefault(); active = (active + 1) % hits.length; paintHits(); }
+    else if (e.key === 'ArrowUp' && hits.length) { e.preventDefault(); active = (active - 1 + hits.length) % hits.length; paintHits(); }
+    else if (e.key === 'Enter' && hits[active]) { e.preventDefault(); pick(hits[active]); }
+    else if (e.key === 'Escape') { qi.value = ''; hits = []; paintHits(); }
+  });
+  qi.addEventListener('blur', () => { ql.classList.remove('on'); qi.setAttribute('aria-expanded', 'false'); });
+  qi.addEventListener('focus', () => { if (qi.value.trim()) paintHits(); });
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const typing = t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || (t && t.isContentEditable);
+    if (e.key === '/' && !typing && !drawer.classList.contains('on')) { e.preventDefault(); qi.focus(); }
+  });
+
+  /* ---------- toc highlight ---------- */
+  const tocLinks = $$('#toc-list a');
+  const tocMap = Object.fromEntries(tocLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      tocLinks.forEach((a) => a.removeAttribute('aria-current'));
+      const a = tocMap[en.target.id];
+      if (a) a.setAttribute('aria-current', 'true');
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  $$('main .section').forEach((s) => io.observe(s));
+})();
+</script>
+</body>
+</html>

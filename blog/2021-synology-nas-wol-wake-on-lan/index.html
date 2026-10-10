@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="zh-CN" data-astro-cid-ju4pidww><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="干饭CEO（AI · FDE下乡）" href="/rss.xml"><meta name="generator" content="Astro v7.3.7"><link rel="canonical" href="https://ceo.fandao.dev/blog/2021-synology-nas-wol-wake-on-lan/"><title>2021-05 群辉 Synology NAS 实现 WOL(Wake On Lan)唤醒局域网内任意设备+siri 语音唤醒电脑 - 干饭CEO</title><meta name="description" content="连续更新了两篇读书笔记加起来有一万两千字，本想轻量化完成周记任务的我整个人都不好了。于是决定这一篇周记改为技术周记，主要讲述我是如何不花一分钱解决在外唤醒家中休眠电脑问题的！！（令我没想到的是这篇周记写完之后也达到了 4600 字！）"><meta name="author" content="干饭CEO"><meta property="og:type" content="article"><meta property="og:site_name" content="干饭CEO（AI · FDE下乡）"><meta property="og:url" content="https://ceo.fandao.dev/blog/2021-synology-nas-wol-wake-on-lan/"><meta property="og:title" content="2021-05 群辉 Synology NAS 实现 WOL(Wake On Lan)唤醒局域网内任意设备+siri 语音唤醒电脑 - 干饭CEO"><meta property="og:description" content="连续更新了两篇读书笔记加起来有一万两千字，本想轻量化完成周记任务的我整个人都不好了。于是决定这一篇周记改为技术周记，主要讲述我是如何不花一分钱解决在外唤醒家中休眠电脑问题的！！（令我没想到的是这篇周记写完之后也达到了 4600 字！）"><meta property="og:image" content="https://ceo.fandao.dev/_astro/avatar.onCGcZyq_2cgzvR.jpg"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@ganfanCEO"><meta name="twitter:title" content="2021-05 群辉 Synology NAS 实现 WOL(Wake On Lan)唤醒局域网内任意设备+siri 语音唤醒电脑 - 干饭CEO"><meta name="twitter:description" content="连续更新了两篇读书笔记加起来有一万两千字，本想轻量化完成周记任务的我整个人都不好了。于是决定这一篇周记改为技术周记，主要讲述我是如何不花一分钱解决在外唤醒家中休眠电脑问题的！！（令我没想到的是这篇周记写完之后也达到了 4600 字！）"><meta name="twitter:image" content="https://ceo.fandao.dev/_astro/avatar.onCGcZyq_2cgzvR.jpg"><style>.seg[data-astro-cid-hp56b5ub]{display:inline-block}
+.toc[data-astro-cid-7k3pnqyz]{display:none}@media (width>=1100px){.toc[data-astro-cid-7k3pnqyz]{top:var(--s-6);max-height:calc(100vh - 2 * var(--s-6));margin-top:var(--s-8);padding-bottom:var(--s-2);align-self:start;display:block;position:sticky;overflow-y:auto}.toc-title[data-astro-cid-7k3pnqyz]{margin:0 0 var(--s-3);color:var(--c-paddy);letter-spacing:.04em;font-size:14px;font-weight:700}.toc-list[data-astro-cid-7k3pnqyz]{border-left:1px solid var(--c-line);margin:0;padding:0;list-style:none}.toc-item[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]{padding:5px 0 5px var(--s-4);color:var(--c-text-2);word-break:keep-all;overflow-wrap:anywhere;border-left:2px solid #0000;margin-left:-1px;font-size:14px;line-height:1.55;text-decoration:none;display:block}.toc-sub[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]{padding-left:calc(var(--s-4) + 1em);font-size:13.5px}.toc-item[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]:hover{border-left-color:var(--c-link);color:var(--c-link)}}.post[data-astro-cid-g5songws]{max-width:calc(var(--measure) + 2 * var(--gutter));padding:0 var(--gutter);margin:0 auto}.post-head[data-astro-cid-g5songws]{padding:var(--s-6) 0 var(--s-5)}.post-title[data-astro-cid-g5songws]{letter-spacing:.01em;margin:0;font-size:26px;font-weight:700;line-height:1.4}.post-date[data-astro-cid-g5songws]{gap:var(--s-3);margin:var(--s-3) 0 0;color:var(--c-text-2);flex-wrap:wrap;font-size:14px;display:flex}.post[data-astro-cid-g5songws] .post-hero{width:100%;height:auto;margin:0 0 var(--s-6);border-radius:var(--radius-img);display:block}.post-end[data-astro-cid-g5songws]{margin:var(--s-8) 0 0;padding-top:var(--s-5);border-top:1px solid var(--c-line);font-size:15px}.post-end[data-astro-cid-g5songws] a[data-astro-cid-g5songws]{align-items:center;min-height:44px;display:inline-flex}@media (width>=768px){.post-head[data-astro-cid-g5songws]{padding:var(--s-8) 0 var(--s-6)}.post-title[data-astro-cid-g5songws]{font-size:34px;line-height:1.35}.post-date[data-astro-cid-g5songws]{font-size:15px}}@media (width>=1100px){.post-has-toc[data-astro-cid-g5songws]{grid-template-columns:minmax(0, var(--measure)) minmax(220px, 1fr);column-gap:var(--s-8);max-width:calc(var(--page-max) + 2 * var(--gutter));display:grid}.post-has-toc[data-astro-cid-g5songws]>.toc{grid-area:1/2/span 2}.post-has-toc[data-astro-cid-g5songws] .post-end[data-astro-cid-g5songws]{grid-column:1}.post-has-toc[data-astro-cid-g5songws] .prose :is(h2,h3){scroll-margin-top:var(--s-5)}}
+</style><link rel="stylesheet" href="/_astro/Layout.DMCyY_Mc.css"></head><body data-astro-cid-ju4pidww><a class="skip-link" href="#main" data-astro-cid-ju4pidww>跳到正文</a><header class="topbar" data-astro-cid-ju4pidww><div class="topbar-inner" data-astro-cid-ju4pidww><a class="me" href="/" data-astro-cid-ju4pidww><img src="/_astro/avatar.onCGcZyq_1ChOXh.webp" srcset="/_astro/avatar.onCGcZyq_1ChOXh.webp 64w, /_astro/avatar.onCGcZyq_mPWDg.webp 128w" alt data-astro-cid-ju4pidww="true" loading="lazy" decoding="async" sizes="(min-width: 64px) 64px, 100vw" data-astro-image="constrained" data-astro-image-fit="cover" data-astro-image-pos="center" width="64" height="64" class="me-avatar"><span data-astro-cid-ju4pidww>干饭CEO</span></a><nav class="topbar-nav" aria-label="站点导航" data-astro-cid-ju4pidww><a href="/about/" data-astro-cid-ju4pidww>关于</a><a href="/rss.xml" data-astro-cid-ju4pidww>RSS</a></nav></div></header><main id="main" class="post post-has-toc" data-astro-cid-g5songws><article data-astro-cid-g5songws><header class="post-head" data-astro-cid-g5songws><h1 class="post-title" data-astro-cid-g5songws>2021-05 群辉 Synology NAS 实现 WOL(Wake On Lan)唤醒局域网内任意设备+siri 语音唤醒电脑</h1><p class="post-date" data-astro-cid-g5songws><time data-astro-cid-g5songws>2021 年</time></p><p class="source-note"><span class="source-summary">原载于 2021 年的旧博客（已关闭）</span></p></header><div class="prose" data-astro-cid-g5songws><h2 id="关于本周">关于本周</h2>
+<h3 id="插播一篇技术周记">插播一篇技术周记</h3>
+<p>连续更新了两篇读书笔记加起来有一万两千字，本想<strong>轻量化完成周记任务</strong>的我整个人都不好了。于是决定这一篇周记改为<strong>技术周记</strong>，主要讲述我是如何<strong>不花一分钱</strong>解决<strong>在外唤醒家中休眠电脑</strong>问题的！！（令我<strong>没想到的是</strong>这篇周记<strong>写完之后也达到了 4600 字！</strong>）</p>
+<h3 id="研究远程唤醒的起因">研究远程唤醒的起因</h3>
+<p>我前段时间重装了一遍电脑系统，之后有一天在公司想远程家里电脑的时候发现<strong>由于忘记设置电源管理配置导致电脑进入休眠了</strong>，于是当时就想如何<strong>把这个问题优化一下。</strong></p>
+<p><strong>向日葵</strong>是一个很好用的远程软件，可是他们的 <strong>WOL 棒子卖的太黑了</strong>（<code>168</code> ~ <code>198</code>元），我肯定是<strong>不会花这么多钱</strong>买一个<strong>专门用来开机的硬件的</strong>，对于我来说买这个<strong>都不如买树莓派。</strong>（当然，对于<strong>没有技术基础的用户</strong>来说，买一个<strong>向日葵的开机棒确实是满足远程唤醒唯一的选项</strong>）。</p>
+<p>因为我的 <code>NAS</code> 是<strong>全年通电的</strong>，因此通过 <code>WOL</code> 的方法可以在能耗和使用体验上面进行比较好的平衡，我最终决定将<strong>通过</strong> <code>NAS</code> 作为桥梁来实现这个需求。</p>
+<h3 id="名词解释">名词解释</h3>
+<p>这里我对一些英文缩写进行解释，至于后续文章中出现的 <code>pip</code> 、<code>Python</code> 以及 <code>SSH</code> 等词将不会做特殊解释，各位可以自行去我们的好伙伴<a href="https://www.baidu.com/">百度</a> 进行查询。</p>
+<blockquote>
+<p>WOL - Wake On Lan 顾名思义，<strong>通过局域网唤醒</strong></p>
+</blockquote>
+<blockquote>
+<p>NAS - Network Attached Storage 学名叫做“网络附属存储”，我的理解<strong>就是一个硬盘巨大的电脑（我的 NAS 有 4 张 8T 的硬盘）。</strong>这款群辉的 <code>NAS</code> 我用了有 3 年了，质量一直很坚挺，所用到的功能越来越多（<code>Aria2</code>、<code>Aliddns 自动解析</code>、<code>WOL</code> 以及 <code>Homebridge 智能家居</code>等等）</p>
+</blockquote>
+<h2 id="nas-配置">NAS 配置</h2>
+<h3 id="型号ds918现-ds920内存-4gdsm-版本-dsm-623-25426-update-3">型号：DS918+（现 DS920）<br>内存： 4G<br>DSM 版本： DSM 6.2.3-25426 Update 3</h3>
+<h2 id="通过-wol-唤醒局域网设备的核心思路">通过 WOL 唤醒局域网设备的核心思路</h2>
+<p><strong>第一步</strong> - 通过群辉的<strong>任务计划</strong>发送<strong>指令</strong></p>
+<p><strong>第二步</strong> - <strong>指令</strong>通过 <code>root</code> 权限执行<code>wakeonlan</code>程序</p>
+<p><strong>第三步</strong> - <code>wakeonlan</code> <strong>指令</strong>通过群辉 <code>NAS</code> 发送至内网特定 <code>MAC</code> 地址设备</p>
+<p><strong>最终</strong> - <strong>设备唤醒成功</strong></p>
+<h2 id="准备工作">准备工作</h2>
+<h3 id="被唤醒的设备开启-wol-支持">被唤醒的设备开启 WOL 支持</h3>
+<p>开启 windows10 电脑的 WOL 功能<strong>可以参考这篇文章</strong><a href="https://www.386w.com/jiaocheng/win10_article_41517.html">Win10 系统打开 WOL 远程网络唤醒功能的方法</a>，本文将<strong>不做详细开启 WOL 功能的教程，</strong>遇到问题或需要帮助可<strong>于公众号或文章底部留言。</strong></p>
+<h3 id="外网-ip">外网 IP</h3>
+<p>由于我在使用<strong>远程唤醒</strong>大部分时间<strong>是需要外网执行的，</strong>那么这里就需要我们<strong>能够从外网</strong>顺利的<strong>访问我们内网的设备。</strong>因为运营商的 <code>ipv4</code> 地址数量有限，因此对于家庭网络我们一般<strong>需要向电信申请</strong>外网的 <code>ipv4</code>，这样<strong>才能够从外网访问我们家里的设备。</strong>请看到这里的朋友首先<strong>确保自己是外网</strong> <code>IP</code>，我之前有一次由于忽略了外网 <code>IP</code> 这个事情导致我在另一个项目上面<strong>浪费了</strong>超过 <code>4</code> 个小时的时间！！！</p>
+<h4 id="如何确认自己是否为公网-ip">如何确认自己是否为公网 IP</h4>
+<p>确认自己是否为公网 <code>IP</code> 需要<strong>进入到路由器后台，</strong>进入路由器后台的方法不做阐述。</p>
+<p><strong>进入到路由器之后找到</strong><code>WAN IP</code></p>
+<p><img alt="这里是路由器显示的WAN IP" loading="lazy" decoding="async" sizes="(min-width: 921px) 921px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="921" height="548" src="/_astro/001.DZVDf74q_3rJds.webp" srcset="/_astro/001.DZVDf74q_ZbaN8D.webp 640w, /_astro/001.DZVDf74q_3rJds.webp 921w"></p>
+<p>这里是路由器显示的WAN IP</p>
+<p>这个是你目前网络分配的 <code>IP</code> 地址，那么此时需要你前往<a href="https://ip138.com/">iP 地址归属地查询</a>来查看自己的<strong>外网 <code>IP</code> 地址</strong></p>
+<p><img alt="这里是你的IP地址" loading="lazy" decoding="async" sizes="(min-width: 946px) 946px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="946" height="208" src="/_astro/002.JBO813Oy_Z2ocGAm.webp" srcset="/_astro/002.JBO813Oy_1MQMqe.webp 640w, /_astro/002.JBO813Oy_Z2ocGAm.webp 946w"></p>
+<p>这里是你的IP地址</p>
+<p>当你的<code>WAN IP</code>和<code>IP138</code>显示的<strong>IP 地址相同</strong>时，那么恭喜你，你的 IP 已经是<strong>外网可访问状态了。</strong></p>
+<p>如果<code>WAN IP</code>显示与 <code>IP138</code> 查询<strong>结果不符</strong>，那么<strong>您现在还是电信的内网 IP。</strong></p>
+<h4 id="申请公网-ip">申请公网 IP</h4>
+<p><strong>申请公网 <code>IP</code> 非常简单，</strong>只需要<strong>联系电信客服</strong>（我是直接联系的附近电信师傅）提供<strong>身份证、姓名以及电话号码</strong>即可<strong>很快获取到公网 IP（我申请过两次，分别为一天和七天申请下来）。</strong></p>
+<h3 id="自动解析域名至外网-ip可选">自动解析域名至外网 IP（可选）</h3>
+<p><strong>即使</strong>我们现在获取到了一个<strong>公网</strong> <code>IP</code>，但家用的 <code>IP</code> 地址<strong>是非固定的</strong>，其一般会在 <code>24-48</code> 小时内<strong>被重新分配至一个不同的 IP 地址。</strong></p>
+<p>因此这里建议通过 <code>NAS</code> 进行<strong>自动域名解析，</strong>即在 <code>IP</code> <strong>重新分配之后</strong>通过 <code>阿里云</code> 的 <code>API</code> 自动<strong>重新解析域名至本地公网 <code>IP</code>。</strong>这样可以保证仅需<strong>配置一次域名地址即可随意访问家里网络。</strong></p>
+<p>域名自动解析的方法我后续可能会更新作为一篇周记，但<strong>这是非常简单的一个流程。</strong>我是<strong>通过 Docer 安装</strong><code>chenhw2</code>的<code>aliyun-ddns-cli</code>包直接启用的域名自动解析，可以通过<code>Dcoker</code>项目<a href="https://registry.hub.docker.com/r/chenhw2/aliyun-ddns-cli/">chenhw2/aliyun-ddns-cli</a>进行配置。</p>
+<p><strong>具体教程</strong>可以参考<a href="https://www.woodmanzhang.com/%e9%80%9a%e8%bf%87%e7%be%a4%e8%be%89docker%e9%98%bf%e9%87%8c%e4%ba%91%e7%ae%80%e5%8d%95%e5%ae%9e%e7%8e%b0ddns/">通过群辉 docker+阿里云简单实现 DDNS</a></p>
+<h3 id="设置端口映射">设置端口映射</h3>
+<p>由于我们的<code>NAS</code>并<strong>没有直接暴露</strong>在公网<code>IP</code>，实际上这是<strong>需要通过路由器进行端口映射的。</strong>这里端口映射的方法我不做详细描述，各位请自行百度。</p>
+<p>我们需要的内部端口分别为</p>
+<h5 id="22---ssh-端口">22 - SSH 端口</h5>
+<h5 id="5000---群辉-nas-默认-http-访问端口">5000 - 群辉 NAS 默认 HTTP 访问端口</h5>
+<h5 id="5001---群辉-nas-默认-https-访问端口">5001 - 群辉 NAS 默认 HTTPS 访问端口</h5>
+<p>同时需要<strong>将局域网<code>IP</code>设置为<code>NAS</code>对应的<code>IP</code></strong></p>
+<p><img alt="端口转发配置参考" loading="lazy" decoding="async" sizes="(min-width: 708px) 708px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="708" height="454" src="/_astro/003.AOCSsGOo_ZDmWhA.webp" srcset="/_astro/003.AOCSsGOo_Z1vmcLA.webp 640w, /_astro/003.AOCSsGOo_ZDmWhA.webp 708w"></p>
+<p>端口转发配置参考</p>
+<p>注意，这里在端口转发的时候如果已经设置内网端口为<code>22</code>了，那么后面在设置<code>NAS</code>的<code>SSH</code>端口时也务必设置为<code>22</code>！！</p>
+<h2 id="正式开始请再次确认确认">正式开始请再次确认确认</h2>
+<p><strong>已获取公网 IP</strong></p>
+<p><strong>已将公网 IP 自动解析至自己的域名（可选）</strong></p>
+<p><strong>被唤醒的设备已开启 WOL 支持</strong></p>
+<h2 id="开始设置-wol">开始设置 WOL</h2>
+<h3 id="安装-python3">安装 Python3</h3>
+<p><img alt="群辉套件中心的Python3截图" loading="lazy" decoding="async" sizes="(min-width: 1056px) 1056px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1056" height="879" src="/_astro/004.BPGck45a_Z21W0NW.webp" srcset="/_astro/004.BPGck45a_Z2vU4L9.webp 640w, /_astro/004.BPGck45a_Z1RuX6R.webp 960w, /_astro/004.BPGck45a_Z21W0NW.webp 1056w"></p>
+<p>群辉套件中心的Python3截图</p>
+<p>我们首先需要在群辉的<code>套件中心</code>安装 <code>Python3</code></p>
+<h3 id="允许使用-root-账号登录">允许使用 root 账号登录</h3>
+<p>接下来我们需要开启 <code>root</code> 账号权限，这里我参考了这篇文章。<a href="https://www.myxzy.com/post-81.html">群晖 DSM 开启 ROOT 权限及 WinSCP 使用 ROOT 登录</a></p>
+<h4 id="dsm-开启-ssh">DSM 开启 SSH</h4>
+<p>随后我们需要<strong>进入群辉的控制面板</strong>找到<code>终端机和SNMP</code>选项勾选<code>启动Telnet功能</code>以及<code>启动SSH功能</code>后<strong>应用</strong></p>
+<p><img alt="开启SSH示意图" loading="lazy" decoding="async" sizes="(min-width: 1493px) 1493px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1493" height="851" src="/_astro/005.xPtBT3Qe_15FBUb.webp" srcset="/_astro/005.xPtBT3Qe_Z1lpMBA.webp 640w, /_astro/005.xPtBT3Qe_Z1LvHhS.webp 960w, /_astro/005.xPtBT3Qe_26w8et.webp 1280w, /_astro/005.xPtBT3Qe_15FBUb.webp 1493w"></p>
+<p>开启SSH示意图</p>
+<h3 id="获取-root-权限">获取 root 权限</h3>
+<h4 id="开启-root-账号和修改密码">开启 ROOT 账号和修改密码</h4>
+<p>开启群辉的 <code>SSH</code> 功能<strong>之后</strong>我们需要一个 <code>SSH</code> 工具，这里我用的是<a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html">PUTTY</a>这里可以<strong>自行百度或谷歌进行下载。</strong></p>
+<p>下载完 <code>Putty</code> 之后我们打开 <code>Putty</code> 进行<strong>链接</strong></p>
+<p>按顺序输入</p>
+<p>1.<code>NAS</code> 的内网 <code>IP</code>（我的是 <code>192.168.1.10</code>，<strong>请务必替换为自己的 NAS 内网 IP</strong>）</p>
+<p>2.在 <code>NAS</code> 控制面板开启 <code>SSH</code> 时候显示的端口（默认都是 <code>22</code>）</p>
+<p>3.确保连接模式调整为<code>SSH</code></p>
+<p>4.链接！</p>
+<p><img alt="PUTTY链接设置示意图" loading="lazy" decoding="async" sizes="(min-width: 466px) 466px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="466" height="449" src="/_astro/006.DkrJ3T6y_ZfJG9h.webp" srcset="/_astro/006.DkrJ3T6y_ZfJG9h.webp 466w"></p>
+<p>PUTTY链接设置示意图</p>
+<p><em>（原图已失效）这里可能会有安全警告，点是即可</em></p>
+<p>这里可能会有安全警告，点是即可</p>
+<p><img alt="PUTTY成功链接服务器示意图" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/008.Avb_3rav_Z1ocB25.webp" srcset="/_astro/008.Avb_3rav_Z1t3qAE.webp 640w, /_astro/008.Avb_3rav_Z1ocB25.webp 675w"></p>
+<p>PUTTY成功链接服务器示意图</p>
+<p>控制台显示</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>login as:</span></span></code></pre></div>
+<p>这时需要输入你群辉 <code>admin</code> 账号的名称（一般应该是 <code>admin</code>）</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>login as:admin</span></span></code></pre></div>
+<p>回车之后出现</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>admin@192.168.1.10's password:</span></span></code></pre></div>
+<p>这时请输入 <code>admin</code> 账号的密码，注意这里<strong>密码是不会显示的，因此请小心输入</strong></p>
+<p>当提示</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>admin@你的NAS主机名称:~$</span></span></code></pre></div>
+<p>即代表已成功登录 <code>admin</code> 账号</p>
+<p><img alt="登陆成功截图" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/009.BTSV3VLD_1HNpMY.webp" srcset="/_astro/009.BTSV3VLD_1CWAep.webp 640w, /_astro/009.BTSV3VLD_1HNpMY.webp 675w"></p>
+<p>登陆成功截图</p>
+<p>登录成功之后输入</p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">sudo</span><span style="--shiki-light:#005CC5"> -i</span></span></code></pre></div>
+<p>这里会再次提示输入密码，这里继续使用刚才的 <code>admin</code> 密码即可。 密码正确之后显示如下</p>
+<p><img alt="密码正确，已进入root账号权限" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/010.COR86RI7_Z2q2dFk.webp" srcset="/_astro/010.COR86RI7_Z2uS3eT.webp 640w, /_astro/010.COR86RI7_Z2q2dFk.webp 675w"></p>
+<p>密码正确，已进入root账号权限</p>
+<p>此时接着输入</p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">synouser</span><span style="--shiki-light:#005CC5"> --setpw</span><span style="--shiki-light:#032F62"> root</span><span style="--shiki-light:#032F62"> 密码</span></span></code></pre></div>
+<p>这里的密码<strong>建议</strong>与之前的 <code>admin</code> <strong>密码相同即可，避免后续搞混。</strong>（<strong>记得回车执行命令，确保命令正确执行！</strong>）</p>
+<p><img alt="退出前界面应该长这样" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/011.B8njLW3Y_e2Kln.webp" srcset="/_astro/011.B8njLW3Y_9bULN.webp 640w, /_astro/011.B8njLW3Y_e2Kln.webp 675w"></p>
+<p>退出前界面应该长这样</p>
+<h4 id="dsm-版本-62-以上需要的额外操作">DSM 版本 6.2 以上需要的额外操作</h4>
+<p>这里<strong>我们不用教程贴作者的做法，</strong>因为<strong>直接通过命令行界面去编辑文件</strong>对于不熟悉 <code>Linux</code> 的朋友<strong>可能会造成误操作。</strong>（比如说我当时就因为误操作导致差点无法恢复 SSH 服务！）</p>
+<p>我们需要<strong>回到群辉</strong> <code>NAS</code> 的<code>套件中心</code>找到<code>Perl插件</code>并安装</p>
+<p><img alt="Perl插件" loading="lazy" decoding="async" sizes="(min-width: 1048px) 1048px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1048" height="296" src="/_astro/012.DtcyhNfz_2tfq02.webp" srcset="/_astro/012.DtcyhNfz_Z10bN1S.webp 640w, /_astro/012.DtcyhNfz_f5VXb.webp 960w, /_astro/012.DtcyhNfz_2tfq02.webp 1048w"></p>
+<p>Perl插件</p>
+<p>安装 <code>Perl</code> 之后我们还需要安装 <code>ConfigFileEditor-noarch-16.spk</code></p>
+<p><code>ConfigFileEditor-noarch-16.spk</code> 的下载链接<strong>可以在前面的教程文章底部找到。</strong></p>
+<p>由于<strong>微信公众号无法直接上传文件 ，</strong>因此我也上传了一份至我的阿里云 <code>OSS</code> ，可以<strong>复制此链接至浏览器</strong>进行下载<a href="https://kevinshicn.oss-cn-shenzhen.aliyuncs.com/zhouji/05/ConfigFileEditor-noarch-16.spk">https://kevinshicn.oss-cn-shenzhen.aliyuncs.com/zhouji/05/ConfigFileEditor-noarch-16.spk</a></p>
+<p><strong>下载完成之后</strong>请在 <code>NAS</code> 的<code>套件中心</code>点击<code>手动安装</code>进行安装</p>
+<p><img alt="手动安装ConfigFileEditor" loading="lazy" decoding="async" sizes="(min-width: 1106px) 1106px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1106" height="909" src="/_astro/013.xIm5kBnc_ZEfWpW.webp" srcset="/_astro/013.xIm5kBnc_1hQvMw.webp 640w, /_astro/013.xIm5kBnc_1uDd0S.webp 960w, /_astro/013.xIm5kBnc_ZEfWpW.webp 1106w"></p>
+<p>手动安装ConfigFileEditor</p>
+<p><strong>安装完毕之后</strong>在套件中心找到 <code>Config File Editor</code> 并<strong>打开</strong></p>
+<p><img alt="找到Config File Editor" loading="lazy" decoding="async" sizes="(min-width: 1135px) 1135px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1135" height="938" src="/_astro/014.CVkoCNbJ_Z2eiDfk.webp" srcset="/_astro/014.CVkoCNbJ_Z2c4Qwq.webp 640w, /_astro/014.CVkoCNbJ_1cYdA0.webp 960w, /_astro/014.CVkoCNbJ_Z2eiDfk.webp 1135w"></p>
+<p>找到Config File Editor</p>
+<p>随后选中 <code>sshd</code> 配置文件</p>
+<p><img alt="选中sshd配置文件" loading="lazy" decoding="async" sizes="(min-width: 1168px) 1168px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1168" height="908" src="/_astro/015.CHBLdY2Y_8PUyp.webp" srcset="/_astro/015.CHBLdY2Y_qESQ6.webp 640w, /_astro/015.CHBLdY2Y_Z1o1vca.webp 960w, /_astro/015.CHBLdY2Y_8PUyp.webp 1168w"></p>
+<p>选中sshd配置文件</p>
+<p>之后<strong>找到</strong></p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>#PermitRootLogin prohibit-password</span></span></code></pre></div>
+<p>将其<strong>替换</strong>为</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PermitRootLogin yes</span></span></code></pre></div>
+<p><img alt="替换前" loading="lazy" decoding="async" sizes="(min-width: 549px) 549px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="549" height="140" src="/_astro/016.CNeUlAfr_Z1EhvOX.webp" srcset="/_astro/016.CNeUlAfr_Z1EhvOX.webp 549w"></p>
+<p>替换前</p>
+<p><img alt="替换后" loading="lazy" decoding="async" sizes="(min-width: 238px) 238px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="238" height="143" src="/_astro/017.CA84yE_y_1jdfet.webp" srcset="/_astro/017.CA84yE_y_1jdfet.webp 238w"></p>
+<p>替换后</p>
+<p><strong>保存之后重启 <code>NAS</code> 即可</strong></p>
+<h4 id="错误的修改-sudoers-造成-sudo--i-命令报错">错误的修改 sudoers 造成 sudo -i 命令报错</h4>
+<p>我参考的教程帖子底下<strong>有部分用户出现这样的问题，</strong>这是因为之前根据其他教程不小心改了 <code>sudoers</code>导致的。解决方法我这里不再阐述，请直接参考下图进行修改（看不清的话请去底部翻文章的参考引用[6]</p>
+<p><img alt="修复sudoers步骤" loading="lazy" decoding="async" sizes="(min-width: 855px) 855px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="855" height="1140" src="/_astro/018.C232ygY8_ZX3wdk.webp" srcset="/_astro/018.C232ygY8_Z26FuNr.webp 640w, /_astro/018.C232ygY8_ZX3wdk.webp 855w"></p>
+<p>修复sudoers步骤</p>
+<h3 id="安装-pip">安装 pip</h3>
+<h4 id="重新通过-ssh-登录服务器">重新通过 SSH 登录服务器</h4>
+<p>此时我们打开 <code>Putty</code> <strong>输入相同的地址与端口链接，</strong>此时记得使用 <code>root</code> <strong>账号以及前面设置的密码进行登录。</strong></p>
+<p><img alt="登录后界面如下" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/019.DdzhA5Ql_7RSC8.webp" srcset="/_astro/019.DdzhA5Ql_3243y.webp 640w, /_astro/019.DdzhA5Ql_7RSC8.webp 675w"></p>
+<p>登录后界面如下</p>
+<p>随后<strong>输入</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">sudo</span><span style="--shiki-light:#032F62"> su</span></span></code></pre></div>
+<p><strong>回车</strong>后<strong>输入</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">wget</span><span style="--shiki-light:#032F62"> https://bootstrap.pypa.io/get-pip.py</span></span></code></pre></div>
+<p>即可开始从 bootstrap.pypa.io 网站下载 <code>get-pip.py</code></p>
+<p><img alt="下载截图" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/020.CZpAMB_L_2u3HkT.webp" srcset="/_astro/020.CZpAMB_L_2pcRLk.webp 640w, /_astro/020.CZpAMB_L_2u3HkT.webp 675w"></p>
+<p>下载截图</p>
+<p>这时候的下载速度可能会非常慢，因为服务器在国外。我是通过将<code>get-pip.py</code>文件<strong>放到自己的服务器之后进行下载的</strong>，这里我把我的<strong>OSS 链接</strong>分享出来供大家下载。</p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">wget</span><span style="--shiki-light:#032F62"> https://kevinshicn.oss-cn-shenzhen.aliyuncs.com/zhouji/05/get-pip.py</span></span></code></pre></div>
+<p>之后<strong>通过</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">python3</span><span style="--shiki-light:#032F62"> get-pip.py</span><span style="--shiki-light:#005CC5"> -i</span><span style="--shiki-light:#032F62"> http://pypi.douban.com/simple/</span><span style="--shiki-light:#005CC5"> --trusted-host</span><span style="--shiki-light:#032F62"> pypi.douban.com</span></span></code></pre></div>
+<p><strong>指令</strong>来安装 <code>pip</code>，这里<strong>安装成功</strong>后显示如下（注意这里我直接使用的<strong>豆瓣镜像，</strong>因为国内用户直接执行 <code>get-pip.py</code> <strong>下载会异常缓慢。</strong>如遇问题请改用下面这个<strong>原版指令通过 pip 默认服务器安装！</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">python3</span><span style="--shiki-light:#032F62"> get-pip.py</span></span></code></pre></div>
+<p><img alt="显示Successfully installed pip-21.0.1代表pip安装成功" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/021.h_lXVQXF_ieRE7.webp" srcset="/_astro/021.h_lXVQXF_do35x.webp 640w, /_astro/021.h_lXVQXF_ieRE7.webp 675w"></p>
+<p>显示Successfully installed pip-21.0.1代表pip安装成功</p>
+<h3 id="通过-pip-安装-wakeonlan">通过 pip 安装 wakeonlan</h3>
+<p>我当时在<strong>成功安装</strong> <code>pip</code> 之后<strong>遇到了大坑</strong>，这个问题应该是<strong>由于环境变量导致的，</strong>因此这里我将<strong>用我自己的方法来优化接下来的步骤。</strong></p>
+<p>按照<strong>原文</strong>我们是<strong>需要通过下面指令直接安装 <code>wakeonlan</code> 包的</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">pip3</span><span style="--shiki-light:#032F62"> install</span><span style="--shiki-light:#032F62"> wakeonlan</span></span></code></pre></div>
+<p><strong>然而</strong>回车执行之后<strong>我这里弹出了 <code>pip</code> 指令未找到的提示</strong></p>
+<p><img alt="未找到pip命令，哪怕换pip install也不行" loading="lazy" decoding="async" sizes="(min-width: 675px) 675px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="675" height="425" src="/_astro/022.CHBfIbAr_ZQ28Oi.webp" srcset="/_astro/022.CHBfIbAr_ZURXnR.webp 640w, /_astro/022.CHBfIbAr_ZQ28Oi.webp 675w"></p>
+<p>未找到pip命令，哪怕换pip install也不行</p>
+<p>这个<strong>问题当时困扰了我很久，</strong>最后我找到的<strong>解决办法</strong>是<strong>在不更改环境变量的前提条件下，</strong>直接<strong>跑到<code>pip</code>的目录进行调用，</strong>于是我需要<strong>先找到<code>pip</code>在哪</strong>里。这里我们<strong>输入</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">find</span><span style="--shiki-light:#032F62"> /</span><span style="--shiki-light:#005CC5"> -name</span><span style="--shiki-light:#032F62"> pip</span></span></code></pre></div>
+<p>我这里<strong>返回了结果</strong>如下</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>ash-4.3# find / -name pip</span></span>
+<span class="line"><span>/tmp/pip-uninstall-yl447hvl/pip</span></span></code></pre></div>
+<p>其中</p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/tmp/pip-uninstall-yl447hvl/pip</span></span></code></pre></div>
+<p>就是我们需要访问的 <code>pip</code> 路径</p>
+<p>然后我们<strong>改一下上面的命令</strong></p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>从</span></span>
+<span class="line"><span>pip3 install wakeonlan</span></span>
+<span class="line"><span>修改为</span></span>
+<span class="line"><span>/tmp/pip-uninstall-yl447hvl/pip install wakeonlan -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com</span></span></code></pre></div>
+<p>回车之后进行 <code>wakeonlan</code> 的安装<strong>（同样这里我直接把豆瓣的镜像源带上了，不然直接执行的网速还是非常的慢）</strong>，这边可以看到 <code>pip</code> <code>正常执行了，wakeonlan</code> 的<strong>安装也正常在运行了。</strong></p>
+<p>随后我们用同样的方法<strong>确定</strong> <code>wakeonlan</code> 的<strong>路径</strong></p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">find</span><span style="--shiki-light:#032F62"> /</span><span style="--shiki-light:#005CC5"> -name</span><span style="--shiki-light:#032F62"> wakeonlan</span></span></code></pre></div>
+<p>返回<strong>结果</strong></p>
+<div class="code-block" data-lang="text" data-wrap="true"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>ash-4.3# find / -name wakeonlan</span></span>
+<span class="line"><span>/volume1/@appstore/py3k/usr/local/bin/wakeonlan</span></span></code></pre></div>
+<p>就是我们的 <code>wakeonlan</code> 路径！！</p>
+<p>此时<strong>证明</strong>我们的 <code>wakeonlan</code> <strong>安装成功！</strong></p>
+<h3 id="通过-ssh-发送指令执行唤醒">通过 ssh 发送指令执行唤醒</h3>
+<p>此时我们用不同的设备（手机、平板以及另一台电脑等）通过 <code>SSH</code> <strong>发送以下指令</strong>就可以<strong>唤醒我们指定的设备</strong>了</p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">/volume1/@appstore/py3k/usr/local/bin/wakeonlan</span><span style="--shiki-light:#032F62"> 需要被唤醒设备的MAC地址</span></span></code></pre></div>
+<h3 id="将唤醒指令添加进群辉-nas-的任务计划功能备用选项">将唤醒指令添加进群辉 NAS 的任务计划功能（备用选项）</h3>
+<p>此时我们已经可以通过 <code>SSH</code> 链接群辉 <code>NAS</code> 进行<strong>局域网设备唤醒</strong>了，但<strong>不排除</strong>有时我们的 <code>SSH</code> <strong>链接不稳定。</strong>那么这就需要我们<strong>通过群辉的控制台</strong>进行<strong>指令的发送。</strong></p>
+<h4 id="找到群辉控制面板的计划任务">找到群辉控制面板的计划任务</h4>
+<h4 id="添加计划任务">添加计划任务</h4>
+<p><img alt="任务名称任意填写，用户账号记得选择root" loading="lazy" decoding="async" sizes="(min-width: 562px) 562px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="562" height="553" src="/_astro/023.kEii9MWw_2qnAXI.webp" srcset="/_astro/023.kEii9MWw_2qnAXI.webp 562w"></p>
+<p>任务名称任意填写，用户账号记得选择root</p>
+<h4 id="务必按图设置任务的计划">务必按图设置任务的计划</h4>
+<p><img alt="禁止任务自动执行" loading="lazy" decoding="async" sizes="(min-width: 566px) 566px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="566" height="561" src="/_astro/024.CiF8KBHg_Z28WV2.webp" srcset="/_astro/024.CiF8KBHg_Z28WV2.webp 566w"></p>
+<p>禁止任务自动执行</p>
+<h4 id="任务设置">任务设置</h4>
+<p>这里我们<strong>输入前面测试成功的唤醒指令</strong>，至于邮件提醒功能是<strong>可有可无</strong>的。</p>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">/volume1/@appstore/py3k/usr/local/bin/wakeonlan</span><span style="--shiki-light:#032F62"> 需要被唤醒设备的MAC地址</span></span></code></pre></div>
+<p><img alt="设置界面如下" loading="lazy" decoding="async" sizes="(min-width: 552px) 552px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="552" height="554" src="/_astro/025.BfX8f1vB_ZXT1NN.webp" srcset="/_astro/025.BfX8f1vB_ZXT1NN.webp 552w"></p>
+<p>设置界面如下</p>
+<p>点击<strong>确定</strong>即可<strong>完成任务的添加，</strong>随后从控制台<strong>右键</strong>即可<strong>运行唤醒本地设备</strong></p>
+<p><img alt="右键运行即可" loading="lazy" decoding="async" sizes="(min-width: 1222px) 1222px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1222" height="110" src="/_astro/026.Cp9PhDgu_1uHuhQ.webp" srcset="/_astro/026.Cp9PhDgu_zrXK0.webp 640w, /_astro/026.Cp9PhDgu_1M3SE5.webp 960w, /_astro/026.Cp9PhDgu_1uHuhQ.webp 1222w"></p>
+<p>右键运行即可</p>
+<h3 id="通过-ios-快捷命令语音唤醒设备装逼选项">通过 IOS 快捷命令语音唤醒设备（装逼选项）</h3>
+<p><strong>参考的文章</strong>同时<strong>给出了另一种很好玩的做法</strong>那就是通过<code>IOS</code>的<strong>快捷命令</strong>连接<code>SSH</code>后<strong>发送命令来进行唤醒。</strong></p>
+<p>设置过程非常简单，只需要<strong>找到<code>通过SSH运行脚本</code>这个快捷指令即可，</strong>设置方法如下</p>
+<h4 id="主机设置为你的公网-ip-或域名">主机设置为你的公网 IP 或域名</h4>
+<h4 id="端口设置为对应的-ssh-端口">端口设置为对应的 SSH 端口</h4>
+<h4 id="用户设置为-root">用户设置为 root</h4>
+<h4 id="密码设置为-root-对应密码">密码设置为 root 对应密码</h4>
+<h4 id="输入设置为前面测试可以用的唤醒代码">输入设置为前面测试可以用的唤醒代码</h4>
+<div class="code-block" data-lang="bash" data-wrap="false"><div class="code-head"><button type="button" class="code-copy" hidden>复制</button><span class="code-status visually-hidden" role="status" aria-live="polite"></span></div><pre class="astro-code astro-code-themes github-light" style="--shiki-light:#24292e;--shiki-light-bg:#fff; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1">/volume1/@appstore/py3k/usr/local/bin/wakeonlan</span><span style="--shiki-light:#032F62"> 需要被唤醒设备的MAC地址</span></span></code></pre></div>
+<p><img alt="IOS快捷指令设置" loading="lazy" decoding="async" sizes="(min-width: 1004px) 1004px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="1004" height="749" src="/_astro/027.CyOWV6yG_1LRRnf.webp" srcset="/_astro/027.CyOWV6yG_ZfvByg.webp 640w, /_astro/027.CyOWV6yG_Z1mj3cL.webp 960w, /_astro/027.CyOWV6yG_1LRRnf.webp 1004w"></p>
+<p>IOS快捷指令设置</p>
+<p>之后就可以愉快的通过 <code>siri</code> 唤醒电脑了！</p>
+<h2 id="本周总结">本周总结</h2>
+<h3 id="可能写的太过于详细了">可能写的太过于详细了</h3>
+<p>一篇<strong>这么简单的教程</strong>写下来<strong>篇幅达到了接近 4500 个字，</strong>我仍然认为<strong>这对读者</strong>以及<strong>对于作者（我）</strong>来说都<strong>并不是最完美的展现方式，</strong>下一篇技术类周记<strong>我将用更简洁的方法来写文章，</strong>并尽量<strong>保证技术基础低的读者</strong>理解并实现目标！</p>
+<h5 id="推荐阅读">推荐阅读</h5>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s/AtHYksWbXnaJheWlNTLGXA">周记 2021-01-周记项目正式启动</a></li>
+<li><a href="https://mp.weixin.qq.com/s/O_RHEhW6A6arUSvBxshTvg">周记 2021-02-我是如何 43 天内拿下 PMP 证书的</a></li>
+<li><a href="https://mp.weixin.qq.com/s/dzn8uJV-7lLvCyKyz3udAg">周记 2021-03-书籍分享《重新定义团队：谷歌如何工作》（1-3 章）</a></li>
+<li><a href="https://mp.weixin.qq.com/s/ap_JhwgmfxgqFAIcTF3nKQ">周记 2021-04-书籍分享《重新定义团队：谷歌如何工作》（第 4 章）</a></li>
+</ul>
+<p>---</p>
+<p>欢迎关注我的公众号“<strong>凯文有事找你</strong>”，原创<strong>技术</strong>、<strong>生活</strong>、<strong>经验教训</strong>文章第一时间推送。</p>
+<p><img alt="公众号二维码" loading="lazy" decoding="async" sizes="(min-width: 400px) 400px, 100vw" data-astro-image="constrained" data-astro-image-pos="center" width="400" height="400" src="/_astro/qrcode-wechat.CJud9Hup_PTGVD.webp" srcset="/_astro/qrcode-wechat.CJud9Hup_PTGVD.webp 400w"></p>
+</div></article><nav class="toc" aria-labelledby="toc-title" data-astro-cid-7k3pnqyz><p class="toc-title" id="toc-title" data-astro-cid-7k3pnqyz>本文目录</p><ol class="toc-list" data-astro-cid-7k3pnqyz><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#关于本周" data-astro-cid-7k3pnqyz>关于本周</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#插播一篇技术周记" data-astro-cid-7k3pnqyz>插播一篇技术周记</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#研究远程唤醒的起因" data-astro-cid-7k3pnqyz>研究远程唤醒的起因</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#名词解释" data-astro-cid-7k3pnqyz>名词解释</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#nas-配置" data-astro-cid-7k3pnqyz>NAS 配置</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#型号ds918现-ds920内存-4gdsm-版本-dsm-623-25426-update-3" data-astro-cid-7k3pnqyz>型号：DS918+（现 DS920） 内存： 4G DSM 版本： DSM 6.2.3-25426 Update 3</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#通过-wol-唤醒局域网设备的核心思路" data-astro-cid-7k3pnqyz>通过 WOL 唤醒局域网设备的核心思路</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#准备工作" data-astro-cid-7k3pnqyz>准备工作</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#被唤醒的设备开启-wol-支持" data-astro-cid-7k3pnqyz>被唤醒的设备开启 WOL 支持</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#外网-ip" data-astro-cid-7k3pnqyz>外网 IP</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#自动解析域名至外网-ip可选" data-astro-cid-7k3pnqyz>自动解析域名至外网 IP（可选）</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#设置端口映射" data-astro-cid-7k3pnqyz>设置端口映射</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#正式开始请再次确认确认" data-astro-cid-7k3pnqyz>正式开始请再次确认确认</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#开始设置-wol" data-astro-cid-7k3pnqyz>开始设置 WOL</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#安装-python3" data-astro-cid-7k3pnqyz>安装 Python3</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#允许使用-root-账号登录" data-astro-cid-7k3pnqyz>允许使用 root 账号登录</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#获取-root-权限" data-astro-cid-7k3pnqyz>获取 root 权限</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#安装-pip" data-astro-cid-7k3pnqyz>安装 pip</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#通过-pip-安装-wakeonlan" data-astro-cid-7k3pnqyz>通过 pip 安装 wakeonlan</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#通过-ssh-发送指令执行唤醒" data-astro-cid-7k3pnqyz>通过 ssh 发送指令执行唤醒</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#将唤醒指令添加进群辉-nas-的任务计划功能备用选项" data-astro-cid-7k3pnqyz>将唤醒指令添加进群辉 NAS 的任务计划功能（备用选项）</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#通过-ios-快捷命令语音唤醒设备装逼选项" data-astro-cid-7k3pnqyz>通过 IOS 快捷命令语音唤醒设备（装逼选项）</a></li><li class="toc-item" data-astro-cid-7k3pnqyz><a href="#本周总结" data-astro-cid-7k3pnqyz>本周总结</a></li><li class="toc-item toc-sub" data-astro-cid-7k3pnqyz><a href="#可能写的太过于详细了" data-astro-cid-7k3pnqyz>可能写的太过于详细了</a></li></ol></nav><p class="post-end" data-astro-cid-g5songws><a href="/" data-astro-cid-g5songws>回首页看全部文章</a></p></main><script type="module">var e={copied:2e3,failed:5e3};async function t(e){if(window.isSecureContext&&navigator.clipboard?.writeText)try{await navigator.clipboard.writeText(e);return}catch(e){console.warn(`剪贴板接口不可用，改用 execCommand`,e)}let t=document.createElement(`textarea`);t.value=e,t.setAttribute(`readonly`,``),t.style.position=`fixed`,t.style.opacity=`0`,document.body.append(t),t.select();let n=document.execCommand(`copy`);if(t.remove(),!n)throw Error(`execCommand copy 返回 false`)}function n(n){let r=n.querySelector(`.code-copy`),i=n.querySelector(`.code-status`),a=n.querySelector(`pre code`);if(!r||!i||!a)return;let o;r.hidden=!1,r.addEventListener(`click`,async()=>{window.clearTimeout(o),r.disabled=!0;let n=`copied`;try{await t(a.textContent??``),r.textContent=`已复制`,i.textContent=`已复制到剪贴板`}catch(e){console.error(`复制失败`,e),n=`failed`,r.textContent=`复制失败，请长按选择`,i.textContent=`复制失败，请长按文字手动选择`}finally{r.dataset.state=n,r.disabled=!1,o=window.setTimeout(()=>{delete r.dataset.state,r.textContent=`复制`,i.textContent=``},e[n])}})}document.querySelectorAll(`.code-block`).forEach(n);</script><footer class="site-footer" data-astro-cid-ju4pidww><div class="footer-inner" data-astro-cid-ju4pidww><p class="tight-punct" data-astro-cid-ju4pidww>干饭CEO（AI · FDE下乡）</p><p class="footer-links" data-astro-cid-ju4pidww><a href="https://x.com/ganfanCEO" data-astro-cid-ju4pidww>X @ganfanCEO</a><a href="/about/" data-astro-cid-ju4pidww>关于</a><a href="/rss.xml" data-astro-cid-ju4pidww>RSS</a></p></div></footer></body></html>
