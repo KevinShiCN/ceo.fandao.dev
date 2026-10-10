@@ -1,0 +1,111 @@
+/*
+ * 全站样式「稻田」（10-09 本人在三版设计里选定 A 版）：沿用各平台主页的蓝天白云稻田背景，安静、透气。
+ * 颜色取自那张航拍：天蓝做链接，稻穗的黄绿做年份和小标记。
+ * 手机单栏居中；电脑上用满宽度（10-10 本人：要支持宽屏电脑）：首页左边个人资料、右边文章列表，文章页右边放本文目录。
+ */
+:root {
+	--c-bg: #ffffff;
+	--c-text: #1b231e;
+	--c-heading: #1b231e;
+	--c-text-2: #4d5953;
+	--c-link: #1d5f9f;
+	--c-link-hover: #144a7d;
+	--c-paddy: #5d6b14;
+	--c-line: #dfe5e9;
+	--c-mist: #eef3f6;
+	--c-focus: #1d5f9f;
+	--c-selection: #cfe2f3;
+	--c-selection-text: #1b231e;
+
+	--c-code-bg: #eef3f6;
+	--c-code-text: #1b231e;
+	--c-inline-code-bg: #eef3f6;
+	--c-inline-code-text: #1b231e;
+	--c-copy-bg: #ffffff;
+	--c-copy-text: #1b231e;
+	--c-copy-bg-hover: #dfe9f1;
+	--c-copy-text-hover: #1b231e;
+	--c-copy-done-bg: #1d5f9f;
+	--c-copy-done-text: #ffffff;
+	--c-copy-fail-bg: #9f2a1d;
+	--c-copy-fail-text: #ffffff;
+	--copy-border: 1px solid #cdd7de;
+
+	--font-body: var(--font-cjk);
+	--font-display: var(--font-cjk);
+	--fs-body: 17px;
+	--lh-body: 1.85;
+	--prose-gap: 1.15em;
+	--fs-h2: 21px;
+	--fs-h3: 18px;
+	--fw-heading: 600;
+	--tracking-body: 0.02em;
+
+	--radius-img: 8px;
+	--radius-code: 10px;
+	--radius-inline-code: 4px;
+	--radius-button: 6px;
+
+	/* --measure：正文一栏的宽度（文章、关于、404）；--page-max：整页内容的宽度（首页两栏、正文加目录、顶栏、页脚）。
+	   768 及以下两个一样宽 */
+	--measure: 680px;
+	--page-max: 680px;
+	--gutter: 20px;
+}
+
+@media (min-width: 768px) {
+	:root {
+		--fs-body: 18px;
+		--fs-h2: 24px;
+		--fs-h3: 20px;
+		--gutter: 32px;
+	}
+}
+
+/* 电脑（宽于 768）：内容区随屏宽变宽，整页最宽 1360 居中。768 及以下（手机、竖放的平板）一点不改 */
+@media (min-width: 769px) {
+	:root {
+		--measure: 880px;
+		--page-max: 1360px;
+	}
+}
+
+.prose blockquote {
+	margin-left: 0;
+	margin-right: 0;
+	padding: var(--s-4) var(--s-5);
+	background: var(--c-mist);
+	border-radius: var(--radius-img);
+	color: var(--c-text);
+}
+
+.prose blockquote > :last-child {
+	margin-bottom: 0;
+}
+
+/* 旧博客文末的公众号二维码：原站 100px 宽，这里 120px，居中（.prose img 已是块级、左右 auto） */
+.prose img[alt='公众号二维码'] {
+	width: 120px;
+}
+
+.source-note {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--s-2) var(--s-4);
+	margin: var(--s-4) 0 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--c-text-2);
+}
+
+.source-links {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--s-4);
+}
+
+.source-link {
+	color: var(--c-link);
+	text-underline-offset: 0.22em;
+}

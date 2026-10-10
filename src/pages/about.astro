@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import avatar from '../assets/avatar.jpg';
+import AboutBody from '../components/AboutBody.astro';
+import Bio from '../components/Bio.astro';
+import { AUTHOR, SITE_DESCRIPTION } from '../consts';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="关于" description={SITE_DESCRIPTION}>
+	<main id="main" class="about">
+		<Image
+			class="about-photo"
+			src={avatar}
+			alt={AUTHOR.avatarAlt}
+			widths={[640, 960, 1360, 1600]}
+			sizes="(min-width: 769px) 880px, (min-width: 744px) 680px, 100vw"
+		/>
+		<h1 class="about-name tight-punct">{AUTHOR.fullName}</h1>
+		<Bio class="about-bio" />
+		<AboutBody />
+	</main>
+</Layout>
+
+<style>
+	.about {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: var(--s-6) var(--gutter) 0;
+	}
+
+	.about :global(.about-photo) {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-height: 420px;
+		object-fit: cover;
+		object-position: 50% 40%;
+		border-radius: var(--radius-img);
+	}
+
+	.about-name {
+		margin: var(--s-5) 0 var(--s-1);
+		font-size: 26px;
+		line-height: 1.4;
+	}
+
+	.about :global(.about-bio) {
+		margin: 0 0 var(--s-6);
+		color: var(--c-text-2);
+		font-size: 15px;
+	}
+
+	@media (min-width: 768px) {
+		.about {
+			padding-top: var(--s-8);
+		}
+
+		.about-name {
+			font-size: 32px;
+		}
+	}
+</style>

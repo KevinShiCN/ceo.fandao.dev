@@ -1,0 +1,28 @@
+---
+// 文章页的「原发于 X / 公众号」「原载于旧博客」。只出结构和文字，长相在 src/styles/theme.css。
+import type { Post } from '../lib/posts';
+import { sourceInfo } from '../lib/posts';
+
+interface Props {
+	post: Post;
+}
+
+const info = sourceInfo(Astro.props.post);
+---
+
+{
+	info && (
+		<p class="source-note">
+			<span class="source-summary">{info.summary}</span>
+			{info.links.length > 0 && (
+				<span class="source-links">
+					{info.links.map((link) => (
+						<a class="source-link" href={link.href}>
+							{link.label}
+						</a>
+					))}
+				</span>
+			)}
+		</p>
+	)
+}

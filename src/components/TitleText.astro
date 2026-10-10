@@ -1,0 +1,18 @@
+---
+// 标题按中文标点分段：换行优先落在「，：｜？」这类标点之后，不把「也在编」这样的词拆到两行。
+// 一段本身比一行还长时，段内照常换行。
+interface Props {
+	text: string;
+}
+
+const { text } = Astro.props;
+const segments = text.split(/(?<=[，。：；？！｜、])/u).filter(Boolean);
+---
+
+{segments.length > 1 ? segments.map((segment) => <span class="seg">{segment}</span>) : text}
+
+<style>
+	.seg {
+		display: inline-block;
+	}
+</style>

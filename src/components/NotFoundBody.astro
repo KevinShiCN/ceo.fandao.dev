@@ -1,0 +1,15 @@
+---
+// 404 正文。配图是饭导 IP 形象的官方 3D 正面图（缩小版）。
+import { Image } from 'astro:assets';
+import ip from '../assets/fandao-ip.jpg';
+import { withBase } from '../lib/url';
+---
+
+<div class="not-found">
+	<div class="not-found-text">
+		<h1>这个地址没有页面</h1>
+		<p>可能是链接打错了，或者文章换了地址。</p>
+		<p><a class="not-found-home" href={withBase('/')}>回首页看全部文章</a></p>
+	</div>
+	<Image class="not-found-ip" src={ip} alt="饭导的 IP 形象：一个装满米饭、罩着玻璃罩的饭桶" width={360} loading="eager" />
+</div>

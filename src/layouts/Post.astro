@@ -1,0 +1,147 @@
+---
+import TitleText from '../components/TitleText.astro';
+import { Image } from 'astro:assets';
+import CodeCopy from '../components/CodeCopy.astro';
+import SourceNote from '../components/SourceNote.astro';
+import Toc from '../components/Toc.astro';
+import { fullDateText, isoDate, type Post, updatedText } from '../lib/posts';
+import { tocItems } from '../lib/toc';
+import { withBase } from '../lib/url';
+import Layout from './Layout.astro';
+
+interface Props {
+	post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, heroImage } = post.data;
+const updated = updatedText(post);
+// 正文先渲染成 HTML，本文目录从里面取二、三级小标题（见 src/lib/toc.ts）。
+// 一个都没有的文章不放目录，正文居中
+const body = await Astro.slots.render('default');
+const toc = tocItems(body);
+const hasToc = toc.length > 0;
+---
+
+<Layout title={title} description={description} image={heroImage} type="article">
+	<main id="main" class:list={['post', hasToc && 'post-has-toc']}>
+		<article>
+			<header class="post-head">
+				<h1 class="post-title"><TitleText text={title} /></h1>
+				<p class="post-date">
+					<time datetime={isoDate(post) ?? undefined}>{fullDateText(post)}</time>
+					{updated && <span>更新于 {updated}</span>}
+				</p>
+				<SourceNote post={post} />
+			</header>
+			{
+				heroImage && (
+					<Image
+						class="post-hero"
+						src={heroImage}
+						alt=""
+						widths={[640, 960, 1360, 1760]}
+						sizes="(min-width: 769px) 880px, (min-width: 744px) 680px, 100vw"
+						loading="eager"
+					/>
+				)
+			}
+			<div class="prose">
+				<Fragment set:html={body} />
+			</div>
+		</article>
+		{hasToc && <Toc items={toc} />}
+		<p class="post-end"><a href={withBase('/')}>回首页看全部文章</a></p>
+	</main>
+	<CodeCopy />
+</Layout>
+
+<style>
+	.post {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.post-head {
+		padding: var(--s-6) 0 var(--s-5);
+	}
+
+	.post-title {
+		margin: 0;
+		font-size: 26px;
+		line-height: 1.4;
+		font-weight: 700;
+		letter-spacing: 0.01em;
+	}
+
+	.post-date {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-3);
+		margin: var(--s-3) 0 0;
+		color: var(--c-text-2);
+		font-size: 14px;
+	}
+
+	.post :global(.post-hero) {
+		display: block;
+		width: 100%;
+		height: auto;
+		margin: 0 0 var(--s-6);
+		border-radius: var(--radius-img);
+	}
+
+	.post-end {
+		margin: var(--s-8) 0 0;
+		padding-top: var(--s-5);
+		border-top: 1px solid var(--c-line);
+		font-size: 15px;
+	}
+
+	.post-end a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+	@media (min-width: 768px) {
+		.post-head {
+			padding: var(--s-8) 0 var(--s-6);
+		}
+
+		.post-title {
+			font-size: 34px;
+			line-height: 1.35;
+		}
+
+		.post-date {
+			font-size: 15px;
+		}
+	}
+
+	/* 电脑（≥1100）有小标题的文章：左边正文（--measure 宽，代码块和图片跟正文同宽），右边本文目录，
+	   合起来最宽 --page-max。没有小标题的文章照旧一栏居中 */
+	@media (min-width: 1100px) {
+		.post-has-toc {
+			display: grid;
+			grid-template-columns: minmax(0, var(--measure)) minmax(220px, 1fr);
+			column-gap: var(--s-8);
+			max-width: calc(var(--page-max) + 2 * var(--gutter));
+		}
+
+		.post-has-toc > :global(.toc) {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
+
+		.post-has-toc .post-end {
+			grid-column: 1;
+		}
+
+		/* 点目录跳过去时，小标题上方留一点空 */
+		.post-has-toc :global(.prose :is(h2, h3)) {
+			scroll-margin-top: var(--s-5);
+		}
+	}
+</style>

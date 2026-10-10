@@ -1,0 +1,26 @@
+---
+// 关于页正文。
+import { AUTHOR, LINKS } from '../consts';
+---
+
+<div class="prose about-body">
+	<p>我是{AUTHOR.bio[0]}，97 年生，五常米厂二代。饭导给餐厅供应五常大米，也上门教餐厅把饭煮好。</p>
+	<p>我做过天美的项目经理。现在我在用 AI 重做这家卖大米的公司，过程公开写出来：主阵地在 X，长文同步公众号。</p>
+	<h2>这个站放什么</h2>
+	<p>
+		这里不另写稿，是我的存档。X 和公众号上发过的长文，按发布版原样存一份，每篇标出原发链接。平台放不下的东西也放在这里：完整提示词、能直接复制的代码、交互网页。2021 年旧博客上的文章也搬了过来。
+	</p>
+	<h2>在哪找到我</h2>
+	<ul>
+		<li>X：<a href={LINKS.x.href}>{LINKS.x.handle}</a></li>
+		<li>{LINKS.search.platforms.join('、')}：搜<span class="keyword">「{LINKS.search.keyword}」</span></li>
+		<li>订阅更新：<a href={LINKS.rss.href}>RSS</a></li>
+	</ul>
+</div>
+
+<style>
+	/* 手机上折行时「干饭CEO」整个挪到下一行，不拆成「干 / 饭CEO」 */
+	.keyword {
+		white-space: nowrap;
+	}
+</style>

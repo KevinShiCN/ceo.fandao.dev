@@ -1,0 +1,46 @@
+---
+// 一句话简介。只在条目之间断行，不把「卖大米，用 AI 重做公司」拆到两行；
+// 换行后每行开头的分隔线被裁掉，不会出现行首或行尾悬空的「|」。
+import { AUTHOR } from '../consts';
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<p class:list={['bio', className, 'bio-separated']}>
+	<span class="bio-items">
+		{AUTHOR.bio.map((item) => <span class="bio-item">{item}</span>)}
+	</span>
+</p>
+
+<style>
+	.bio {
+		overflow: hidden;
+	}
+
+	.bio-items {
+		display: flex;
+		flex-wrap: wrap;
+		column-gap: var(--bio-gap, 0.75em);
+	}
+
+	.bio-item {
+		white-space: nowrap;
+	}
+
+	.bio-separated .bio-items {
+		column-gap: 0;
+		margin-left: -1.3em;
+	}
+
+	.bio-separated .bio-item::before {
+		content: '|';
+		display: inline-block;
+		width: 1.3em;
+		text-align: center;
+		opacity: 0.6;
+	}
+</style>

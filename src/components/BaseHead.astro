@@ -1,0 +1,52 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import avatar from '../assets/avatar.jpg';
+import { AUTHOR, LINKS, SITE_TITLE } from '../consts';
+import { withBase } from '../lib/url';
+
+interface Props {
+	/** 页面自己的标题；首页不传，直接用站名 */
+	title?: string;
+	description: string;
+	/** 分享卡片图；文章用封面，其余页面用头像 */
+	image?: ImageMetadata;
+	type?: 'website' | 'article';
+	/** 404 页没有自己的地址（文件是 404.html，任何错地址都显示它），不输出 canonical 和 og:url */
+	canonical?: boolean;
+}
+
+const { title, description, image, type = 'website', canonical = true } = Astro.props;
+const fullTitle = title ? `${title} - ${AUTHOR.name}` : SITE_TITLE;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const shareImage = await getImage({ src: image ?? avatar, width: 1200, format: 'jpg' });
+const shareImageURL = new URL(shareImage.src, Astro.site);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" href={withBase('/favicon.ico')} sizes="48x48" />
+<link rel="icon" type="image/png" href={withBase('/favicon.png')} />
+<link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+<link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+<link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={LINKS.rss.href} />
+<meta name="generator" content={Astro.generator} />
+{canonical && <link rel="canonical" href={canonicalURL} />}
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<meta name="author" content={AUTHOR.name} />
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE_TITLE} />
+{canonical && <meta property="og:url" content={canonicalURL} />}
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={shareImageURL} />
+
+<meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:site" content="@ganfanCEO" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={shareImageURL} />
+<slot />

@@ -1,0 +1,86 @@
+---
+// 文章页右侧的本文目录：列出正文的二、三级小标题，点了跳到对应位置。
+// 只在宽于 1100 的电脑上显示，固定在右侧不随正文滚走；手机和平板上不显示。放在哪一栏由 Post.astro 决定。
+import type { TocItem } from '../lib/toc';
+
+interface Props {
+	/** 正文的二、三级小标题，至少一个（见 src/lib/toc.ts） */
+	items: TocItem[];
+}
+
+const { items } = Astro.props;
+// 全文没有二级、只有三级小标题时，三级就是第一层，不缩进
+const top = Math.min(...items.map((item) => item.depth));
+---
+
+<nav class="toc" aria-labelledby="toc-title">
+	<p class="toc-title" id="toc-title">本文目录</p>
+	<ol class="toc-list">
+		{
+			items.map((item) => (
+				<li class:list={['toc-item', item.depth > top && 'toc-sub']}>
+					<a href={`#${item.id}`} set:html={item.html} />
+				</li>
+			))
+		}
+	</ol>
+</nav>
+
+<style>
+	.toc {
+		display: none;
+	}
+
+	@media (min-width: 1100px) {
+		/* 固定在窗口里，目录太长时自己滚动，不超出窗口 */
+		.toc {
+			display: block;
+			position: sticky;
+			top: var(--s-6);
+			align-self: start;
+			max-height: calc(100vh - 2 * var(--s-6));
+			overflow-y: auto;
+			margin-top: var(--s-8);
+			padding-bottom: var(--s-2);
+		}
+
+		.toc-title {
+			margin: 0 0 var(--s-3);
+			color: var(--c-paddy);
+			font-size: 14px;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+		}
+
+		.toc-list {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			border-left: 1px solid var(--c-line);
+		}
+
+		.toc-item a {
+			display: block;
+			margin-left: -1px;
+			padding: 5px 0 5px var(--s-4);
+			border-left: 2px solid transparent;
+			color: var(--c-text-2);
+			font-size: 14px;
+			line-height: 1.55;
+			text-decoration: none;
+			/* 跟正文小标题一样只在标点和空格处换行，太长时照常折行 */
+			word-break: keep-all;
+			overflow-wrap: anywhere;
+		}
+
+		.toc-sub a {
+			padding-left: calc(var(--s-4) + 1em);
+			font-size: 13.5px;
+		}
+
+		.toc-item a:hover {
+			border-left-color: var(--c-link);
+			color: var(--c-link);
+		}
+	}
+</style>

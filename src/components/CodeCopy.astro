@@ -1,0 +1,63 @@
+---
+// 代码块「复制」按钮的行为。按钮本身由 src/lib/code-block.mjs 在构建时写进 HTML。
+---
+
+<script>
+	const RESET_AFTER_MS = { copied: 2000, failed: 5000 } as const;
+
+	/** 先用异步剪贴板接口；没有这个接口（非 https 预览）或被拒绝（部分内置浏览器）时改用 execCommand，复制的内容不变 */
+	async function writeClipboard(text: string): Promise<void> {
+		if (window.isSecureContext && navigator.clipboard?.writeText) {
+			try {
+				await navigator.clipboard.writeText(text);
+				return;
+			} catch (error) {
+				console.warn('剪贴板接口不可用，改用 execCommand', error);
+			}
+		}
+		const area = document.createElement('textarea');
+		area.value = text;
+		area.setAttribute('readonly', '');
+		area.style.position = 'fixed';
+		area.style.opacity = '0';
+		document.body.append(area);
+		area.select();
+		const ok = document.execCommand('copy');
+		area.remove();
+		if (!ok) throw new Error('execCommand copy 返回 false');
+	}
+
+	function setup(block: HTMLElement) {
+		const button = block.querySelector<HTMLButtonElement>('.code-copy');
+		const status = block.querySelector<HTMLElement>('.code-status');
+		const code = block.querySelector<HTMLElement>('pre code');
+		if (!button || !status || !code) return;
+		let timer: number | undefined;
+		button.hidden = false;
+		button.addEventListener('click', async () => {
+			window.clearTimeout(timer);
+			button.disabled = true;
+			let state: keyof typeof RESET_AFTER_MS = 'copied';
+			try {
+				await writeClipboard(code.textContent ?? '');
+				button.textContent = '已复制';
+				status.textContent = '已复制到剪贴板';
+			} catch (error) {
+				console.error('复制失败', error);
+				state = 'failed';
+				button.textContent = '复制失败，请长按选择';
+				status.textContent = '复制失败，请长按文字手动选择';
+			} finally {
+				button.dataset.state = state;
+				button.disabled = false;
+				timer = window.setTimeout(() => {
+					delete button.dataset.state;
+					button.textContent = '复制';
+					status.textContent = '';
+				}, RESET_AFTER_MS[state]);
+			}
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('.code-block').forEach(setup);
+</script>

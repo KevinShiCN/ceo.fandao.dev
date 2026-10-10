@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+staging/
+.env
+.env.*
+spec.md
+交付页/

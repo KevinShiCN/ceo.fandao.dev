@@ -1,0 +1,153 @@
+---
+import '../styles/base.css';
+import '../styles/theme.css';
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import avatar from '../assets/avatar.jpg';
+import BaseHead from '../components/BaseHead.astro';
+import { AUTHOR, LINKS } from '../consts';
+import { navItems } from '../lib/nav';
+import { withBase } from '../lib/url';
+
+interface Props {
+	title?: string;
+	description: string;
+	image?: ImageMetadata;
+	type?: 'website' | 'article';
+	/** 首页用大横幅代替顶栏 */
+	topbar?: boolean;
+	/** 只有 404 页传 false，见 BaseHead */
+	canonical?: boolean;
+}
+
+const { title, description, image, type, topbar = true, canonical = true } = Astro.props;
+// 顶栏左边的头像和名字就是回首页，右边只放其余两项
+const home = withBase('/');
+const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} image={image} type={type} canonical={canonical} />
+	</head>
+	<body>
+		<a class="skip-link" href="#main">跳到正文</a>
+		{
+			topbar && (
+				<header class="topbar">
+					<div class="topbar-inner">
+						<a class="me" href={home}>
+							<Image class="me-avatar" src={avatar} alt="" width={64} height={64} />
+							<span>{AUTHOR.name}</span>
+						</a>
+						<nav class="topbar-nav" aria-label="站点导航">
+							{nav.map((item) => (
+								<a href={item.href} aria-current={item.current ? 'page' : undefined}>
+									{item.label}
+								</a>
+							))}
+						</nav>
+					</div>
+				</header>
+			)
+		}
+		<slot />
+		<footer class="site-footer">
+			<div class="footer-inner">
+				<p class="tight-punct">{AUTHOR.fullName}</p>
+				<p class="footer-links">
+					<a href={LINKS.x.href}>X {LINKS.x.handle}</a>
+					<a href={withBase('/about/')}>关于</a>
+					<a href={LINKS.rss.href}>RSS</a>
+				</p>
+			</div>
+		</footer>
+	</body>
+</html>
+
+<style>
+	.topbar {
+		border-bottom: 1px solid var(--c-line);
+	}
+
+	/* 顶栏和页脚按整页宽度排，电脑上跟首页两栏、正文加目录的左右边对齐 */
+	.topbar-inner,
+	.footer-inner {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.topbar-inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 56px;
+	}
+
+	.me {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--s-2);
+		min-height: 44px;
+		color: var(--c-text);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.me :global(.me-avatar) {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.topbar-nav {
+		display: flex;
+		gap: var(--s-1);
+	}
+
+	.topbar-nav a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 var(--s-3);
+		color: var(--c-text-2);
+		font-size: 15px;
+		text-decoration: none;
+	}
+
+	.topbar-nav a:hover,
+	.topbar-nav a[aria-current='page'] {
+		color: var(--c-link);
+	}
+
+	.site-footer {
+		margin-top: var(--s-9);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-text-2);
+		font-size: 14px;
+	}
+
+	.footer-inner {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: var(--s-2) var(--s-5);
+		padding-top: var(--s-6);
+		padding-bottom: var(--s-7);
+	}
+
+	.footer-inner p {
+		margin: 0;
+	}
+
+	.footer-links {
+		display: flex;
+		gap: var(--s-4);
+	}
+
+	.footer-links a {
+		color: var(--c-text-2);
+	}
+</style>

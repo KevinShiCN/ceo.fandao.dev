@@ -1,0 +1,60 @@
+---
+import NotFoundBody from '../components/NotFoundBody.astro';
+import { SITE_DESCRIPTION } from '../consts';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="页面不存在" description={SITE_DESCRIPTION} canonical={false}>
+	<main id="main" class="nf">
+		<NotFoundBody />
+	</main>
+</Layout>
+
+<style>
+	.nf {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: var(--s-7) var(--gutter) 0;
+	}
+
+	.nf :global(.not-found) {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s-6);
+	}
+
+	.nf :global(h1) {
+		margin: 0 0 var(--s-3);
+		font-size: 26px;
+	}
+
+	.nf :global(p) {
+		margin: 0 0 var(--s-2);
+		color: var(--c-text-2);
+	}
+
+	.nf :global(.not-found-home) {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		font-weight: 600;
+	}
+
+	.nf :global(.not-found-ip) {
+		width: 220px;
+		height: auto;
+		border-radius: var(--radius-img);
+	}
+
+	@media (min-width: 768px) {
+		.nf :global(.not-found) {
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.nf :global(h1) {
+			font-size: 32px;
+		}
+	}
+</style>

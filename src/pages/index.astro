@@ -1,0 +1,347 @@
+---
+import { Image } from 'astro:assets';
+import avatar from '../assets/avatar.jpg';
+import banner from '../assets/banner-field.jpg';
+import Bio from '../components/Bio.astro';
+import EmptyPosts from '../components/EmptyPosts.astro';
+import TitleText from '../components/TitleText.astro';
+import { AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, STANDALONE_PAGES } from '../consts';
+import Layout from '../layouts/Layout.astro';
+import { getSortedPosts, groupPosts, isoDate, listDateText, postHref, sourceInfo } from '../lib/posts';
+import { withBase } from '../lib/url';
+
+const groups = groupPosts(await getSortedPosts());
+---
+
+<Layout description={SITE_DESCRIPTION} topbar={false}>
+	<div class="banner">
+		<Image
+			src={banner}
+			alt=""
+			widths={[640, 960, 1280, 1920]}
+			sizes="100vw"
+			loading="eager"
+			fetchpriority="high"
+		/>
+	</div>
+	{/* 手机上从上到下一栏；电脑（≥1024）左边个人资料（固定不随列表滚走），右边文章列表 */}
+	<div class="home-wrap">
+		<header class="profile-inner">
+			<Image class="avatar" src={avatar} alt={AUTHOR.avatarAlt} width={240} height={240} loading="eager" />
+			<h1 class="name tight-punct">{AUTHOR.fullName}</h1>
+			<Bio class="bio" />
+			<p class="intro">{SITE_INTRO}</p>
+			<nav class="profile-nav" aria-label="站点导航">
+				<a href={LINKS.x.href}>X {LINKS.x.handle}</a>
+				<a href={withBase('/about/')}>关于</a>
+				<a href={LINKS.rss.href}>RSS</a>
+			</nav>
+		</header>
+
+		<main id="main" class="home">
+			<section class="block" aria-labelledby="h-pages">
+				<h2 id="h-pages" class="block-title">交互网页</h2>
+				<ul class="list">
+					{
+						STANDALONE_PAGES.map((page) => (
+							<li>
+								<a class="item" href={page.href}>
+									<span class="item-title">{page.title}</span>
+									<span class="item-desc">{page.description}</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+
+			<section class="block" aria-labelledby="h-posts">
+				<h2 id="h-posts" class="block-title">文章</h2>
+				{groups.length === 0 && <EmptyPosts />}
+				{
+					groups.map((group) => (
+						<section class="year" aria-label={group.label}>
+							<h3 class="year-title">{group.label}</h3>
+							<ul class="list">
+								{group.posts.map((post) => {
+									const date = listDateText(post);
+									const source = sourceInfo(post);
+									return (
+										<li>
+											<a class="item" href={postHref(post)}>
+												<span class="item-title"><TitleText text={post.data.title} /></span>
+												{post.data.description && <span class="item-desc">{post.data.description}</span>}
+												<span class="item-meta">
+													{date && <time datetime={isoDate(post) ?? undefined}>{date}</time>}
+													{source?.platforms.map((p) => (
+														<span class="item-src">{p}</span>
+													))}
+												</span>
+											</a>
+										</li>
+									);
+								})}
+							</ul>
+						</section>
+					))
+				}
+			</section>
+		</main>
+	</div>
+</Layout>
+
+<style>
+	.banner {
+		height: 168px;
+		overflow: hidden;
+		background: var(--c-mist);
+	}
+
+	.banner :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		max-width: none;
+		object-fit: cover;
+		object-position: 50% 58%;
+	}
+
+	/* 一栏：768 及以下 680 宽，再宽跟正文一样宽（--measure） */
+	.profile-inner,
+	.home {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.profile-inner :global(.avatar) {
+		display: block;
+		width: 96px;
+		height: 96px;
+		margin-top: -48px;
+		border: 4px solid var(--c-bg);
+		border-radius: 50%;
+		object-fit: cover;
+		background: var(--c-bg);
+	}
+
+	.name {
+		margin: var(--s-3) 0 var(--s-1);
+		font-size: 25px;
+		line-height: 1.35;
+		font-weight: 700;
+		letter-spacing: 0.01em;
+	}
+
+	.profile-inner :global(.bio) {
+		margin: 0;
+		color: var(--c-text-2);
+		font-size: 15px;
+		line-height: 1.7;
+	}
+
+	.intro {
+		margin: var(--s-4) 0 0;
+		font-size: 15px;
+		line-height: 1.75;
+	}
+
+	.profile-nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--s-5);
+		margin-top: var(--s-2);
+	}
+
+	.profile-nav a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		font-size: 15px;
+		color: var(--c-link);
+		text-decoration: none;
+	}
+
+	.profile-nav a:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.22em;
+	}
+
+	.block {
+		margin-top: var(--s-6);
+	}
+
+	.block-title {
+		margin: 0 0 var(--s-2);
+		padding-bottom: var(--s-2);
+		border-bottom: 2px solid var(--c-text);
+		font-size: 15px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+	}
+
+	.year {
+		margin-top: var(--s-5);
+	}
+
+	.year-title {
+		margin: 0;
+		color: var(--c-paddy);
+		font-size: 15px;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.list li + li {
+		border-top: 1px solid var(--c-line);
+	}
+
+	.item {
+		display: block;
+		padding: var(--s-3) 0 14px;
+		color: var(--c-text);
+		text-decoration: none;
+	}
+
+	.item-title {
+		display: block;
+		font-size: 17px;
+		font-weight: 600;
+		line-height: 1.5;
+		text-wrap: balance;
+	}
+
+	.item:hover .item-title {
+		color: var(--c-link);
+	}
+
+	.item-desc {
+		display: -webkit-box;
+		margin-top: 2px;
+		overflow: hidden;
+		color: var(--c-text-2);
+		font-size: 14.5px;
+		line-height: 1.65;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
+	.item-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-3);
+		margin-top: var(--s-1);
+		color: var(--c-text-2);
+		font-size: 13px;
+		line-height: 1.6;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.item-meta:empty {
+		display: none;
+	}
+
+	.item-src {
+		color: var(--c-paddy);
+		font-weight: 600;
+	}
+
+	@media (min-width: 768px) {
+		.banner {
+			height: 300px;
+		}
+
+		.profile-inner :global(.avatar) {
+			width: 128px;
+			height: 128px;
+			margin-top: -64px;
+		}
+
+		.name {
+			font-size: 32px;
+		}
+
+		.profile-inner :global(.bio),
+		.intro {
+			font-size: 16px;
+		}
+
+		.item-title {
+			font-size: 18px;
+		}
+
+		.item-desc {
+			font-size: 15px;
+		}
+	}
+
+	/* 电脑（≥1024）：横幅照旧通栏，下面分两栏：左边个人资料，右边文章列表，整页最宽 --page-max */
+	@media (min-width: 1024px) {
+		.home-wrap {
+			display: grid;
+			grid-template-columns: 320px minmax(0, 1fr);
+			column-gap: var(--s-8);
+			align-items: start;
+			max-width: calc(var(--page-max) + 2 * var(--gutter));
+			margin: 0 auto;
+			padding: 0 var(--gutter);
+		}
+
+		.profile-inner,
+		.home {
+			max-width: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		/* 账号名在左栏里排成一行 */
+		.name {
+			font-size: 28px;
+		}
+	}
+
+	/* 左栏固定在左侧，不随列表滚走。头像上半截压在横幅上（-64px），固定后头像离窗口顶 24px。
+	   窗口矮得放不下整栏时不固定，免得下半截的链接看不到 */
+	@media (min-width: 1024px) and (min-height: 560px) {
+		.profile-inner {
+			position: sticky;
+			top: calc(64px + var(--s-5));
+		}
+	}
+
+	/* 列表够宽（≥1200）时一行排开：左边标题和简介，右边来源和日期，日期靠右对齐 */
+	@media (min-width: 1200px) {
+		.item {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			column-gap: var(--s-7);
+			align-items: baseline;
+			padding: 14px 0 var(--s-4);
+		}
+
+		.item-title,
+		.item-desc {
+			grid-column: 1;
+		}
+
+		.item-meta {
+			grid-column: 2;
+			grid-row: 1;
+			justify-content: flex-end;
+			margin-top: 0;
+		}
+
+		.item-meta time {
+			order: 1;
+			min-width: 4.6em;
+			text-align: right;
+		}
+	}
+</style>

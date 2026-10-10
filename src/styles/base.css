@@ -1,0 +1,363 @@
+/*
+ * 底层样式：重置、正文排版骨架、代码块、无障碍。
+ * 颜色、字号、字体全部来自 theme.css 定义的变量，这里不写具体色值。
+ */
+
+:root {
+	--s-1: 4px;
+	--s-2: 8px;
+	--s-3: 12px;
+	--s-4: 16px;
+	--s-5: 24px;
+	--s-6: 32px;
+	--s-7: 48px;
+	--s-8: 64px;
+	--s-9: 96px;
+	--font-cjk: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Noto Sans CJK SC',
+		'Source Han Sans SC', 'Microsoft YaHei', sans-serif;
+	--font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', 'Noto Sans Mono CJK SC', monospace;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--c-bg);
+	color: var(--c-text);
+	font-family: var(--font-body);
+	font-size: var(--fs-body);
+	line-height: var(--lh-body);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+a {
+	color: var(--c-link);
+}
+
+a:hover {
+	color: var(--c-link-hover);
+}
+
+:focus-visible {
+	outline: 2px solid var(--c-focus);
+	outline-offset: 2px;
+}
+
+::selection {
+	background: var(--c-selection);
+	color: var(--c-selection-text);
+}
+
+.skip-link {
+	position: absolute;
+	left: var(--s-4);
+	top: -100px;
+	z-index: 100;
+	padding: var(--s-2) var(--s-4);
+	background: var(--c-text);
+	color: var(--c-bg);
+	text-decoration: none;
+}
+
+.skip-link:focus {
+	top: var(--s-4);
+}
+
+/* 标题均衡断行，避免末行只剩一个字；正文段落避免末行孤字（不支持的浏览器照常断行） */
+h1,
+h2,
+h3,
+h4 {
+	text-wrap: balance;
+}
+
+/* 正文小标题来自 Markdown，没法像页面标题那样分段（见 TitleText），
+   改用 keep-all：只在标点和空格处换行；一段长到一行放不下时，overflow-wrap 兜住不溢出 */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+	word-break: keep-all;
+	overflow-wrap: anywhere;
+}
+
+p,
+.prose li {
+	text-wrap: pretty;
+}
+
+/* 账号名「干饭CEO（AI · FDE下乡）」用比例宽度的标点（palt），括号和间隔点不再各占一个字宽。
+   标题正文仍用全角标点，读起来更像中文。 */
+.tight-punct {
+	font-feature-settings: 'palt';
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* ---------- 正文 ---------- */
+
+.prose {
+	font-size: var(--fs-body);
+	line-height: var(--lh-body);
+	letter-spacing: var(--tracking-body, 0.02em);
+	overflow-wrap: break-word;
+}
+
+.prose > :first-child {
+	margin-top: 0;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose table,
+.prose .code-block {
+	margin: 0 0 var(--prose-gap);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+	font-family: var(--font-display);
+	font-weight: var(--fw-heading);
+	letter-spacing: var(--tracking-heading, 0);
+	line-height: 1.4;
+	color: var(--c-heading);
+	margin: var(--s-7) 0 var(--s-4);
+}
+
+/* 文章页已有页面标题 h1；正文里自带的 h1（旧博客导出时保留的）按二级标题显示 */
+.prose h1,
+.prose h2 {
+	font-size: var(--fs-h2);
+}
+
+.prose h3 {
+	font-size: var(--fs-h3);
+}
+
+.prose h4,
+.prose h5,
+.prose h6 {
+	font-size: var(--fs-body);
+	margin: var(--s-6) 0 var(--s-3);
+}
+
+.prose strong {
+	font-weight: 700;
+	color: var(--c-heading);
+}
+
+.prose a {
+	color: var(--c-link);
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.22em;
+}
+
+.prose ul,
+.prose ol {
+	padding-left: 1.4em;
+}
+
+.prose li + li {
+	margin-top: var(--s-2);
+}
+
+.prose li > p {
+	margin: 0;
+}
+
+.prose img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: var(--s-5) auto;
+	border-radius: var(--radius-img);
+}
+
+.prose hr {
+	border: 0;
+	border-top: 1px solid var(--c-line);
+	margin: var(--s-7) 0;
+}
+
+.prose table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	border-collapse: collapse;
+	font-size: 0.92em;
+}
+
+.prose th,
+.prose td {
+	padding: var(--s-2) var(--s-3);
+	border-bottom: 1px solid var(--c-line);
+	text-align: left;
+	vertical-align: top;
+}
+
+/* 行内代码 */
+.prose :not(pre) > code {
+	font-family: var(--font-mono);
+	font-size: 0.88em;
+	letter-spacing: 0;
+	padding: 0.12em 0.36em;
+	border-radius: var(--radius-inline-code);
+	background: var(--c-inline-code-bg);
+	color: var(--c-inline-code-text);
+	overflow-wrap: anywhere;
+}
+
+/* ---------- 代码块（结构由 src/lib/code-block.mjs 生成） ---------- */
+
+.code-block {
+	position: relative;
+	background: var(--c-code-bg);
+	color: var(--c-code-text);
+	border-radius: var(--radius-code);
+	letter-spacing: 0;
+}
+
+.code-head {
+	position: sticky;
+	top: var(--sticky-top, 0px);
+	z-index: 2;
+	display: flex;
+	justify-content: flex-end;
+	min-height: var(--s-2);
+	padding: var(--s-2) var(--s-2) 0;
+	background: var(--c-code-bg);
+	border-radius: var(--radius-code) var(--radius-code) 0 0;
+}
+
+.code-copy {
+	min-height: 40px;
+	min-width: 72px;
+	padding: var(--s-2) var(--s-4);
+	border: var(--copy-border);
+	border-radius: var(--radius-button);
+	background: var(--c-copy-bg);
+	color: var(--c-copy-text);
+	font: inherit;
+	font-family: var(--font-body);
+	font-size: 14px;
+	line-height: 1.2;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition:
+		background-color 160ms ease-out,
+		color 160ms ease-out;
+}
+
+@media (pointer: coarse) {
+	.code-copy {
+		min-height: 44px;
+	}
+}
+
+.code-copy:hover {
+	background: var(--c-copy-bg-hover);
+	color: var(--c-copy-text-hover);
+}
+
+.code-copy:active {
+	transform: translateY(1px);
+}
+
+.code-copy:disabled {
+	cursor: progress;
+	opacity: 0.6;
+}
+
+.code-copy[data-state='copied'] {
+	background: var(--c-copy-done-bg);
+	color: var(--c-copy-done-text);
+}
+
+.code-copy[data-state='failed'] {
+	background: var(--c-copy-fail-bg);
+	color: var(--c-copy-fail-text);
+}
+
+.code-block pre {
+	margin: 0;
+	padding: var(--s-2) var(--s-4) var(--s-4);
+	overflow-x: auto;
+	background: transparent; /* 底色在外层 .code-block，用 theme.css 的 --c-code-bg */
+	color: var(--c-code-text);
+	font-family: var(--font-mono);
+	font-size: 13.5px;
+	line-height: 1.7;
+	tab-size: 2;
+	-webkit-overflow-scrolling: touch;
+}
+
+.code-block pre code {
+	font-family: inherit;
+}
+
+.code-block pre span {
+	color: var(--shiki-light, inherit);
+}
+
+/* 成段文字（多半是提示词）：自动换行、用正文字体，手机上不用左右拖着读 */
+.code-block[data-wrap='true'] pre {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font-family: var(--font-body);
+	font-size: 15px;
+	line-height: 1.8;
+}
+
+.code-block[data-wrap='true'] pre span {
+	color: var(--c-code-text);
+}
+
+@media (min-width: 768px) {
+	.code-block pre {
+		padding: var(--s-2) var(--s-5) var(--s-5);
+		font-size: 14px;
+	}
+
+	.code-block[data-wrap='true'] pre {
+		font-size: 15.5px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		animation: none !important;
+		scroll-behavior: auto !important;
+	}
+}
