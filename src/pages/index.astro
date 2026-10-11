@@ -6,7 +6,7 @@ import Bio from '../components/Bio.astro';
 import EmptyPosts from '../components/EmptyPosts.astro';
 import Search from '../components/Search.astro';
 import TitleText from '../components/TitleText.astro';
-import { AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, STANDALONE_PAGES } from '../consts';
+import { AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, TOOLS } from '../consts';
 import Layout from '../layouts/Layout.astro';
 import { getSortedPosts, groupPosts, isoDate, listDateText, postHref, sourceInfo } from '../lib/posts';
 import { withBase } from '../lib/url';
@@ -34,6 +34,7 @@ const groups = groupPosts(await getSortedPosts());
 			<p class="intro">{SITE_INTRO}</p>
 			<nav class="profile-nav" aria-label="站点导航">
 				<a href={LINKS.x.href}>X {LINKS.x.handle}</a>
+				<a href={withBase('/tools/')}>工具库</a>
 				<a href={withBase('/about/')}>关于</a>
 				<a href={LINKS.rss.href}>RSS</a>
 			</nav>
@@ -43,20 +44,23 @@ const groups = groupPosts(await getSortedPosts());
 			{/* 站内搜索：有搜索词时下面的列表藏起来，结果排在搜索框下面（见 Search.astro） */}
 			<Search id="home-search" variant="inline" hides="home-lists" class="home-search" />
 			<div id="home-lists">
-				<section class="block" aria-labelledby="h-pages">
-					<h2 id="h-pages" class="block-title">交互网页</h2>
+				<section class="block" aria-labelledby="h-tools">
+					<h2 id="h-tools" class="block-title">工具库</h2>
 					<ul class="list">
 						{
-							STANDALONE_PAGES.map((page) => (
+							TOOLS.map((tool) => (
 								<li>
-									<a class="item" href={page.href}>
-										<span class="item-title">{page.title}</span>
-										<span class="item-desc">{page.description}</span>
+									<a class="item" href={tool.href}>
+										<span class="item-title">{tool.title}</span>
+										<span class="item-desc">{tool.description}</span>
 									</a>
 								</li>
 							))
 						}
 					</ul>
+					<p class="block-more">
+						<a href={withBase('/tools/')}>全部工具 →</a>
+					</p>
 				</section>
 
 				<section class="block" aria-labelledby="h-posts">
@@ -260,6 +264,26 @@ const groups = groupPosts(await getSortedPosts());
 	.item-src {
 		color: var(--c-paddy);
 		font-weight: 600;
+	}
+
+	/* 工具库区块末尾的「全部工具 →」：接在最后一条下面，和条目之间一样用分隔线隔开 */
+	.block-more {
+		margin: 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.block-more a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		font-size: 15px;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.block-more a:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.22em;
 	}
 
 	@media (min-width: 768px) {

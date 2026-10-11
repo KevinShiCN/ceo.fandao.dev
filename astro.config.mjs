@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { codeBlockTransformer } from './src/lib/code-block.mjs';
 import { searchIndex } from './src/lib/search-index.mjs';
+import { TOOL_PAGES } from './src/lib/tools.mjs';
 
 // 正式站：https://ceo.fandao.dev 的根路径。
 // 预览构建放在别的网站的子路径下时，用环境变量换掉站点和前缀，例如：
@@ -23,8 +24,8 @@ export default defineConfig({
 	output: 'static',
 	integrations: [
 		mdx(),
-		// public/ 下的独立网页不经过 Astro 路由，手动登记进 sitemap
-		sitemap({ customPages: [new URL('matt/', siteRoot).href] }),
+		// public/ 下的独立网页（工具库里的工具）不经过 Astro 路由，手动登记进 sitemap；清单和 /tools/ 页同一份
+		sitemap({ customPages: TOOL_PAGES.map((tool) => new URL(tool.path.slice(1), siteRoot).href) }),
 		// 构建完在输出目录里建站内搜索索引（pagefind/），换了 --outDir 也跟着走
 		searchIndex(),
 	],

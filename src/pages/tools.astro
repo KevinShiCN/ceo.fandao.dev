@@ -1,0 +1,165 @@
+---
+import { TOOLS, TOOLS_INTRO } from '../consts';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="工具库" description={TOOLS_INTRO}>
+	{/* 手机上一栏：标题、导语、工具卡片从上到下；电脑（≥1024）跟首页一样分两栏：左边标题和导语，右边卡片。
+	   整页收进站内搜索（工具网页本身不经过 Astro，搜不到），结果里的标题显示「工具库」，见 src/lib/search-index.mjs */}
+	<main id="main" class="tools" data-pagefind-body data-pagefind-meta="title:工具库">
+		<header class="tools-head">
+			<h1 class="tools-title">工具库</h1>
+			<p class="tools-intro">{TOOLS_INTRO}</p>
+		</header>
+		<ul class="tools-list">
+			{
+				TOOLS.map((tool) => (
+					<li>
+						{/* 整张卡片是一个链接；「打开 →」只是提示，读屏念标题和说明就够了，也不收进搜索 */}
+						<a class="tool" href={tool.href}>
+							<h2 class="tool-title">{tool.title}</h2>
+							<p class="tool-desc">{tool.description}</p>
+							<span class="tool-open" aria-hidden="true" data-pagefind-ignore>
+								打开 →
+							</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</main>
+</Layout>
+
+<style>
+	/* 一栏时跟关于页、文章页一样宽：768 及以下 680，再宽 880（--measure） */
+	.tools {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: var(--s-6) var(--gutter) 0;
+	}
+
+	.tools-title {
+		margin: 0;
+		font-size: 26px;
+		line-height: 1.4;
+		font-weight: 700;
+		letter-spacing: 0.01em;
+	}
+
+	.tools-intro {
+		margin: var(--s-2) 0 0;
+		color: var(--c-text-2);
+		font-size: 16px;
+		line-height: 1.75;
+	}
+
+	/* 卡片最窄 340，放得下两张就并排；同一行的卡片一样高，「打开 →」都落在底边 */
+	.tools-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+		gap: var(--s-4);
+		margin: var(--s-5) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.tools-list li {
+		display: flex;
+	}
+
+	.tool {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		padding: var(--s-4);
+		border: 1px solid var(--c-line);
+		border-radius: var(--radius-img);
+		background: var(--c-bg);
+		color: var(--c-text);
+		text-decoration: none;
+		touch-action: manipulation;
+	}
+
+	.tool:hover {
+		border-color: var(--c-field-border);
+	}
+
+	.tool:active {
+		background: var(--c-mist);
+	}
+
+	.tool-title {
+		margin: 0;
+		font-size: 17px;
+		font-weight: 600;
+		line-height: 1.5;
+	}
+
+	.tool:hover .tool-title {
+		color: var(--c-link);
+	}
+
+	.tool-desc {
+		flex: 1;
+		margin: var(--s-1) 0 0;
+		color: var(--c-text-2);
+		font-size: 15px;
+		line-height: 1.7;
+	}
+
+	.tool-open {
+		margin-top: var(--s-3);
+		color: var(--c-link);
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 1.6;
+	}
+
+	.tool:hover .tool-open {
+		text-decoration: underline;
+		text-underline-offset: 0.22em;
+	}
+
+	@media (min-width: 768px) {
+		.tools {
+			padding-top: var(--s-8);
+		}
+
+		.tools-title {
+			font-size: 34px;
+			line-height: 1.35;
+		}
+
+		.tools-intro {
+			font-size: 17px;
+		}
+
+		.tools-list {
+			gap: var(--s-5);
+			margin-top: var(--s-6);
+		}
+
+		.tool {
+			padding: var(--s-5);
+		}
+
+		.tool-title {
+			font-size: 18px;
+		}
+	}
+
+	/* 电脑（≥1024）：跟首页一样分两栏，左边 320 放标题和导语，右边卡片，整页最宽 --page-max */
+	@media (min-width: 1024px) {
+		.tools {
+			display: grid;
+			grid-template-columns: 320px minmax(0, 1fr);
+			column-gap: var(--s-8);
+			align-items: start;
+			max-width: calc(var(--page-max) + 2 * var(--gutter));
+		}
+
+		.tools-list {
+			margin-top: 0;
+		}
+	}
+</style>

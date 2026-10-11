@@ -3,8 +3,9 @@
 // 只在浏览器里搜，不用服务器；搜索界面见 src/components/Search.astro。
 //
 // 收哪些页、收页里哪部分，由页面上的 data-pagefind-* 属性决定：
-//   - 文章正文（Post.astro 的 .prose，标题作为 title 元数据）和关于页（about.astro）标了 data-pagefind-body；
-//     没标的页面一律不收：首页、404、public/ 下的 /matt/。
+//   - 文章正文（Post.astro 的 .prose，标题作为 title 元数据）、关于页（about.astro）和工具库页（tools.astro）
+//     标了 data-pagefind-body；没标的页面一律不收：首页、404、public/ 下的工具网页（/matt/ 等）。
+//     工具网页本身搜不到，搜工具名会搜到工具库页，从那里点进去。
 //   - 代码块的「复制」按钮标了 data-pagefind-ignore（code-block.mjs）。导航、页脚、本文目录在 data-pagefind-body 外面。
 // 页面是 <html lang="zh-CN">，Pagefind 按中文分词。npm 包调用的是 pagefind_extended（带中文分词），见 node_modules/pagefind/lib/service.js。
 import { readFile, rm } from 'node:fs/promises';

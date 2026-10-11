@@ -45,7 +45,11 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 						<div class="topbar-right">
 							<nav class="topbar-nav" aria-label="站点导航">
 								{nav.map((item) => (
-									<a href={item.href} aria-current={item.current ? 'page' : undefined}>
+									<a
+										href={item.href}
+										aria-current={item.current ? 'page' : undefined}
+										class:list={[item.secondary && 'nav-secondary']}
+									>
 										{item.label}
 									</a>
 								))}
@@ -83,6 +87,7 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 				<p class="tight-punct">{AUTHOR.fullName}</p>
 				<p class="footer-links">
 					<a href={LINKS.x.href}>X {LINKS.x.handle}</a>
+					<a href={withBase('/tools/')}>工具库</a>
 					<a href={withBase('/about/')}>关于</a>
 					<a href={LINKS.rss.href}>RSS</a>
 				</p>
@@ -181,6 +186,19 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 	.topbar-search :global(.topbar-search-icon) {
 		width: 17px;
 		height: 17px;
+	}
+
+	/* 窄手机（430 以下）：头像名字加四项排不下，会挤成两行字。先收起 RSS（页脚和首页都还有），
+	   链接左右留白收窄一点；360 宽也排得下 */
+	@media (max-width: 429px) {
+		.topbar-nav .nav-secondary {
+			display: none;
+		}
+
+		.topbar-nav a,
+		.topbar-search {
+			padding: 0 10px;
+		}
 	}
 
 	/* 搜索浮层（里面的结构和行为在 Search.astro）：手机上占满屏幕，电脑上是靠上居中的面板 */

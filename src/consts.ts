@@ -1,4 +1,5 @@
 // 全站共用的身份和文案。改简介只改这里。
+import { TOOL_PAGES } from './lib/tools.mjs';
 import { withBase } from './lib/url';
 
 const NAME = '干饭CEO';
@@ -15,11 +16,11 @@ export const AUTHOR = {
 } as const;
 
 export const SITE_TITLE = AUTHOR.fullName;
-export const SITE_DESCRIPTION = `${AUTHOR.bio.join(' | ')}。X 和公众号发过的长文、完整提示词和交互网页都存在这里。`;
+export const SITE_DESCRIPTION = `${AUTHOR.bio.join(' | ')}。X 和公众号发过的长文、完整提示词存在这里；交互讲解页都在工具库，拿来就能用。`;
 
 /** 首页一句话：这个站是干什么的 */
 export const SITE_INTRO =
-	'X 和公众号发过的长文存在这里，每篇标出原发链接。平台放不下的完整提示词、代码、交互网页，也放在这里。';
+	'X 和公众号发过的长文存在这里，每篇标出原发链接。平台放不下的完整提示词、代码也放在这里。交互讲解页都在工具库，可以自己查，也能直接转发给别人。';
 
 export const LINKS = {
 	x: { label: 'X', handle: '@ganfanCEO', href: 'https://x.com/ganfanCEO' },
@@ -28,11 +29,8 @@ export const LINKS = {
 	rss: { label: 'RSS', href: withBase('/rss.xml') },
 } as const;
 
-/** 不经过 Astro 路由、原样放在 public/ 下的独立网页 */
-export const STANDALONE_PAGES = [
-	{
-		href: withBase('/matt/'),
-		title: 'Matt Pocock 的 Skills 线路图',
-		description: '38 个 Skill 怎么用出效果。中文交互网页，整理自 mattpocock/skills（MIT）。',
-	},
-] as const;
+/** 工具库页（/tools/）标题下的一句，也是这一页的简介 */
+export const TOOLS_INTRO = '拿来就能用的交互讲解页：自己查，也能直接转发给别人。';
+
+/** 工具库：原样放在 public/ 下的独立网页，清单在 src/lib/tools.mjs（sitemap 也从那里取），这里加上部署前缀 */
+export const TOOLS = TOOL_PAGES.map(({ path, title, description }) => ({ href: withBase(path), title, description }));
