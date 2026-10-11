@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code 的 claude-api Skill：8 个子命令怎么用出效果</title>
+<meta name="description" content="Claude Code 内置 claude-api Skill 中文讲解：什么时候自动用上，migrate、prompt-audit、upgrade、preserved-thinking-migration、build-eval、hillclimb、cost-optimize、managed-agents-onboard 八个子命令怎么敲、按什么步骤做、在哪停下等你点头。">
+<style>/* ===== tokens ===== */
+:root {
+  color-scheme: light;
+  --paper: oklch(98.7% 0.004 240);
+  --surface: oklch(100% 0 0);
+  --sunken: oklch(96.4% 0.007 245);
+  --ink: oklch(23% 0.035 258);
+  --ink-2: oklch(40% 0.03 258);
+  --ink-3: oklch(50% 0.022 258);
+  --rule: oklch(90% 0.01 250);
+  --rule-strong: oklch(80% 0.014 250);
+  --focus: oklch(52% 0.2 262);
+  --on-accent: oklch(99% 0 0);
+  --line-main: oklch(50% 0.19 262);
+  --line-way: oklch(47% 0.17 305);
+  --line-triage: oklch(63% 0.15 62);
+  --line-bug: oklch(54% 0.2 27);
+  --line-health: oklch(52% 0.13 158);
+  --line-vocab: oklch(56% 0.07 70);
+  --line-free: oklch(60% 0.02 258);
+  --line-off: oklch(72% 0.012 258);
+  --tint-main: oklch(95.5% 0.025 262);
+  --scrim: oklch(23% 0.035 258 / 0.38);
+  --shadow-pop: 0 1px 0 oklch(23% 0.035 258 / 0.06), 0 18px 40px -16px oklch(23% 0.035 258 / 0.3);
+  --r-s: 4px;
+  --r-m: 8px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 72px;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: oklch(19% 0.02 258);
+    --surface: oklch(23% 0.022 258);
+    --sunken: oklch(26% 0.022 258);
+    --ink: oklch(94% 0.01 250);
+    --ink-2: oklch(81% 0.015 250);
+    --ink-3: oklch(71% 0.015 250);
+    --rule: oklch(32% 0.02 258);
+    --rule-strong: oklch(44% 0.02 258);
+    --focus: oklch(76% 0.13 262);
+    --on-accent: oklch(16% 0.02 258);
+    --line-main: oklch(70% 0.15 262);
+    --line-way: oklch(70% 0.14 305);
+    --line-triage: oklch(78% 0.13 65);
+    --line-bug: oklch(70% 0.16 27);
+    --line-health: oklch(74% 0.13 158);
+    --line-vocab: oklch(74% 0.07 70);
+    --line-free: oklch(66% 0.02 258);
+    --line-off: oklch(50% 0.015 258);
+    --tint-main: oklch(31% 0.05 262);
+    --scrim: oklch(8% 0.02 258 / 0.62);
+    --shadow-pop: 0 18px 40px -16px oklch(0% 0 0 / 0.65);
+  }
+}
+
+/* ===== base ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html.lock { overflow: hidden; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.75 var(--font-sans); }
+a { color: var(--line-main); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+code, kbd { font-family: var(--font-mono); font-size: .9em; }
+code { padding: 1px 5px; border-radius: var(--r-s); background: var(--sunken); }
+p { margin: 0 0 var(--s3); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 100; padding: 8px 14px; background: var(--ink); color: var(--paper); border-radius: var(--r-s); }
+.skip-link:focus { left: 8px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--ink-3); }
+.small { font-size: 14px; }
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ===== top bar ===== */
+.topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: var(--s5); height: 56px; padding: 0 var(--s5); background: var(--paper); border-bottom: 1px solid var(--rule); }
+.brand { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--ink); text-decoration: none; }
+.qs { position: relative; flex: 1; max-width: 440px; }
+.qs .ico { position: absolute; left: 10px; top: 9px; color: var(--ink-3); pointer-events: none; }
+.qs input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 15px var(--font-sans); }
+.qs input::placeholder { color: var(--ink-3); }
+.qs-list { position: absolute; top: 42px; left: 0; right: 0; display: none; margin: 0; padding: 4px; list-style: none; max-height: 60vh; overflow: auto; background: var(--surface); border: 1px solid var(--rule-strong); border-radius: var(--r-m); box-shadow: var(--shadow-pop); }
+.qs-list.on { display: block; }
+.qs-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 8px 10px; border-radius: var(--r-s); cursor: pointer; }
+.qs-list li[aria-selected="true"], .qs-list li:hover { background: var(--tint-main); }
+.qs-list .cmd { font: 600 14px var(--font-mono); }
+.qs-list .one { font-size: 13px; color: var(--ink-2); }
+.qs-list .empty { display: block; color: var(--ink-3); cursor: default; }
+
+/* ===== shell ===== */
+.shell { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: var(--s7); max-width: 1360px; margin: 0 auto; padding: 0 var(--s5); }
+.toc { position: sticky; top: 72px; align-self: start; max-height: calc(100vh - 88px); overflow: auto; padding: var(--s5) 0; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc a { display: block; padding: 6px 10px; color: var(--ink-2); text-decoration: none; border-radius: var(--r-s); font-size: 14px; line-height: 1.45; }
+.toc a:hover { background: var(--sunken); color: var(--ink); }
+.toc a[aria-current="true"] { color: var(--ink); background: var(--tint-main); font-weight: 600; }
+.toc-mobile { display: none; margin: var(--s4) 0 0; border: 1px solid var(--rule); border-radius: var(--r-m); background: var(--surface); }
+.toc-mobile summary { padding: 10px 14px; cursor: pointer; font-weight: 600; }
+.toc-mobile ol { margin: 0; padding: 0 14px 12px 32px; }
+.toc-mobile a { display: block; padding: 4px 0; }
+main { min-width: 0; }
+.section { padding: var(--s8) 0; border-top: 1px solid var(--rule); scroll-margin-top: 60px; }
+.section.first { border-top: 0; padding-top: var(--s6); }
+h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.2; margin: 0 0 var(--s4); letter-spacing: -.01em; }
+h2 { font-size: clamp(23px, 2.6vw, 30px); line-height: 1.3; margin: 0 0 var(--s3); }
+h3 { font-size: 18px; line-height: 1.45; margin: 0 0 var(--s2); }
+h4 { font-size: 16px; line-height: 1.5; margin: 0 0 4px; }
+.lede { font-size: 18px; color: var(--ink-2); max-width: 40em; margin: 0 0 var(--s5); }
+.prose { max-width: 44em; }
+.sec-intro { color: var(--ink-2); max-width: 44em; margin-bottom: var(--s5); }
+
+/* ===== buttons, chips, tags ===== */
+.btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 500 14px var(--font-sans); text-decoration: none; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.btn:hover { border-color: var(--ink-3); background: var(--sunken); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+.btn.primary { background: var(--line-main); border-color: var(--line-main); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.sk { --dot: var(--line-free); display: inline; padding: 1px 6px; border: 1px solid transparent; border-radius: var(--r-s); background: var(--sunken); color: var(--ink); font: 500 .9em/1.7 var(--font-mono); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color .15s, color .15s; }
+.sk::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 50%; border: 2.5px solid var(--dot); background: var(--surface); vertical-align: -1px; }
+.sk:hover { border-color: var(--focus); color: var(--focus); }
+.chips .sk, .route-line .sk, .free-grid .sk, td .sk { display: inline-block; font-size: 14px; border-color: var(--rule-strong); background: var(--surface); }
+.chips .sk:hover, .route-line .sk:hover, .free-grid .sk:hover, td .sk:hover { border-color: var(--focus); }
+.chips .sk:active, .route-line .sk:active, .free-grid .sk:active { transform: translateY(1px); }
+[data-line="main"] { --dot: var(--line-main); }
+[data-line="way"] { --dot: var(--line-way); }
+[data-line="triage"] { --dot: var(--line-triage); }
+[data-line="bug"] { --dot: var(--line-bug); }
+[data-line="health"] { --dot: var(--line-health); }
+[data-line="vocab"] { --dot: var(--line-vocab); }
+[data-line="free"] { --dot: var(--line-free); }
+[data-line="off"] { --dot: var(--line-off); }
+.tag { display: inline-block; padding: 0 7px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); font-size: 12.5px; line-height: 1.8; color: var(--ink-2); white-space: nowrap; }
+.tag.solid { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.tag.warn { border-color: var(--line-triage); }
+
+/* ===== hero + map ===== */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: var(--s6); align-items: start; }
+.start { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); padding: var(--s5); }
+.start h2 { font-size: 18px; margin-bottom: var(--s4); }
+.start ol { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s5); }
+.start li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--s3); font-size: 15px; line-height: 1.75; }
+.start li::before { content: counter(s); width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 3px solid var(--line-main); color: var(--ink); font-weight: 700; font-size: 13px; }
+.start .note { margin: var(--s3) 0 0; font-size: 13px; color: var(--ink-3); }
+.map-frame { margin: var(--s5) 0 var(--s3); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); overflow-x: auto; overscroll-behavior-x: contain; }
+.map-frame svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.map-hint { display: none; font-size: 13px; color: var(--ink-3); margin: 0 0 var(--s2); }
+.ln { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ln-main { stroke: var(--line-main); stroke-width: 8; }
+.ln-main-alt { stroke: var(--line-main); stroke-width: 5; }
+.ln-detour { stroke: var(--line-main); stroke-width: 4; stroke-dasharray: 2 9; }
+.ln-way { stroke: var(--line-way); stroke-width: 7; }
+.ln-triage { stroke: var(--line-triage); stroke-width: 7; }
+.ln-bug { stroke: var(--line-bug); stroke-width: 7; }
+.ln-health { stroke: var(--line-health); stroke-width: 7; }
+.ln-vocab { stroke: var(--line-vocab); stroke-width: 5; stroke-dasharray: 1 10; }
+.ln-start { stroke: var(--line-free); stroke-width: 4; stroke-dasharray: 2 8; }
+.ln-shaft { stroke: var(--line-vocab); stroke-width: 3; stroke-dasharray: 1 7; }
+.st { cursor: pointer; }
+.st .mk { fill: var(--surface); stroke: var(--ink); stroke-width: 3.5; transition: stroke .15s, stroke-width .15s; }
+.st .mk.ix { stroke-width: 4.5; }
+.st text, .map-note { paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.t-cmd { font: 600 15px var(--font-mono); fill: var(--ink); }
+.t-cmd.sm { font-size: 14px; }
+.t-cap { font: 14px var(--font-sans); fill: var(--ink-2); }
+.map-note { font: 14px var(--font-sans); fill: var(--ink-3); }
+.map-note.b { font-weight: 600; fill: var(--ink-2); }
+.jn { fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
+.term { fill: var(--ink); }
+.st:hover .mk { stroke: var(--focus); stroke-width: 5; }
+.st:hover .t-cmd { fill: var(--focus); }
+.st:focus { outline: none; }
+.st:focus-visible .mk { stroke: var(--focus); stroke-width: 6; }
+.st:focus-visible .t-cmd { fill: var(--focus); text-decoration: underline; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin: 0 0 var(--s5); padding: 0; list-style: none; font-size: 14px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: var(--s2); }
+.sw { --dot: var(--line-free); width: 30px; height: 0; border-top: 6px solid var(--dot); border-radius: 3px; }
+.sw.dot { border-top-style: dotted; }
+.free-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s5); margin-top: var(--s4); }
+.free-grid h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin-bottom: var(--s2); }
+.free-grid ul { list-style: none; margin: 0; padding: 0; }
+.free-grid li { margin-bottom: var(--s2); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.free-grid li .sk { margin-bottom: 2px; }
+
+/* ===== tips ===== */
+.tipgroups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); }
+.tipgroup > h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin-bottom: var(--s2); }
+.tip { padding: var(--s4) 0; border-top: 1px solid var(--rule); }
+.tip p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.tip .src { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
+.tip blockquote { margin: 6px 0 0; font-size: 14px; color: var(--ink-3); }
+
+/* ===== router ===== */
+.router { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--s6); align-items: start; }
+.sit-group h3 { font-size: 14px; color: var(--ink-3); font-weight: 600; margin: var(--s4) 0 var(--s1); }
+.sit-group:first-child h3 { margin-top: 0; }
+.sit { display: block; width: 100%; min-height: 40px; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-s); background: none; color: var(--ink); font: 15px/1.5 var(--font-sans); text-align: left; cursor: pointer; transition: background-color .15s; }
+.sit:hover { background: var(--sunken); }
+.sit[aria-pressed="true"] { background: var(--tint-main); border-color: var(--rule-strong); font-weight: 600; }
+.route { position: sticky; top: 76px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-m); padding: var(--s5); }
+.route h3 { font-size: 20px; }
+.route-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) 0; margin: var(--s4) 0; padding: 0; list-style: none; }
+.route-line li { display: flex; align-items: center; }
+.route-line li + li::before { content: ""; width: 26px; height: 4px; margin: 0 4px; border-radius: 2px; background: var(--line-main); }
+.route .note { color: var(--ink-2); margin: 0; }
+.route .src { margin-top: var(--s3); font-size: 13px; color: var(--ink-3); }
+
+/* ===== catalog ===== */
+.cat-tools { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin: var(--s4) 0 var(--s2); }
+.cat-search { position: relative; flex: 1 1 260px; max-width: 360px; }
+.cat-search .ico { position: absolute; left: 10px; top: 11px; color: var(--ink-3); pointer-events: none; }
+.cat-search input { width: 100%; height: 40px; padding: 0 12px 0 36px; border: 1px solid var(--rule-strong); border-radius: var(--r-s); background: var(--surface); color: var(--ink); font: 15px var(--font-sans); }
+.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: var(--r-s); overflow: hidden; }
+.seg button { min-height: 38px; padding: 0 12px; border: 0; border-left: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink-2); font: 14px var(--font-sans); cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { background: var(--sunken); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.cat-count { font-size: 14px; color: var(--ink-3); }
+.cat-group { margin-top: var(--s6); }
+.cat-group h3 .n { color: var(--ink-3); font-weight: 500; font-size: 15px; margin-left: 6px; }
+.cat-group .gnote { margin: 0 0 var(--s2); font-size: 14px; color: var(--ink-3); }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s6); margin: 0; padding: 0; list-style: none; }
+.row { border-top: 1px solid var(--rule); }
+.row a { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: center; padding: 11px 6px; color: inherit; text-decoration: none; border-radius: var(--r-s); transition: background-color .15s; }
+.row a:hover { background: var(--sunken); }
+.row .dot { width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--dot); background: var(--surface); }
+.row .cmd { font: 600 15px var(--font-mono); overflow-wrap: anywhere; }
+.row .tags { display: flex; gap: 4px; }
+.row .one { grid-column: 2 / 4; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+.empty-state { padding: var(--s6) 0; color: var(--ink-2); }
+.empty-state p { margin-bottom: var(--s3); }
+
+/* ===== why ===== */
+.fails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); }
+.fail { padding-top: var(--s4); border-top: 3px solid var(--ink); }
+.fail p { color: var(--ink-2); font-size: 15px; }
+.fail blockquote { margin: var(--s2) 0 var(--s3); font-size: 14.5px; color: var(--ink-2); }
+.fail cite { display: block; font-style: normal; font-size: 13px; color: var(--ink-3); }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); margin-top: var(--s6); }
+.split .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s2); }
+
+/* ===== glossary ===== */
+.gloss { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s7); }
+.gloss h3 { font-size: 15px; color: var(--ink-3); font-weight: 600; margin: 0 0 var(--s1); }
+.gloss dl { margin: 0; }
+.gloss dt { font-weight: 650; margin-top: var(--s3); }
+.gloss dt .en { font: 500 13px var(--font-mono); color: var(--ink-3); margin-left: 6px; }
+.gloss dd { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
+
+/* ===== quotes, tables, timeline ===== */
+.quotes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s6); }
+.quotes li { border-top: 1px solid var(--rule); padding-top: var(--s3); }
+.quotes .en { margin: 0 0 6px; font-size: 15px; }
+.quotes .zh { margin: 0 0 6px; font-size: 14.5px; color: var(--ink-2); }
+.quotes .meta { margin: 0; font-size: 13px; color: var(--ink-3); }
+.table-wrap { overflow-x: auto; margin: var(--s4) 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+td .sk { white-space: normal; }
+.timeline { list-style: none; margin: var(--s5) 0 0 10px; padding: 0; border-left: 3px solid var(--rule-strong); max-width: 820px; }
+.timeline li { position: relative; padding: 0 0 var(--s5) var(--s5); }
+.timeline li::before { content: ""; position: absolute; left: -11.5px; top: 5px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 3.5px solid var(--line-main); }
+.timeline .when { font-weight: 600; color: var(--ink); }
+.timeline .when .ver { font-family: var(--font-mono); margin-left: 8px; }
+.timeline ul { margin: 4px 0 0; padding-left: 1.2em; color: var(--ink-2); font-size: 15px; }
+.env-list { max-width: 48em; padding-left: 1.2em; }
+.env-list li { margin-bottom: var(--s3); }
+.callout { max-width: 48em; padding: var(--s4) var(--s5); border: 1px solid var(--line-triage); border-radius: var(--r-m); background: var(--surface); margin: var(--s5) 0; }
+.callout h3 { font-size: 16px; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* ===== drawer ===== */
+.scrim { position: fixed; inset: 0; z-index: 60; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 70; width: min(620px, 100vw); display: flex; flex-direction: column; background: var(--surface); box-shadow: var(--shadow-pop); transform: translateX(100%); visibility: hidden; transition: transform .24s var(--ease-out), visibility 0s linear .24s; }
+.drawer.on { transform: none; visibility: visible; transition: transform .24s var(--ease-out), visibility 0s; }
+.d-bar { display: flex; align-items: center; gap: var(--s2); padding: 10px var(--s4); border-bottom: 1px solid var(--rule); }
+.d-head { padding: var(--s5) var(--s5) var(--s3); }
+.d-head h2 { font: 700 26px/1.3 var(--font-mono); margin: 0 0 var(--s2); overflow-wrap: anywhere; }
+.d-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.d-one { font-size: 17px; margin: var(--s3) 0 0; }
+.d-body { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 var(--s5) var(--s7); }
+.d-sec { margin-top: var(--s5); }
+.d-sec > h3 { font-size: 14.5px; color: var(--ink-3); font-weight: 600; margin: 0 0 var(--s2); }
+.d-sec ul, .d-sec ol { margin: 0; padding-left: 1.3em; }
+.d-sec li { margin: 5px 0; }
+.d-sec .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.d-note { padding: var(--s3) var(--s4); border: 1px solid var(--line-triage); border-radius: var(--r-m); font-size: 14.5px; }
+.d-quote { margin: 0; font-size: 15px; }
+.d-quote cite { display: block; margin-top: 4px; font-style: normal; font-size: 13px; color: var(--ink-3); }
+.d-terms dt { font-weight: 600; font-family: var(--font-mono); font-size: 14px; margin-top: var(--s2); }
+.d-terms dd { margin: 0; color: var(--ink-2); font-size: 15px; }
+.faq { border-top: 1px solid var(--rule); padding: 8px 0; }
+.faq summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.faq p { margin: 4px 0 0; color: var(--ink-2); font-size: 15px; }
+.flow { padding: var(--s3) 0; border-top: 1px solid var(--rule); }
+.flow h4 { margin-bottom: 2px; }
+.flow p { margin: 0 0 6px; font-size: 14.5px; color: var(--ink-2); }
+.d-src { font-size: 13px; color: var(--ink-3); }
+.d-src ul { padding-left: 1.2em; }
+.toast { position: fixed; left: 50%; bottom: 24px; z-index: 90; transform: translate(-50%, 16px); padding: 10px 16px; border-radius: var(--r-m); background: var(--ink); color: var(--paper); font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== responsive ===== */
+@media (max-width: 1180px) {
+  .tipgroups { grid-template-columns: 1fr; gap: var(--s4); }
+  .free-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  .shell { grid-template-columns: 1fr; gap: 0; }
+  .toc { display: none; }
+  .toc-mobile { display: block; }
+  .router { grid-template-columns: 1fr; }
+  .route { position: static; }
+}
+@media (max-width: 900px) {
+  .map-hint { display: block; }
+  .rows, .fails, .split, .gloss, .quotes, .start ol { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .topbar { padding: 0 var(--s3); gap: var(--s3); }
+  .brand { display: none; }
+  .shell { padding: 0 var(--s4); }
+  .section { padding: var(--s7) 0; }
+  .free-grid { grid-template-columns: 1fr; }
+  .d-head, .d-body { padding-left: var(--s4); padding-right: var(--s4); }
+  .row .tags { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+@media print {
+  .topbar, .toc, .toc-mobile, .drawer, .scrim, .toast { display: none !important; }
+  .shell { display: block; }
+}
+
+/* ===== claude-api 页追加 ===== */
+:root {
+  --line-gen: var(--line-main);
+  --line-qual: var(--line-health);
+  --line-cost: var(--line-triage);
+  --line-managed: var(--line-way);
+  --line-auto: var(--line-vocab);
+  --tint-cost: oklch(97% 0.03 75);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --tint-cost: oklch(27% 0.035 65); }
+}
+[data-line="gen"] { --dot: var(--line-gen); }
+[data-line="qual"] { --dot: var(--line-qual); }
+[data-line="cost"] { --dot: var(--line-cost); }
+[data-line="managed"] { --dot: var(--line-managed); }
+[data-line="auto"] { --dot: var(--line-auto); }
+
+.back { flex: none; display: inline-flex; align-items: center; min-height: 40px; color: var(--ink-2); font-size: 14px; text-decoration: none; white-space: nowrap; }
+.back:hover { color: var(--ink); text-decoration: underline; }
+
+.ln-gen { stroke: var(--line-gen); stroke-width: 8; }
+.ln-qual { stroke: var(--line-qual); stroke-width: 7; }
+.ln-cost { stroke: var(--line-cost); stroke-width: 7; }
+.ln-cost-if { stroke: var(--line-cost); stroke-width: 4; stroke-dasharray: 2 9; }
+.ln-managed { stroke: var(--line-managed); stroke-width: 7; }
+.ln-xfer { stroke: var(--line-free); stroke-width: 4; stroke-dasharray: 2 8; }
+.ln-auto { stroke: var(--line-auto); stroke-width: 5; stroke-dasharray: 1 10; }
+.st .mk.sm { stroke-width: 3; }
+.legend .ring { width: 16px; height: 16px; border-radius: 50%; border: 4px solid var(--ink); background: var(--surface); }
+
+.cat-note { margin: 0 0 var(--s2); font-size: 14px; color: var(--ink-3); max-width: 44em; }
+.tag.cost { border-color: var(--line-cost); }
+
+.d-auto { margin: var(--s3) 0 0; font-size: 13.5px; color: var(--ink-3); }
+.usage { list-style: none; margin: 0; padding: 0 !important; }
+.usage li { margin: 0; padding: var(--s2) 0; border-top: 1px solid var(--rule); }
+.usage li:first-child { border-top: 0; padding-top: 0; }
+.usage code { display: inline-block; font-size: 14px; white-space: normal; overflow-wrap: anywhere; }
+.usage p { margin: 2px 0 0; font-size: 14.5px; color: var(--ink-2); }
+.d-cost { padding: var(--s3) var(--s4); border: 1px solid var(--line-cost); border-radius: var(--r-m); background: var(--tint-cost); }
+.d-cost p { margin: 0 0 var(--s2); }
+.d-cost h4 { font-size: 14.5px; margin: var(--s2) 0 2px; }
+.d-sec.cost > h3 { color: var(--ink); }
+.d-models dt { font-weight: 600; margin-top: var(--s2); }
+.d-models dd { margin: 0; color: var(--ink-2); font-size: 15px; }
+.pairs { list-style: none; padding: 0 !important; }
+.pairs li { margin: 6px 0; color: var(--ink-2); font-size: 15px; }
+.pairs .sk { margin-right: 6px; }
+
+.auto-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4) var(--s6); }
+.auto-grid h3 { margin-top: var(--s2); }
+.auto-grid ul { margin: 0; padding-left: 1.2em; }
+.auto-grid li { margin-bottom: var(--s2); color: var(--ink-2); font-size: 15px; }
+.auto-grid li strong { color: var(--ink); }
+.sub { margin-top: var(--s6); }
+.stack td:first-child { font-weight: 600; }
+.tname { font: 600 14px var(--font-mono); white-space: nowrap; }
+.links { columns: 2; column-gap: var(--s6); max-width: 60em; padding-left: 1.2em; }
+.links li { break-inside: avoid; margin-bottom: var(--s2); }
+.filelist { max-width: 52em; padding-left: 1.2em; }
+.filelist li { margin-bottom: var(--s2); }
+.filelist code { overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .auto-grid { grid-template-columns: 1fr; }
+  .links { columns: 1; }
+}
+@media (max-width: 640px) {
+  table.stack, .stack tbody, .stack tr, .stack td { display: block; width: 100%; }
+  .stack thead { display: none; }
+  .stack tr { padding: var(--s2) 0; border-bottom: 1px solid var(--rule); }
+  .stack td { padding: 2px 0; border: 0; }
+  .stack td[data-label]::before { content: attr(data-label) "："; color: var(--ink-3); font-size: 13px; }
+  .tname { white-space: normal; overflow-wrap: anywhere; }
+  .stack td.na { display: none; }
+  .qs-list { position: fixed; top: 52px; left: var(--s3); right: var(--s3); }
+  .qs-list li { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="topbar">
+  <a class="back" href="../tools/">← 干饭CEO 工具库</a>
+  <a class="brand" href="#top">claude-api Skill 线路图</a>
+  <div class="qs" role="search">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <label class="vh" for="qs-input">搜索子命令</label>
+    <input id="qs-input" type="search" placeholder="搜子命令：migrate、省钱、评测（按 / 键）" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="qs-list" aria-autocomplete="list">
+    <ul class="qs-list" id="qs-list" role="listbox" aria-label="搜索结果"></ul>
+  </div>
+</header>
+<div class="shell">
+  <nav class="toc" aria-label="目录">
+    <ol id="toc-list">
+      <li><a href="#top">线路图</a></li>
+      <li><a href="#tips">用出效果的 8 条</a></li>
+      <li><a href="#router">我现在要……</a></li>
+      <li><a href="#catalog">8 站索引</a></li>
+      <li><a href="#auto">不敲子命令时</a></li>
+      <li><a href="#templates">托管 Agent 的 13 个模板</a></li>
+      <li><a href="#why">为什么这样设计</a></li>
+      <li><a href="#terms">概念词典</a></li>
+      <li><a href="#sources">官方入口和来源</a></li>
+    </ol>
+  </nav>
+  <main id="main">
+    <details class="toc-mobile">
+      <summary>目录</summary>
+      <ol>
+        <li><a href="#top">线路图</a></li>
+        <li><a href="#tips">用出效果的 8 条</a></li>
+        <li><a href="#router">我现在要……</a></li>
+        <li><a href="#catalog">8 站索引</a></li>
+        <li><a href="#auto">不敲子命令时</a></li>
+        <li><a href="#templates">托管 Agent 的 13 个模板</a></li>
+        <li><a href="#why">为什么这样设计</a></li>
+        <li><a href="#terms">概念词典</a></li>
+        <li><a href="#sources">官方入口和来源</a></li>
+      </ol>
+    </details>
+
+    <section class="section first" id="top" aria-labelledby="h-top">
+      <h1 id="h-top">Claude Code 的 claude-api Skill：8 个子命令怎么用出效果</h1>
+      <p class="lede">Claude Code 自带这个 Skill，不用安装。你写调用 Claude API 的代码，或者问模型、价格、上限、缓存，它会自动加载，当参考资料用；你敲 <code>/claude-api</code> 加一个子命令，它就照一条写死的流程做事。下面把 8 个子命令排成四条线，点任意一站，看它怎么敲、按什么步骤做、在哪停下来等你点头。</p>
+      <p class="muted small">整理自 Claude Code 2.1.296 内置的 claude-api Skill（Anthropic）和 Anthropic 官方文档，2026-10-10 快照，以官方文档为准。</p>
+      <div class="start" aria-labelledby="h-start">
+        <h2 id="h-start">现在就能做的 3 步</h2>
+        <ol>
+          <li><span>要换新模型：敲 <a class="sk" href="#skill/migrate">migrate</a>，同一句里点名文件和目标模型，比如 <code>/claude-api migrate src/llm/ 迁到 claude-opus-5-5</code>。只说「我的项目」，它会先停下来问范围。</span></li>
+          <li><span>改提示词之前，先敲 <a class="sk" href="#skill/build-eval">build-eval</a> 建一把尺子：题集、打分法和 baseline 分数。再用 <a class="sk" href="#skill/hillclimb">hillclimb</a> 一轮改一处往上爬；没有尺子，它会先把你转去 build-eval。</span></li>
+          <li><span>账单太高：敲 <a class="sk" href="#skill/cost-optimize">cost-optimize</a>。它先拿不碰质量的省钱项（缓存、输入瘦身、batch），调 effort、换模型这类拿质量换钱的排在最后，要你明确点头。</span></li>
+        </ol>
+        <p class="note">站名就是子命令，前面都加 /claude-api。每一站在哪停下等你，见抽屉里的「花钱和确认点」。</p>
+      </div>
+
+      <p class="map-hint">图比屏幕宽，左右滑动看全图。</p>
+      <div class="map-frame">
+        <svg viewBox="0 0 1200 640" role="group" aria-labelledby="map-title">
+          <title id="map-title">claude-api 子命令线路图：换代线、提质线、省钱线、托管线，地下一层是不敲子命令时的自动参考</title>
+          <!-- 线 -->
+          <path class="ln ln-auto" d="M60 600 H1140"/>
+          <path class="ln ln-xfer" d="M400 200 V360"/>
+          <path class="ln ln-cost-if" d="M630 200 V360"/>
+          <path class="ln ln-cost" d="M330 80 H560 C606 80 630 116 630 166 V200"/>
+          <path class="ln ln-gen" d="M60 200 H1110"/>
+          <path class="ln ln-qual" d="M250 360 H800"/>
+          <path class="ln ln-managed" d="M330 480 H980"/>
+          <path class="ln ln-managed" d="M700 480 C760 480 770 420 830 420 H980"/>
+          <path class="ln ln-managed" d="M700 480 C760 480 770 540 830 540 H980"/>
+
+          <!-- 起讫和说明 -->
+          <text class="map-note" x="40" y="40">站名都是 /claude-api 后面的子命令</text>
+          <rect class="term" x="55" y="186" width="10" height="28" rx="3"/>
+          <text class="map-note" x="40" y="174">SDK 或模型要换代</text>
+          <rect class="term" x="1105" y="186" width="10" height="28" rx="3"/>
+          <text class="map-note" x="1110" y="174" text-anchor="middle">历史只追加，不改写</text>
+          <rect class="term" x="325" y="66" width="10" height="28" rx="3"/>
+          <text class="map-note" x="314" y="85" text-anchor="end">账单太高</text>
+          <rect class="term" x="245" y="346" width="10" height="28" rx="3"/>
+          <text class="map-note" x="234" y="365" text-anchor="end">改提示词之前</text>
+          <rect class="term" x="795" y="346" width="10" height="28" rx="3"/>
+          <text class="map-note b" x="816" y="365">只认 test 上的涨幅</text>
+          <rect class="term" x="325" y="466" width="10" height="28" rx="3"/>
+          <text class="map-note" x="314" y="485" text-anchor="end">要 Anthropic 替你跑 agent</text>
+          <text class="map-note" x="414" y="285">换完行为变了：先建 eval</text>
+          <text class="map-note" x="644" y="285">有评测后，接着爬</text>
+          <text class="map-note b" x="60" y="584">地下层：不敲子命令时，自动当参考</text>
+
+          <!-- 换代线 -->
+          <a class="st" href="#skill/upgrade" aria-label="upgrade：Python SDK 从 0.x 升到 1.x">
+            <circle class="mk" cx="170" cy="200" r="10"/>
+            <text class="t-cmd" x="170" y="238" text-anchor="middle">upgrade</text>
+            <text class="t-cap" x="170" y="257" text-anchor="middle">Python SDK 0.x → 1.x</text>
+          </a>
+          <a class="st" href="#skill/migrate" aria-label="migrate：换模型，改 ID 和会 400 的参数">
+            <circle class="mk ix" cx="400" cy="200" r="13"/>
+            <text class="t-cap" x="400" y="143" text-anchor="middle">换模型：改 ID 和会 400 的参数</text>
+            <text class="t-cmd" x="400" y="162" text-anchor="middle">migrate</text>
+          </a>
+          <a class="st" href="#skill/prompt-audit" aria-label="prompt-audit：换乘站，审为旧模型写的提示词">
+            <circle class="mk ix" cx="630" cy="200" r="13"/>
+            <text class="t-cap" x="648" y="163">审为旧模型写的提示词</text>
+            <text class="t-cmd" x="648" y="182">prompt-audit</text>
+          </a>
+          <a class="st" href="#skill/preserved-thinking-migration" aria-label="preserved-thinking-migration：历史被改，旧 thinking 对不上">
+            <circle class="mk" cx="900" cy="200" r="10"/>
+            <text class="t-cmd sm" x="900" y="238" text-anchor="middle">preserved-thinking-migration</text>
+            <text class="t-cap" x="900" y="257" text-anchor="middle">历史被改，旧 thinking 对不上</text>
+          </a>
+
+          <!-- 省钱线、提质线 -->
+          <a class="st" href="#skill/cost-optimize" aria-label="cost-optimize：先免费，后取舍">
+            <circle class="mk" cx="470" cy="80" r="10"/>
+            <text class="t-cap" x="470" y="40" text-anchor="middle">先免费，后取舍</text>
+            <text class="t-cmd" x="470" y="59" text-anchor="middle">cost-optimize</text>
+          </a>
+          <a class="st" href="#skill/build-eval" aria-label="build-eval：建尺子，题集加打分法">
+            <circle class="mk ix" cx="400" cy="360" r="12"/>
+            <text class="t-cmd" x="400" y="398" text-anchor="middle">build-eval</text>
+            <text class="t-cap" x="400" y="417" text-anchor="middle">建尺子：题集＋打分法</text>
+          </a>
+          <a class="st" href="#skill/hillclimb" aria-label="hillclimb：换乘站，读失败、改一处、重跑">
+            <circle class="mk ix" cx="630" cy="360" r="13"/>
+            <text class="t-cmd" x="630" y="398" text-anchor="middle">hillclimb</text>
+            <text class="t-cap" x="630" y="417" text-anchor="middle">读失败、改一处、重跑</text>
+          </a>
+
+          <!-- 托管线 -->
+          <a class="st" href="#skill/managed-agents-onboard" aria-label="managed-agents-onboard：面试式搭一个托管 agent">
+            <circle class="mk ix" cx="520" cy="480" r="12"/>
+            <text class="t-cmd" x="520" y="518" text-anchor="middle">managed-agents-onboard</text>
+            <text class="t-cap" x="520" y="537" text-anchor="middle">面试式搭一个托管 agent</text>
+          </a>
+          <a class="st" href="#skill/managed-agents-onboard" aria-label="出口一：不带参数，从空白面试开始">
+            <circle class="mk sm" cx="980" cy="420" r="7"/>
+            <text class="t-cap" x="996" y="425">不带参数：空白面试</text>
+          </a>
+          <a class="st" href="#templates" aria-label="出口二：带模板名，13 个模板见下文表格">
+            <circle class="mk sm" cx="980" cy="480" r="7"/>
+            <text class="t-cap" x="996" y="485">带模板名：13 个模板</text>
+          </a>
+          <a class="st" href="#skill/managed-agents-onboard" aria-label="出口三：带网址，照官方示例搭">
+            <circle class="mk sm" cx="980" cy="540" r="7"/>
+            <text class="t-cap" x="996" y="545">带网址：照官方示例搭</text>
+          </a>
+
+          <!-- 地下层 -->
+          <a class="st" href="#auto" aria-label="地下层：只用官方 SDK">
+            <circle class="mk sm" cx="420" cy="600" r="7"/>
+            <text class="t-cap" x="420" y="630" text-anchor="middle">只用官方 SDK</text>
+          </a>
+          <a class="st" href="#auto" aria-label="地下层：不猜 SDK 用法">
+            <circle class="mk sm" cx="700" cy="600" r="7"/>
+            <text class="t-cap" x="700" y="630" text-anchor="middle">不猜 SDK 用法</text>
+          </a>
+          <a class="st" href="#auto" aria-label="地下层：默认模型 claude-opus-5-5">
+            <circle class="mk sm" cx="980" cy="600" r="7"/>
+            <text class="t-cap" x="980" y="630" text-anchor="middle">默认 claude-opus-5-5</text>
+          </a>
+        </svg>
+      </div>
+      <ul class="legend" aria-label="图例">
+        <li><span class="sw" data-line="gen"></span>换代线：换 SDK、换模型、修历史</li>
+        <li><span class="sw" data-line="qual"></span>提质线：先建尺子，再提分</li>
+        <li><span class="sw" data-line="cost"></span>省钱线：不掉质量地降本</li>
+        <li><span class="sw" data-line="managed"></span>托管线：搭一个托管 agent</li>
+        <li><span class="sw dot" data-line="auto"></span>地下层：不敲子命令时自动当参考</li>
+        <li><span class="sw dot" data-line="free"></span>虚线：有条件才走的换乘</li>
+        <li><span class="ring" aria-hidden="true"></span>粗圈：换乘站</li>
+      </ul>
+    </section>
+
+    <section class="section" id="tips" aria-labelledby="h-tips">
+      <h2 id="h-tips">用出效果的 8 条</h2>
+      <p class="sec-intro">从各子命令指南里的规矩和坑提炼。每条下面注明出自哪个子命令。</p>
+      <div class="tipgroups">
+        <div class="tipgroup">
+          <h3>动手前：定范围、备尺子</h3>
+          <div class="tip">
+            <h4>范围要点名</h4>
+            <p>在命令里点名文件或目录。只说「我的项目」「整个代码库」，<a class="sk" href="#skill/migrate">migrate</a> 算范围不明，先问清楚才动手；<a class="sk" href="#skill/upgrade">upgrade</a> 不带路径也一样。</p>
+            <p class="src">出处：migrate、upgrade</p>
+          </div>
+          <div class="tip">
+            <h4>先有尺子，再优化</h4>
+            <p>没有评测，分不清是省了钱还是变差了。<a class="sk" href="#skill/hillclimb">hillclimb</a> 没有 eval 不开爬，先转 <a class="sk" href="#skill/build-eval">build-eval</a>；<a class="sk" href="#skill/cost-optimize">cost-optimize</a> 没有评测时，拿质量换钱的项只停在提案。</p>
+            <p class="src">出处：hillclimb、cost-optimize</p>
+          </div>
+          <div class="tip">
+            <h4>价格现查，不凭记忆</h4>
+            <p>报价之前，<a class="sk" href="#skill/cost-optimize">cost-optimize</a> 现抓官方 Pricing 页并记下抓取时间；<a class="sk" href="#skill/preserved-thinking-migration">preserved-thinking-migration</a> 估测量预算也按当前价算。</p>
+            <blockquote>“Remembered rates or figures, for any model, are not a source.”</blockquote>
+            <p class="src">出处：cost-optimize、preserved-thinking-migration</p>
+          </div>
+        </div>
+        <div class="tipgroup">
+          <h3>动手时：花钱先问，一次改一处</h3>
+          <div class="tip">
+            <h4>花钱的步骤先报规模，等你点头</h4>
+            <p>真调模型就是真花钱。跑基线、做验证、回放切片之前，它先报要跑多少（<a class="sk" href="#skill/build-eval">build-eval</a> 的说法是几题 × 几次 × 哪个模型），等你说 yes，或者一次批一个测量预算。</p>
+            <p class="src">出处：build-eval、cost-optimize、preserved-thinking-migration</p>
+          </div>
+          <div class="tip">
+            <h4>一个改动一个 diff，改一个测一个</h4>
+            <p><a class="sk" href="#skill/cost-optimize">cost-optimize</a> 每个省钱杠杆单独一个 diff，掉准确率就回退；<a class="sk" href="#skill/preserved-thinking-migration">preserved-thinking-migration</a> 每个原因一个 diff，先修丢得最多的；<a class="sk" href="#skill/hillclimb">hillclimb</a> 一轮只验证一个假设。</p>
+            <p class="src">出处：cost-optimize、preserved-thinking-migration、hillclimb</p>
+          </div>
+          <div class="tip">
+            <h4>迁移连提示词一起审</h4>
+            <p>换模型不只是换 ID。<a class="sk" href="#skill/migrate">migrate</a> 改完代码，还要按 <a class="sk" href="#skill/prompt-audit">prompt-audit</a> 审一遍范围内的提示词、工具描述和请求代码。</p>
+            <blockquote>“prompting written for the source model is part of every migration”</blockquote>
+            <p class="src">出处：migrate（SKILL.md）</p>
+          </div>
+        </div>
+        <div class="tipgroup">
+          <h3>看结果：别骗自己</h3>
+          <div class="tip">
+            <h4>只认 test 上的涨幅</h4>
+            <p><a class="sk" href="#skill/hillclimb">hillclimb</a> 把题切成 train 和 test，提改动的子 agent 只读 train。train 涨、test 不动就是过拟合；涨幅落在噪声里，它会直说不建议合并。</p>
+            <p class="src">出处：hillclimb</p>
+          </div>
+          <div class="tip">
+            <h4>「不用改」也是结论</h4>
+            <p>审完说不用改，不算白跑。<a class="sk" href="#skill/cost-optimize">cost-optimize</a> 和 <a class="sk" href="#skill/preserved-thinking-migration">preserved-thinking-migration</a> 都把 “no changes recommended” 列为合法结论，小账单上省钱清单为空也算成功；<a class="sk" href="#skill/prompt-audit">prompt-audit</a> 没问题就报一句「干净」，不凑 diff。</p>
+            <p class="src">出处：cost-optimize、preserved-thinking-migration、prompt-audit</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="router" aria-labelledby="h-router">
+      <h2 id="h-router">我现在要……</h2>
+      <p class="sec-intro">挑一个最像你眼下情况的，右边给出该敲的子命令和先后顺序。点站名看详解。</p>
+      <div class="router">
+        <div id="sit-list"></div>
+        <div class="route" id="route" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="catalog" aria-labelledby="h-catalog">
+      <h2 id="h-catalog">8 站索引</h2>
+      <p class="sec-intro">8 个子命令全是你敲的：<code>/claude-api</code> 加子命令名，有的后面还能接范围或参数（见各站的「怎么敲」）。不敲的时候，整个 claude-api Skill 也会在你写 Claude API 代码时自动加载，见「<a href="#auto">不敲子命令时</a>」。点任意一行看详解。</p>
+      <div id="cat-groups"></div>
+    </section>
+
+    <section class="section" id="auto" aria-labelledby="h-auto">
+      <h2 id="h-auto">不敲子命令时</h2>
+      <p class="sec-intro">claude-api 平时是一份参考资料：碰到下面这些情况，Claude Code 自动加载它，照里面的规矩写代码、答问题。这一层你不用敲任何命令。</p>
+      <div class="auto-grid">
+        <div>
+          <h3>什么时候自动加载</h3>
+          <ul>
+            <li>提示里以任何形式出现 Claude 或 Anthropic：Claude、Anthropic、Fable、Opus、Sonnet、Haiku、<code>anthropic</code>、<code>@anthropic-ai</code>、<code>claude-*</code> 等。</li>
+            <li>问到大模型的价格、选型、上限、缓存。原文要求 “never answer from memory”。</li>
+            <li>任务本身是大模型的活、但没说用哪家：agent、MCP、工具定义、多 agent、RAG、LLM 评审、computer use；对自然语言做生成、总结、抽取、分类、改写、对话；排查拒答、截断、流式、工具调用、token。</li>
+            <li><strong>跳过：</strong>明确在用别家（OpenAI、GPT、Gemini、Llama、Mistral、Cohere、Ollama），或者项目里 grep 到这些 SDK。</li>
+            <li>开工前先扫目标文件；有别家 SDK 的痕迹就停下来问你要不要换成 Claude，不往别家的文件里塞 Anthropic 代码。</li>
+          </ul>
+        </div>
+        <div>
+          <h3>它坚持的规矩</h3>
+          <ul>
+            <li><strong>只用官方 SDK。</strong>只有你要 cURL/REST、项目本身是 shell 或 cURL、或者这门语言没有官方 SDK 时，才写裸 HTTP；两种不混用，也不退回 OpenAI 兼容层。</li>
+            <li><strong>不猜 SDK 用法</strong>（“Never guess SDK usage.”）。函数名、类名、参数必须来自 Skill 自带的文档或官方 SDK 仓库；网络不通时先照文档写出来，让编译器报错再改，不反复重试。</li>
+            <li><strong>默认值：</strong>模型用 <code>claude-opus-5-5</code>；稍复杂就开 adaptive thinking；长输入、长输出用流式。</li>
+            <li><strong>训练记忆可能过期。</strong>Skill 里有一张对照表：extended thinking 的 budget_tokens 在新模型上改成 adaptive（多数新模型直接 400）；web search 和 web fetch 有新版本号；PHP 参数名改成 camelCase；Managed Agents 的凭据改用 vault；Files API、Skills 已经出了 beta。</li>
+            <li><strong>支持的语言：</strong>Python、TypeScript/JS、Java（含 Kotlin、Scala）、Go、Ruby、C#、PHP、cURL。先从项目文件判断用哪种，判断不了就问你。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sub">
+        <h3>选哪种做法：先从简单的开始</h3>
+        <p class="prose">原则是 “Start simple.”：单次调用（分类、摘要、抽取、问答）用 Claude API；多步但流程由你的代码控制，用 API 加工具；需要模型自己探索，才做 agent。要不要做 agent 先过四关：复杂度、价值、可行性、出错代价，任何一关答「否」就退回更简单的做法。</p>
+        <div class="table-wrap">
+          <table class="stack">
+            <thead><tr><th scope="col">做 agent 的四条路</th><th scope="col">怎么回事</th><th scope="col">这个 Skill 生成代码吗</th></tr></thead>
+            <tbody>
+              <tr><td>手写循环</td><td data-label="怎么回事">自己写 <code>while stop_reason == "tool_use"</code> 的循环</td><td data-label="生成代码">生成</td></tr>
+              <tr><td>Tool Runner</td><td data-label="怎么回事">SDK 帮你跑循环，只跑你定义的工具</td><td data-label="生成代码">生成</td></tr>
+              <tr><td>Managed Agents</td><td data-label="怎么回事">Anthropic 跑循环，每个会话托管一个沙箱，按 API 计费</td><td data-label="生成代码">生成；从零搭一个用 <a class="sk" href="#skill/managed-agents-onboard">managed-agents-onboard</a></td></tr>
+              <tr><td>Claude Agent SDK</td><td data-label="怎么回事">把 Claude Code 打包成库，自带读写文件、bash 等工具，你自己部署</td><td data-label="生成代码">不生成</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted small">出处：SKILL.md 的触发条件、默认规矩、API Drift 对照表和选型一节。</p>
+      </div>
+    </section>
+
+    <section class="section" id="templates" aria-labelledby="h-templates">
+      <h2 id="h-templates">托管 Agent 的 13 个模板</h2>
+      <p class="sec-intro">Console 里有 13 个现成模板。敲 <code>/claude-api managed-agents-onboard 模板名</code>，它照 Console 的顺序（agent、environment、vault、测试会话、定时、集成）问你几道选项题，用 agents/ 下的文件加 ant 命令做出同一个 agent。模板名写文件名主干或 console_key 都认，大小写、空格和下划线会规整成连字符。</p>
+      <div class="callout">
+        <h3>测试会话默认最多花 $5</h3>
+        <p>模板用法的测试会话默认上限是 $5.00（配置里 <code>max_list_cost</code> 写的是 "500"，单位是美分，“as in the Console”）；模板自带的定时部署，每次运行也最多 $5.00。按 API 计费，预算按公开标价累计，到顶是暂停（<code>budget_reached</code>），不是终止。不带参数和带网址这两种用法，指南没给默认上限。</p>
+      </div>
+      <div class="table-wrap">
+        <table class="stack">
+          <thead><tr><th scope="col">模板名</th><th scope="col">做什么</th><th scope="col">要接的服务</th><th scope="col">动态工作流</th></tr></thead>
+          <tbody>
+            <tr><td class="tname">deep-researcher</td><td data-label="做什么">多步骤网络调研，综合多个来源并附引用；自带 outcome</td><td class="na" data-label="要接的服务">—</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">structured-extractor</td><td data-label="做什么">把非结构化文本解析成带类型的 JSON schema</td><td class="na" data-label="要接的服务">—</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">field-monitor</td><td data-label="做什么">扫描软件类博客上某个主题的动态，写每周「有什么变化」简报；每周一定时跑</td><td data-label="要接的服务">Notion MCP</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">support-agent</td><td data-label="做什么">依据你的文档和知识库回答客户问题，必要时升级</td><td data-label="要接的服务">Notion、Slack MCP</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">incident-commander</td><td data-label="做什么">分诊 Sentry 告警、开 Linear 事故单、主持 Slack 作战室</td><td data-label="要接的服务">4 个 MCP：Sentry、Linear、Slack、GitHub</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">contract-tracker</td><td data-label="做什么">从给定的 Box 文件里提取条款、设到期提醒、在 Asana 跟踪义务</td><td data-label="要接的服务">Box、Asana</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">sprint-retro-facilitator</td><td data-label="做什么">从 Linear 拉已结束的迭代、归纳主题、会前写好复盘文档；每月 1 日、15 日定时跑</td><td data-label="要接的服务">Linear；用 docx skill</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">support-to-eng-escalator</td><td data-label="做什么">读 Intercom 对话、复现 bug、提交带复现步骤的 Jira 工单</td><td data-label="要接的服务">Intercom、Jira</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">data-analyst</td><td data-label="做什么">加载、探索、可视化数据，生成报告</td><td data-label="要接的服务">Amplitude MCP</td><td class="na" data-label="动态工作流">—</td></tr>
+            <tr><td class="tname">bug-hunter</td><td data-label="做什么">并行读代码库，每部分复查，只报另一个 agent 证实过的 bug；网络只放行 github.com 和 codeload.github.com</td><td class="na" data-label="要接的服务">—</td><td data-label="动态工作流">是</td></tr>
+            <tr><td class="tname">performance-tuner</td><td data-label="做什么">每个慢函数配一个优化器，再让第二个 agent 试着弄坏并超越每个结果</td><td class="na" data-label="要接的服务">—</td><td data-label="动态工作流">是</td></tr>
+            <tr><td class="tname">explainer-video-maker</td><td data-label="做什么">把主题和素材做成带字幕、配乐的短视频，每个场景一个 agent</td><td class="na" data-label="要接的服务">—</td><td data-label="动态工作流">是</td></tr>
+            <tr><td class="tname">watchlist-scanner</td><td data-label="做什么">扫描股票自选列表自上次收盘以来的变化，第二个 agent 复核每只股票；网络不受限（unrestricted）</td><td class="na" data-label="要接的服务">—</td><td data-label="动态工作流">是</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">「—」表示模板说明里没写，手机上省略不列。写了 MCP 的照模板说明；Box、Asana、Intercom、Jira 这几项是从「做什么」里看出要接的服务，说明里没写接法。</p>
+
+      <div class="sub">
+        <h3>「动态工作流」是什么</h3>
+        <p class="prose">Managed Agents 的多 agent 类型（<code>multiagent_20261001</code>）可以同时开三样：subagents，主 agent 只往下委派一层，同时最多 25 个子线程；dynamic workflows，主 agent 写一段程序，服务器在后台按阶段跑很多 agent，一次 run 同时约 64 个线程、总计约 1000 个，默认寿命 24 小时；advisor，中途请更强的模型给意见。每个 agent 都花 token，要设会话预算。它和 Claude Code 自带的 Workflow 工具是两回事，文档原话 “not Claude Code's own dynamic workflows (its Workflow tool)”。</p>
+        <p class="muted small">出处：managed-agents-onboarding-from-quickstart.md；shared/managed-agents-quickstarts/*.md 的 frontmatter；SKILL.md 的多 agent 一节。</p>
+      </div>
+    </section>
+
+    <section class="section" id="why" aria-labelledby="h-why">
+      <h2 id="h-why">为什么这样设计</h2>
+      <p class="sec-intro">各子命令的指南有几条共同的写法：照做、先问、敢说不用改。下面六条是它们的骨架，每条注明出自哪几个子命令。</p>
+      <div class="fails">
+        <div class="fail">
+          <h3>子命令是照做的流程，不是摘要</h3>
+          <p>敲子命令时，Claude 按 SKILL.md 里对应那一行的 Action 直接照做，不是读完指南给你一段总结。每个子命令的终点都是实物：改好的代码、报告、diff、评测脚本。</p>
+          <blockquote>“Do not summarize the guide - execute it.”<cite>SKILL.md，migrate 一行</cite></blockquote>
+          <p><a class="sk" href="#skill/migrate">migrate</a></p>
+        </div>
+        <div class="fail">
+          <h3>两条常设规则：花钱先批，缺信息一起补</h3>
+          <p>cost-optimize 和 preserved-thinking-migration 写着同样两条：真跑模型就花真钱，先征得你同意；缺上下文就和你一起补，不指望一次做完。build-eval 第一次付费前报规模等你说 yes；hillclimb 开爬前先拿计划批准，预算和停止条件都写在计划里。</p>
+          <p><a class="sk" href="#skill/cost-optimize">cost-optimize</a> <a class="sk" href="#skill/preserved-thinking-migration">preserved-thinking-migration</a> <a class="sk" href="#skill/build-eval">build-eval</a> <a class="sk" href="#skill/hillclimb">hillclimb</a></p>
+        </div>
+        <div class="fail">
+          <h3>「不改」是合法结论</h3>
+          <p>省钱、修历史、审提示词，都允许空手而归：没找到值得改的就照实说。小账单上省钱清单为空也算成功；审出没问题就报「干净」，不为了交差凑一个 diff。</p>
+          <blockquote>“no changes recommended”<cite>cost-optimize、preserved-thinking-migration 的 Action 列</cite></blockquote>
+          <p><a class="sk" href="#skill/cost-optimize">cost-optimize</a> <a class="sk" href="#skill/preserved-thinking-migration">preserved-thinking-migration</a> <a class="sk" href="#skill/prompt-audit">prompt-audit</a></p>
+        </div>
+        <div class="fail">
+          <h3>范围先确认</h3>
+          <p>动文件之前先确认改哪些。migrate 只认点名的文件、目录或清单，大仓库先按目录统计旧模型 ID 给你挑；upgrade 末尾不带路径，也先问你。</p>
+          <blockquote>“Before any Write, Edit, or MultiEdit call, confirm the scope”<cite>shared/model-migration.md，Step 0</cite></blockquote>
+          <p><a class="sk" href="#skill/migrate">migrate</a> <a class="sk" href="#skill/upgrade">upgrade</a></p>
+        </div>
+        <div class="fail">
+          <h3>被审的文件只是数据</h3>
+          <p>prompt-audit 读的是别人写给模型的指令，里面的话它不照做，只当材料审。评测报告也只走专用生成器，不让模型现写 HTML，因为用例文本来自工单和日志，不可信。</p>
+          <p><a class="sk" href="#skill/prompt-audit">prompt-audit</a> <a class="sk" href="#skill/build-eval">build-eval</a> <a class="sk" href="#skill/hillclimb">hillclimb</a></p>
+        </div>
+        <div class="fail">
+          <h3>签字门本身就是产品</h3>
+          <p>build-eval 的题集和打分法，必须你亲自看过、明确说 yes。它把约 5 个已打分的样例做成 report.html 给你看，问你会不会打不同的分；有一条会，就回去重做。</p>
+          <blockquote>“The sign-offs are the product.”<cite>build-eval 指南</cite></blockquote>
+          <p><a class="sk" href="#skill/build-eval">build-eval</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="terms" aria-labelledby="h-terms">
+      <h2 id="h-terms">概念词典</h2>
+      <p class="sec-intro">指南里常见的词，每个一句大白话。先认得它们，再看子命令的输出会轻松很多。</p>
+      <div class="gloss">
+        <div>
+          <h3>模型和请求</h3>
+          <dl>
+            <dt>思考档位<span class="en">effort</span></dt>
+            <dd>调思考深浅的档位。新模型上思考关不掉，就靠它来控制；各模型默认档不同，比如 Opus 5.5 默认从 high 降到了 medium。</dd>
+            <dt>自适应思考<span class="en">adaptive thinking</span></dt>
+            <dd>新模型上取代 budget_tokens 的思考方式：不再给固定的思考预算，配合 effort 控制。多数新模型再传 budget_tokens 会直接 400。</dd>
+            <dt>思考块<span class="en">thinking block</span></dt>
+            <dd>模型每次思考留下的一段带签名的记录，下一轮要原样带回。签名记着是哪个模型想的，和它想的时候看到的整段对话。</dd>
+            <dt>保留思考<span class="en">preserved thinking</span></dt>
+            <dd>API 拿你发来的历史核对带回的思考块，对不上默认报 400（The block is bound to a different conversation）。2026-08-31 之后建的账号默认强制。</dd>
+            <dt>提示缓存<span class="en">prompt caching</span></dt>
+            <dd>把请求里不变的前缀缓存起来复用。改 system、tools 或历史，缓存就在改动处断掉；时间戳插在稳定内容前面也会破坏缓存。</dd>
+            <dt>结构化输出<span class="en">structured outputs</span></dt>
+            <dd>让 API 直接按你给的格式出结果。prompt-audit 会建议用它替换「prefill 加 stop_sequences、解析失败就重试」这套老办法。</dd>
+            <dt>指定工具<span class="en">tool_choice</span></dt>
+            <dd>告诉模型要不要用工具、用哪个。强制选项（any 或指定某个工具）在 Opus 5.5、Sonnet 5.5、Fable 5.1 上会 400，改成 auto 加 strict: true，再在提示里点名工具。</dd>
+            <dt>预填回复<span class="en">prefill</span></dt>
+            <dd>在 messages 末尾先写好 assistant 回复的开头，让模型接着写。Opus 和 Sonnet 4.6 起末尾 prefill 会 400，Haiku 5.5 也一样，Fable 5.1 不支持。</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>评测</h3>
+          <dl>
+            <dt>评测<span class="en">eval</span></dt>
+            <dd>一套能反复跑的题集加打分法，用来判断改动是变好还是变差。</dd>
+            <dt>训练集和测试集<span class="en">train / test</span></dt>
+            <dd>把题随机分层切成两份。提改动只看 train；test 每轮都打分，但不给提改动的子 agent 看，最后只认 test 上的涨幅。</dd>
+            <dt>噪声下限<span class="en">noise floor</span></dt>
+            <dd>同一套东西重跑，分数自己就会晃的幅度。二分类约为 1/√(题数×重复数)，25 题跑 2 次约 ±14 个点；比它小的提升看不出真假。</dd>
+            <dt>LLM 裁判<span class="en">LLM judge</span></dt>
+            <dd>让模型按 rubric 给输出打分。它有位置偏好、偏爱长答案、偏爱同系模型，要用人工标注样本校准；空答案、「我不知道」、答非所问必须判不过。</dd>
+          </dl>
+          <h3 style="margin-top:var(--s5)">托管 Agent</h3>
+          <dl>
+            <dt>托管 Agent<span class="en">Managed Agents</span></dt>
+            <dd>Anthropic 替你跑 agent 循环，每个会话配一个沙箱容器，按 API 计费。</dd>
+            <dt>会话预算<span class="en">session budget</span></dt>
+            <dd>给会话设的花费上限，按公开标价累计；到顶是暂停（budget_reached），不是终止。</dd>
+            <dt>模板<span class="en">quickstart</span></dt>
+            <dd>Console 里的现成模板，一共 13 个；managed-agents-onboard 认模板的文件名主干或 console_key。</dd>
+            <dt>ant 命令行<span class="en">ant CLI</span></dt>
+            <dd>用文件管托管 agent 的命令行：把 agents/ 等文件写好，ant apply 创建出来；生成的 claude-lock.json 要和文件一起提交。</dd>
+            <dt>产出和评分标准<span class="en">outcome / rubric</span></dt>
+            <dd>托管 agent 的一种开工方式：给它一个要交的产物（outcome）和衡量它的标准（rubric）。只有单一产出物时，onboard 默认用 outcome，并帮你起草 rubric。</dd>
+            <dt>动态工作流<span class="en">dynamic workflows</span></dt>
+            <dd>主 agent 写一段程序，服务器在后台按阶段跑很多 agent。和 Claude Code 自带的 Workflow 工具不是一回事。</dd>
+          </dl>
+          <h3 style="margin-top:var(--s5)">成本</h3>
+          <dl>
+            <dt>用量和费用报表<span class="en">Admin API</span></dt>
+            <dd>能读用量和费用报表的接口（Usage / Cost API）。cost-optimize 有 Admin API key 时用它做 token 画像、给美元区间；读报表本身不耗 token。</dd>
+          </dl>
+        </div>
+      </div>
+      <p class="muted small" style="margin-top:var(--s5)">出处：shared/model-migration.md 各模型章节，shared/preserved-thinking-migration.md，shared/prompt-audit.md，eval-audit.md 与 eval-hillclimb.md，shared/managed-agents-onboarding.md 及两份 onboarding-from 指南，shared/cost-optimization.md。</p>
+    </section>
+
+    <section class="section" id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">官方入口和来源</h2>
+      <h3>官方文档</h3>
+      <ul class="links">
+        <li><a href="https://platform.claude.com/docs/en/about-claude/models/overview" rel="noopener">模型总览</a></li>
+        <li><a href="https://platform.claude.com/docs/en/about-claude/models/migration-guide" rel="noopener">模型迁移指南</a></li>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/preserved-thinking" rel="noopener">Preserved thinking</a></li>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching" rel="noopener">Prompt caching</a></li>
+        <li><a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">价格（价格以这页为准）</a></li>
+        <li><a href="https://platform.claude.com/docs/en/managed-agents/overview" rel="noopener">Managed Agents 概览</a></li>
+        <li><a href="https://platform.claude.com/docs/en/managed-agents/multiagent-orchestration" rel="noopener">Managed Agents 多 agent 编排</a></li>
+        <li><a href="https://code.claude.com/docs/en/agent-sdk/overview" rel="noopener">Claude Agent SDK</a></li>
+      </ul>
+      <h3 style="margin-top:var(--s5)">Skill 里的文件</h3>
+      <p class="muted small">这些文件随 Claude Code 一起装好，路径写法照指南原文。</p>
+      <ul class="filelist">
+        <li><code>SKILL.md</code>：入口。触发条件、默认规矩、选型，以及 8 个子命令各自的 Action 列</li>
+        <li><code>shared/model-migration.md</code>：migrate</li>
+        <li><code>shared/preserved-thinking-migration.md</code>、<code>shared/preserved-thinking-migration/causes.md</code>：preserved-thinking-migration</li>
+        <li><code>python/claude-api/sdk-upgrade.md</code>：upgrade</li>
+        <li><code>shared/prompt-audit.md</code>：prompt-audit</li>
+        <li><code>shared/cost-optimization.md</code>：cost-optimize</li>
+        <li><code>build-eval.md</code>、<code>eval-hillclimb.md</code>、<code>eval-audit.md</code>、<code>evals/cost-hillclimb.md</code>：build-eval、hillclimb，以及降本版的爬坡</li>
+        <li><code>shared/managed-agents-onboarding.md</code>、<code>managed-agents-onboarding-from-quickstart.md</code>、<code>managed-agents-onboarding-from-url.md</code>、<code>shared/managed-agents-quickstarts/*.md</code>：managed-agents-onboard</li>
+        <li><code>shared/live-sources.md</code>：官方链接清单</li>
+      </ul>
+      <h3 style="margin-top:var(--s5)">版本说明</h3>
+      <ul class="env-list">
+        <li>内容整理自 Claude Code 2.1.296 内置 claude-api Skill（Anthropic）与 Anthropic 官方文档，2026-10-10 快照，以官方文档为准。</li>
+        <li>全文用自己的话转述，英文原句每处不超过一句。价格会变，本页不列价格表，请看官方价格页。</li>
+        <li>欢迎转发。</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" tabindex="-1">
+  <div class="d-bar">
+    <button class="btn" type="button" id="d-close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>关闭</button>
+    <button class="btn" type="button" id="d-copy"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>复制命令</span></button>
+  </div>
+  <div class="d-head">
+    <h2 id="d-title"></h2>
+    <div class="d-meta" id="d-meta"></div>
+    <p class="d-one" id="d-one"></p>
+    <p class="d-auto">这是你敲的子命令。不敲的时候，整个 claude-api Skill 也会在你写 Claude API 代码时自动加载，见「<a href="#auto">不敲子命令时</a>」。</p>
+  </div>
+  <div class="d-body" id="d-body"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="skills-data">{"cards": [{"name": "migrate", "bucket": "gen", "invocation": "user", "command": "/claude-api migrate", "costTag": "试跑才花钱", "costWarn": true, "oneLiner": "把现有 Claude API 代码迁到新模型：换 ID、改掉会 400 的参数，再调为旧模型写的提示词。", "aliases": ["换模型", "迁移", "升级模型", "新模型", "模型 ID", "400", "opus", "sonnet", "haiku", "fable"], "whenToUse": ["代码还停在 Opus/Sonnet 4.x 或 Haiku 4.5，要升到 5.5 系列（claude-opus-5-5 等）", "用的模型已经退役，调用报 404（指南的说法）", "换完行为变了：拒答变多、工具调用变少、回复变长，想有依据地调"], "whenNotToUse": ["只升 Python SDK 的大版本、不换模型：用 upgrade"], "usage": [{"cmd": "/claude-api migrate extract.py 迁到 claude-opus-5-5", "note": "点名文件和目标模型，范围明确，直接开工。范围用自然语言写，没有固定的参数语法。"}, {"cmd": "/claude-api migrate src/ 和 tests/", "note": "没说目标模型：它会问你迁到哪个模型（要问范围时放在同一轮）；你没选别的，默认最新的 Opus（claude-opus-5-5）。"}, {"cmd": "/claude-api migrate 我的项目", "note": "「我的项目」「整个代码库」算范围不明：它先问再动手；大仓库会先按目录统计旧模型 ID 给你挑。"}], "howItWorks": ["确认范围：没点名就先问，不动手；开工前先确认 git status 干净。", "给范围内的文件分四类：真调 API 的，按清单换 ID；定义或提供模型的，旧条目保留、新模型并存；把模型 ID 当字符串用的，先排除能力开关、注册表断言和快照；带后缀的变体 ID，查不到就不动并标出来。分类前先搜 MODEL LAUNCH、KEEP IN SYNC 这类标记。", "按目标模型那一章改：[BLOCKS] 是不改就 400 的，[TUNE] 是可选调优。跨好几代，就按顺序叠加各章。", "逐条说明改了什么、为什么；提示词的改动引用前后原文，多处的列成清单让你逐条接受。", "单请求试跑，断言 response.model 的前缀对得上。SKILL.md 还要求改完按 prompt-audit 审一遍范围内的提示词、工具描述和请求代码。", "你报了行为回归，就转去建 eval，再用 eval 调。"], "outputs": ["就地改好的代码", "逐条改动说明：改了什么、为什么", "可以逐项取舍的提示词调整清单", "指南没规定单独的报告文件"], "cost": {"money": "改代码不花钱；只有试跑和 max_tokens=64 的抽查会真调用模型。转去建 eval 才会大量调用，第一次付费前告诉你规模，等你说 yes。", "stops": ["范围：硬门，没确认就不写任何文件", "定义或提供模型的文件：并存、不动还是下线，问你；问不到就默认并存并标出来", "提示词改动：列成清单，等你逐条接受"]}, "tips": ["只说「我的项目」「整个代码库」算范围不明，会被追问", "别盲目替换模型注册表和能力开关：旧模型可能还在服务", "可选的提示词调整不能说成必改", "跨好几代是叠加，不能只看最后一章。比如 Opus 5.5 那章取消了 Opus 5 的「可关 thinking」"], "extras": [{"title": "各目标模型最容易踩的", "items": [{"k": "Opus 5.5（从 Opus 5）", "v": "思考关不掉：thinking disabled 或 budget_tokens 在任何 effort 下都 400，改用 effort 控制；默认 effort 从 high 降到 medium，需要就显式设。强制 tool_choice（any、tool）400，count_tokens 和 Batches 也一样，改成 auto + strict: true + 提示词引导。preserved thinking 生效。Claude API 和 Google Cloud 上 computer_20251124 会 400，改用 computer_toolset_20260801。"}, {"k": "Sonnet 5.5（从 Sonnet 5）", "v": "thinking disabled 400，先试 adaptive + effort low；必须关思考就用 {type: \"between_tools\"}（effort 只能 high 及以下，不能带别的字段）。强制 tool_choice 400；preserved thinking 生效；computer use 必须用 toolset；advisor 只接受更新的 advisor；effort 档位重新标定，默认仍是 high。"}, {"k": "Haiku 5.5（从 Haiku 4.5）", "v": "budget_tokens 400，只能 adaptive，而且默认就思考，小 max_tokens 会被思考吃光（指南的例子：max_tokens 50 的一词分类）。非默认采样参数 400；末尾 assistant prefill 400；同样的文本约多 30% token；新增拒答分类器，没有服务端 fallback。"}, {"k": "Fable 5.1", "v": "只有你明确选它才迁，「升级到最新」默认目标是 Opus 5.5。thinking 永远开，disabled 和 budget_tokens 400；不支持 prefill；要求 30 天数据留存，ZDR 组织 400。从 Fable 5 来：强制 tool_choice 400；block 只给产生它的模型读，改历史会让后续块失效；读 content 前先处理 stop_reason 为 refusal 的情况。"}, {"k": "中间几站", "v": "Opus 5（从 4.8）不传 thinking 也会思考，max_tokens 同时罩住思考和回复；Sonnet 5（从 4.6）budget_tokens 和非默认采样参数 400，新分词器约多 30% token；Opus 4.7 起 budget_tokens 和采样参数 400；Opus 和 Sonnet 4.6 末尾 assistant prefill 400。"}]}], "faq": [{"q": "没说目标模型会怎样？", "a": "它会问你迁到哪个模型；你没明确选别的，默认最新的 Opus（claude-opus-5-5）。Fable 5.1 只有你点名才迁。"}, {"q": "从 Opus 4.x 一步跳到 Opus 5.5，只看 Opus 5.5 那章行吗？", "a": "不行。跨多代要按顺序叠加各章的改动，只看最后一章会漏。"}, {"q": "换完回答变了，直接改提示词行不行？", "a": "指南的做法是先建 eval（build-eval），再用 eval 有依据地调（hillclimb），不凭感觉改。"}], "keyTerms": [{"term": "[BLOCKS]", "zh": "目标模型那章里不改就会 400 的项"}, {"term": "[TUNE]", "zh": "可选的调优项，不能说成必改"}], "quote": {"en": "Never present an optional prompt change as mandatory", "from": "shared/model-migration.md"}, "pairs": [{"name": "prompt-audit", "why": "迁移后审提示词；每出一个新的迁移章节，都是重跑它的时机"}, {"name": "preserved-thinking-migration", "why": "Fable 5.1 那章的 Breaking change 3 讲原理，动手交给它"}, {"name": "build-eval", "why": "换完有行为回归，先建 eval"}, {"name": "hillclimb", "why": "有了 eval，用它把质量调回来"}, {"name": "upgrade", "why": "upgrade 的文档结尾把「验证提示词」指回 migrate"}], "sources": ["SKILL.md：migrate 一行", "shared/model-migration.md：开头引导块、Step 0、Step 1、Explain every change you make、Destination Models、Verify the Migration、Ground the migration with an eval，以及各目标模型章节"]}, {"name": "preserved-thinking-migration", "bucket": "gen", "invocation": "user", "command": "/claude-api preserved-thinking-migration", "costTag": "回放花钱", "costWarn": true, "oneLiner": "给自己拼 messages 的程序做体检：找出哪些操作改了历史、让旧 thinking block 失效，测出损失，逐个修成只追加不改写。", "aliases": ["保留思考", "思考块", "thinking", "bound to a different conversation", "400", "drop_block", "改历史", "缓存命中低", "推理断档"], "whenToUse": ["迁到 Fable 5.1、Opus 5.5、Sonnet 5.5 或 Haiku 5.5 后，报 400：\"The block is bound to a different conversation\"（2026-08-31 之后建的账号默认强制）", "老账号还没被强制，想先测一测", "长会话推理断档、缓存命中低：改历史的地方，缓存也在同一处重新开始"], "whenNotToUse": ["用的是 Claude Code、claude.ai、Managed Agents 或 Agent SDK 这类自己管历史的产品：结论直接是无需迁移", "报错来自换模型（model_binding_mismatch）：那是另一套检查，不是代码 bug"], "usage": [{"cmd": "/claude-api preserved-thinking-migration", "note": "不点名时，查所有构造 system、tools、messages 的地方。"}, {"cmd": "/claude-api preserved-thinking-migration agent/loop.py", "note": "点名的文件或目录就是范围。"}, {"cmd": "prefix_diff.py --scan", "note": "附带脚本：比对相邻两次请求；加 --scan 改成扫代码。"}, {"cmd": "drop_block_probe.py --count-tokens", "note": "附带脚本，参数有 --self-test、--dry-run、--count-tokens、--yes。--count-tokens 免费；不带 --yes 只打印计划，不真跑。"}], "howItWorks": ["Step 0 定范围、流量类别、平台和模型、是否已被强制、质量线和基线。Claude Code、claude.ai、Managed Agents、Agent SDK 这类自己管历史的，结论直接是「无需迁移」。", "Step 0.5 三请求自测：生成一次、原样回放一次、改掉第一条消息再回放一次，证明校验真在跑；显示 NOT WIRED 就停。", "Step 1 在 HTTP 层抓 10–30 段真实会话，比对相邻请求、扫代码，给每处编辑定性：故意的还是无意的。", "Step 2 带上 prefix_mismatch_behavior: \"drop_block\"（beta thinking-binding-controls-2026-08-01）回放切片，按「每段对话新丢了几个 block」计数。", "Step 3 每个原因一个 diff，先修丢得最多的，改一个测一个。", "Step 4 交付断点画像和改动；生产设置单列，放在最后，须你明确批准。"], "outputs": ["断点画像：范围、基线、按损失排序的原因表", "逐个原因的改动：默认只提议，你要求才应用", "什么都不用改时，照实给出 \"no changes recommended\""], "cost": {"money": "会花钱：回放按模型正常价计费。--count-tokens 免费。", "stops": ["自测之前：先报成本，拿到批准", "Step 2 之前：整个测量预算一次批准（请求数 × 输入量 × 当前价，不凭记忆报价）", "生产设置：单列在最后，须你明确批准", "抓包里是真实对话：不能脱敏，不入库，用完删"]}, "tips": ["drop_block 只是把报错换成静默丢推理，不是修复，还可能多花 token", "切片里没有重放 thinking 就测不出东西：要在目标模型上抓包；回放脚本只走 Anthropic 一方 API", "cache_control、tools 重排、改模型或参数、服务端压缩，都不算编辑", "换模型触发的是另一套检查（model_binding_mismatch），不是代码 bug"], "extras": [{"title": "原因分 5 档", "items": [{"k": "Tier 0 不算编辑", "v": "cache_control、tools 重排、服务端压缩、换模型"}, {"k": "Tier 1 无意的", "v": "比如在 system 里塞当前时间"}, {"k": "Tier 2 可修的", "v": "中途增删工具；一次性提醒注入后又删掉"}, {"k": "Tier 3 反复发生的", "v": "保留尾部的压缩、后台压缩、滚动截断，先测再定"}, {"k": "Tier 4 无解的", "v": "剪掉旧工具结果这类前缀手术，只能停手"}]}, {"title": "只追加、不改写的做法", "items": [{"v": "冻结已经渲染好的 system"}, {"v": "开局就声明完整工具集，后到的工具走 defer_loading + tool_addition"}, {"v": "一次性提醒用带 clear_at 的 system 消息"}, {"v": "旧内容在发送前就定好尺寸"}, {"v": "存下并回放原始的线上 JSON"}, {"v": "压缩用服务端压缩"}]}], "faq": [{"q": "这个 400 到底在说什么？", "a": "模型每次思考都留下一个带签名的 thinking block，签名记着是哪个模型想的、想的时候看到的整段对话。下一轮 API 用你发来的历史重新核对，对不上，说明这段推理是对着另一份对话想的，默认直接 400。像考试草稿纸：题目中途被改了，旧草稿就不能再用。"}, {"q": "开 drop_block 能不能了事？", "a": "不能当修复。它把这个块和之后的 thinking block 丢掉、让模型重想，不报错，但可能多想一遍，缓存也在改动处断掉；改历史的那处代码还在。"}, {"q": "常见的无意改动有哪些？", "a": "system 里塞当前时间、删掉上一轮的提醒、截短旧工具结果、中途增删工具。解法是只追加不改写，要变的内容写成新消息放在最后。"}, {"q": "老账号没报错，要不要管？", "a": "2026-08-31 之后建的账号默认强制；老账号还没被强制，可以先用它测一测。"}], "quote": {"en": "hides the error but doesn't fix the edit that caused it", "from": "shared/preserved-thinking-migration.md"}, "pairs": [{"name": "migrate", "why": "migrate 讲原理，这个子命令是能执行的版本"}, {"name": "cost-optimize", "why": "兄弟：改历史的地方，缓存也断在同一处"}, {"name": "hillclimb", "why": "有 eval 之后，Step 3 可以当 hillclimb 来跑"}], "sources": ["SKILL.md：preserved-thinking-migration 一行", "shared/preserved-thinking-migration.md：引导块、Severity tiers、Step 0 到 Step 4", "shared/preserved-thinking-migration/causes.md"]}, {"name": "upgrade", "bucket": "gen", "invocation": "user", "command": "/claude-api upgrade", "costTag": "验证不调模型", "costWarn": false, "oneLiner": "把项目的 anthropic Python SDK 从 0.x 升到 1.x（目前只覆盖这一条），只升 SDK，不换模型。", "aliases": ["SDK", "python", "0.x", "1.x", "升级 SDK", "httpx", "httpx2", "anthropic", "依赖"], "whenToUse": ["依赖还钉在 0.x", "代码里有 1.x 已删掉的写法：completions.create、给 messages.create 传 temperature/top_p/top_k、with_raw_response 之后取 .text", "自己写了 httpx 客户端、传输层、mock 或埋点，担心升级后悄悄失效"], "whenNotToUse": ["要换模型：用 migrate", "不是 Python：没有对应指南，它会直说，并指去那个 SDK 的 CHANGELOG，不照 Python 版硬编"], "usage": [{"cmd": "/claude-api upgrade python src/", "note": "末尾的路径就是范围。"}, {"cmd": "/claude-api upgrade python", "note": "没带路径，算范围不明，先问你。"}, {"cmd": "/claude-api upgrade", "note": "同样先问范围。"}], "howItWorks": ["Step 0 确认范围、当前版本和目标版本；用 pip index versions anthropic 核实 1.x 已经发布，没发布就停，不写装不上的版本约束；在 git 里先看 git status。", "Step 1 按信号表 grep 盘点调用点，分成 SDK 调用点、同名无关、测试、文档；最后重跑同一批 grep 当验证。", "Step 2 环境：Python 下限 3.10，按原来的风格改版本约束，重新生成锁文件。", "Step 3 httpx 换成 httpx2，只改跨 SDK 边界的对象；应用里可以用 httpx2.alias_httpx()。", "Step 4–8 逐类修：with_raw_response 的返回类型、Text Completions 迁到 Messages（唯一不是机械替换的改动）、已删的请求参数（output_format 改成 output_config）、改名或删除的名字、被删的 helper 参数。", "Step 9–10 请求头大小写不敏感；Bedrock 必须有 region。", "Step 11–12 验证并出报告：重跑 grep、compileall、类型检查、跑不需要凭证的测试。"], "outputs": ["改好的代码、测试、文档片段和依赖版本约束", "一份报告：改了什么、要你拍板的事、没能验证的部分和收尾命令", "动了 httpx2 会附一行来源说明，免得供应链扫描把陌生包名当成仿冒包"], "cost": {"money": "指南没提调用模型花钱；验证只跑编译、类型检查和不需要凭证的测试。", "stops": ["范围不明：先问", "git 里有意外改动，或者查不到已发布的 1.x：停下", "标 [DECIDE] 的项单独成 hunk 或写进报告，交你拍板：Python 3.9 下限和 CI 矩阵、httpx 怎么改、依赖采样参数的调用、补全调用换哪个模型、大小写重复的请求头、Bedrock 区域"]}, "tips": ["OpenTelemetry、Sentry、respx、pytest-httpx、vcrpy 升级后不报错，却看不到 SDK 的请求；靠 alias_httpx() 修", "alias_httpx() 必须早于任何 import httpx，只给应用用，不放进库里", "采样参数只是从 SDK 的函数签名里删了，API 收不收看模型；确实要用就放进 extra_body", "Bedrock 没配 region 会抛 ValueError，它不替你编一个 region"], "faq": [{"q": "和 SDK 仓库里的 MIGRATION.md 说法不一样，听谁的？", "a": "以 SDK 仓库的 MIGRATION.md 为准。"}, {"q": "代码里还钉着已经退役的模型怎么办？", "a": "这类调用先归 migrate 处理；补全时代的老提示词，升级后再跑一遍 migrate 核对。"}], "keyTerms": [{"term": "[DECIDE]", "zh": "要你拍板的改动，单独成 hunk 或写进报告"}, {"term": "httpx2", "zh": "升级时替换 httpx 的包；只改跨 SDK 边界的对象"}, {"term": "alias_httpx()", "zh": "修「埋点和 mock 看不到 SDK 请求」的办法；必须早于任何 import httpx，只给应用用"}], "pairs": [{"name": "migrate", "why": "换模型归它；钉着已退役模型的调用也先交给它"}, {"name": "prompt-audit", "why": "补全时代的老提示词，正是它的用武之地"}], "sources": ["SKILL.md：upgrade 一行", "python/claude-api/sdk-upgrade.md：开头、Step 0–12、Checklist", "shared/live-sources.md：SDK major-version upgrade guides"]}, {"name": "prompt-audit", "bucket": "gen", "invocation": "user", "command": "/claude-api prompt-audit", "costTag": "花费未说明", "costWarn": false, "oneLiner": "审已有的提示词、工具描述、Skill 和 Agent 配置文件，找出不再合身的指令：为旧模型写的、仓库用不上的、互相矛盾的。目标不是变短，是每个 token 都有理由。", "aliases": ["提示词", "审计", "CLAUDE.md", "规则", "rules", "skills", "工具描述", "过时", "矛盾", "cruft", "prefill", "budget_tokens"], "whenToUse": ["换了新模型之后", "CLAUDE.md、rules、skills 越攒越长，或者互相打架", "应用里还留着 prefill、budget_tokens、\"think step by step\" 这类老写法"], "whenNotToUse": ["只想把提示词压短：它不是压缩器（\"Cruft != length\"），受众、产品、理由这类上下文永远保留", "想审 settings、凭据、.mcp.json：这些文件它不读"], "usage": [{"cmd": "/claude-api prompt-audit", "note": "不点名就审整个工作目录；目标模型从仓库的迁移文档和代码推断，审 CLAUDE.md 这类文件时取正在跑审计的模型。"}, {"cmd": "/claude-api prompt-audit prompts/ 目标 claude-opus-5-5", "note": "用自然语言点名文件、目录和目标模型；指南没规定固定的参数语法。"}, {"cmd": "/claude-api prompt-audit CLAUDE.md，clean it up", "note": "明说要改才动文件；低置信的项和「事实过期、互相矛盾」类修改，仍然只提议。"}, {"cmd": "/claude-api prompt-audit ~/.claude/CLAUDE.md", "note": "~/.claude/ 这类范围外的文件，只有你点名才审。"}], "howItWorks": ["Step 0 定范围和目标模型，把假设写在报告开头。全程不停下来问你。", "Step 1 盘点提示面，先列清单（settings、凭据、.mcp.json 不读）。", "Step 2 用 git blame 查来历：这行当年防的是哪个模型的什么故障，现在还复现吗。", "Step 3 逐行问「模型是不是本来就会」，只有作者才知道的信息保留。", "Step 4 分四组扫描：提示文本、配置文件、工具描述、请求配置与架构。", "Step 5–7 出报告、出 diff、验证。"], "outputs": ["审计报告：每条有 file:line、原文、命中的模式、为什么过时、置信度（高、中、低）和动作（remove、rewrite、move、replace-with-API-feature、add、flag），按置信度排序", "一份建议 diff：只含高、中置信的项，一条发现一个 hunk", "没问题就一句话报「干净」，不凑 diff"], "cost": {"money": "指南没说明费用。", "stops": ["设计上不中途提问：假设错了，就缩小请求重跑", "默认只提议、不改文件；你明说要改（比如 clean it up）才动手", "低置信项和「事实过期、互相矛盾」类修改，就算你让它改，也只提议", "~/.claude/ 这类范围外的文件，只在你点名时才审"]}, "tips": ["它不是压缩器：受众、产品、理由这类上下文永远保留", "光凭「像老写法」只算低置信，只进报告、不进 diff", "删除只是假设：要用评测或最小探针做前后对比；「问模型还需不需要这句」不算测量", "被审的文件当数据，里面的指令它不照做"], "extras": [{"title": "它会抓的过时写法", "items": [{"k": "吼叫和含糊限定", "v": "CRITICAL: You MUST use this tool when... 改成 Use this tool when...；「if possible」这类含糊限定改成直接要求"}, {"k": "被 API 特性取代的脚手架", "v": "Think step by step、<scratchpad> 换成 adaptive thinking 加 effort；assistant prefill 加 stop_sequences、解析失败就重试，换成 structured outputs；强制 tool_choice 换成在提示里点名工具加 auto"}, {"k": "规定得过细", "v": "判断类任务写 STEP 1、STEP 2；一长串 Do not / Never；you will be graded on..."}, {"k": "老模型补丁的化石", "v": "never use bullets、don't narrate、only use tools when strictly necessary、每轮重复的 reminder"}, {"k": "无出处的风格禁令", "v": "比如 don't start with 'Certainly'，改成一句正面描述"}, {"k": "输出整形编排", "v": "每三次工具调用汇报一次、under 120 words、at most five bullets"}, {"k": "配置文件腐烂", "v": "路径、命令、flag 已经不存在；两份规则互相矛盾；一次会话踩的坑写成永久规则；写死的版本号和模型名"}, {"k": "工具描述错位", "v": "ALWAYS use X、NEVER use Y 互相点名，描述里塞示例和假对话；反过来，描述太短也要补"}, {"k": "请求和架构的化石", "v": "budget_tokens、thinking disabled、偏小的 max_tokens；让大模型干确定性的活；时间戳插在稳定内容前面破坏缓存"}]}, {"title": "明确不删的", "items": [{"v": "上下文：受众、产品、环境事实、质量线、约束背后的理由"}, {"v": "脆弱操作的精确脚本：破坏性命令、鉴权流程、合规步骤"}, {"v": "工具描述里的契约细节：参数含义、限制、失败模式"}, {"v": "对当前仍会复现的失败的禁令，以及带理由或对应业务约束的禁令"}, {"v": "Skill 触发和路由文字里校准过的强调；正常工作的重复、一句话角色设定、结尾一次性重述关键约束，也不算 cruft"}]}], "faq": [{"q": "范围或目标模型它猜错了怎么办？", "a": "它设计上不中途提问，把假设写在报告开头；假设错了，缩小请求再跑一次。"}], "keyTerms": [{"term": "cruft", "zh": "不再合身的指令：为旧模型写的、仓库用不上的、互相矛盾的。不等于长"}, {"term": "置信度", "zh": "高、中、低三档；只有高、中两档进 diff"}], "quote": {"en": "Cruft != length", "from": "shared/prompt-audit.md"}, "pairs": [{"name": "migrate", "why": "各模型的迁移清单同时是它的删除清单；迁移文档末尾推荐用它做长期审计"}, {"name": "cost-optimize", "why": "把它当「输入卫生」这一环来调用"}, {"name": "upgrade", "why": "遇到 Text Completions 时代的提示词时推荐它"}], "sources": ["SKILL.md：prompt-audit 一行", "shared/prompt-audit.md：Step 0–7、Group 1–4、What not to flag", "引用它的地方：model-migration.md:472、cost-optimization.md:12、evals/cost-hillclimb.md:54、python/claude-api/sdk-upgrade.md:173"]}, {"name": "build-eval", "bucket": "qc", "invocation": "user", "command": "/claude-api build-eval", "costTag": "会花钱", "costWarn": true, "oneLiner": "用面试的方式，为某个 Claude 应用流程建一套能反复跑、你信得过的评测，终点是 baseline 分数和一份 report.html。", "aliases": ["评测", "eval", "尺子", "题集", "打分", "baseline", "report.html", "评分"], "whenToUse": ["迁到新模型，想知道是变好还是变差", "改提示词、加工具之前，先要一个能重复的分数", "手里只有零散用例或感觉，想升级成可信的评测"], "whenNotToUse": ["想一套 eval 评好几个流程：一个 eval 只管一个流程", "已经有 eval 和 baseline，想提分：直接用 hillclimb"], "usage": [{"cmd": "/claude-api build-eval", "note": "从「评哪个流程」问起，一次只问一个。"}, {"cmd": "/claude-api build-eval 工单分类的准确率", "note": "参数当作第一个问题的答案，它再跟你确认。"}], "howItWorks": ["先读 eval-audit 清单；问你评哪个流程（一次一个），找到真实入口；盘点已有的用例、打分和脚本，能复用就复用。", "找题，按保真度从高到低：生产对话、工单、你手写的 5–10 条、合成的（最低）。首版 15–100 题。", "签字门一：把全部题目给你看，等你明确说 yes。", "选打分法：程序检查、成对盲评、带 rubric 的模型打分、人工抽查，再选附带指标。", "签字门二：约 5 个已打分的样例做成 report.html，问你会不会打不同的分；有一条会，就重做。", "写能跑的脚本（并发、逐行落盘、能续跑、超时、退避）；第一次付费前先做体检，等你点头。", "跑完整 baseline，自己检查 report.html 后交给你，问要不要把 eval 提交进仓库。"], "outputs": ["签过字的题集和验证过的打分法", "跑分脚本", "baseline 的 results.jsonl 和 traces，放在 .claude/hillclimb/<流程>/baseline/", "report.html：CLI 版是精简版，有汇总表、每题一行、链到对话文件，没有内嵌对话和图表"], "cost": {"money": "会真实调用模型。", "stops": ["硬性签字门两道：题集，等你明确说 yes；打分法，约 5 个样例里有一条你会打不同的分，就重做", "第一次付费之前：告诉你几题 × 几次 × 哪个模型，等你说 yes", "金额只在你问或给了预算时才报，数字来自试跑实测的 usage", "题目要从生产数据拉：先问保留期限和 PII"]}, "tips": ["一个 eval 只管一个流程", "必须调用应用的真实入口，不许重新拼一套 API 调用", "成本或延迟是 0 的列，当成跑分脚本的 bug", "超时、429、max_tokens 截断、评分器崩溃不能记 0 分，单独记进 errors.jsonl", "第一次整轮付费前，用标准答案和空答案各跑一遍，分数应分别接近 100% 和 0%"], "extras": [{"title": "eval 健康检查（eval-audit 清单，和 hillclimb 共用）", "items": [{"k": "题目本身", "v": "答案有争议、参考答案可疑、参考答案来自正在被比较的模型（迁移时会偏袒旧模型）、答案泄露在提示里、靠记忆就能答"}, {"k": "只测一面", "v": "比如只测「该搜索时搜不搜」，永远搜索就满分；类别失衡；baseline 已近满分，分不出高低"}, {"k": "把故障当成模型失败", "v": "超时、429、截断、评分器崩溃单独记；「没给出答案」不等于「答案是没有」"}, {"k": "跑分环境不干净", "v": "没从干净状态开始；实际响应的模型不是指定的（读响应里的 model）；没有每题总时限和带抖动的退避"}, {"k": "成本和延迟算错", "v": "token 取自 usage、不估算，按每行实际模型和缓存价格推导，judge 的花费单列，延迟不含重试和排队"}, {"k": "评分器漏洞", "v": "奖励的不是提示要求的、评路径不评结果、过严或过松、能被钻空子；抽查判错的输出，约十分之一以上是评分器错，就先修评分器"}, {"k": "LLM 裁判偏差", "v": "A/B 位置、偏爱长答案、偏爱同系模型、被告知谁是参考答案；用人工标注样本校准，清晰案例远低于约 90% 就继续改"}, {"k": "看不看得出变化", "v": "噪声下限、提升空间、最小可上线提升；train 和 test 是否同分布；机制是否真接上；总分能否从原始行重算"}]}], "faq": [{"q": "它会主动告诉我要花多少钱吗？", "a": "不会主动报金额。第一次付费前只告诉你几题 × 几次 × 哪个模型；你问或给了预算才报金额，数字来自试跑实测的 usage。"}, {"q": "report.html 怎么没有图表？", "a": "CLI 安装里没有完整的查看器和示范目录（只在 EAP 安装包里），生成的是精简版：汇总表、每题一行、链到对话文件。"}, {"q": "题目很多，怎么审？", "a": "分三层：全量跑脚本检查；分层抽 20–50 条细读；几百条以上才逐条用 LLM 审，而且先问你、报价。"}], "quote": {"en": "The sign-offs are the product.", "from": "build-eval.md"}, "pairs": [{"name": "hillclimb", "why": "做完引导你去 hillclimb；两者共用 eval-audit 清单"}, {"name": "migrate", "why": "迁移后有行为回归，migrate 转来这里建 eval"}, {"name": "cost-optimize", "why": "没有评测时，它的取舍类省钱项只停在提案"}], "sources": ["SKILL.md：build-eval 一行", "build-eval.md：Step 0 到 Step 4、Before the first paid call、Failure modes to avoid", "eval-audit.md：1. Task design 到 6. Reporting findings to the user"]}, {"name": "hillclimb", "bucket": "qc", "invocation": "user", "command": "/claude-api hillclimb", "costTag": "会花钱", "costWarn": true, "oneLiner": "对着已有的 eval 迭代改应用：读失败对话、改一处、重跑、记录，最后只认没见过的 test 题上的涨幅。", "aliases": ["提分", "爬坡", "迭代", "优化提示词", "train", "test", "过拟合", "噪声"], "whenToUse": ["有 eval 和 baseline，想系统地把分数提上去", "质量不降，想压成本或延迟", "迁到新模型后，想把质量找回来"], "whenNotToUse": ["还没有 eval：先用 build-eval（它自己也会把你转过去）"], "usage": [{"cmd": "/claude-api hillclimb", "note": "指南没说明可以带参数。没有 eval 时，它先转去 build-eval。"}], "howItWorks": ["Step 0 确认有能跑的 eval，没有就转 build-eval；按 eval-audit 过一遍。", "Step 0.5 先证明这把尺子能爬：噪声下限、机制接上、总分能重算、抽查评分。", "Step 1–2 定目标、改什么、什么不许动、停止条件和预算，拿到计划批准。", "Step 3 随机分层切 train 和 test，定重复次数，跑 baseline。", "Step 4 循环：每轮一个全新的分析子 agent 只读 train 的对话、提一个改动；应用并存下 patch；全量重跑。", "Step 4.5 连续 2–3 轮没跳出噪声，先把剩下的失败归成五类：产物缺口、评分器分歧、跑分基础设施问题、结构问题、随机波动。", "Step 5 回到 test 上最好的版本，出最终报告。"], "outputs": ["状态目录 .claude/hillclimb/<流程>/：_state.json、narrative.md，每轮一个 vN/（change.md、change.patch、results、traces）", "report.html 和四段式摘要", "改动清单，标 [REQUIRED] 或 [TUNE]", "2–3 对改动前后的对话"], "cost": {"money": "会花钱：每轮全量重跑，都是真实调用。", "stops": ["计划批准门：范围表、谁来应用改动、方法段；也可以选每轮先看 diff", "你问或给了预算时报总成本：(N+1) × R × 单次成本；快超预算先问你", "无人值守之前，要你放行跑分命令；--approve-harness 只能你本人跑"]}, "tips": ["不碰 test", "小于噪声下限的改动不占一轮；一轮只验证一个假设", "judge 分数涨得离谱，先当成被糊弄了", "没有 eval 不开爬；结果落在噪声里，就老实说不建议合并"], "extras": [{"title": "train / test 怎么切，什么时候停", "items": [{"v": "默认只切 train 和 test 两份"}, {"v": "约 150 题以上，才可选再切 validation：每轮用它挑胜出版本，test 留到最后只跑 baseline 和胜出版"}, {"v": "小集合，或排序、成对这类跨题指标不切分，整集每轮打分，标 directional"}, {"v": "停止条件默认是「直到平台期」：连续 K 轮（K≥3）提升都小于 delta"}]}], "faq": [{"q": "怎么知道这把尺子量得出变化？", "a": "二分类的噪声约为 1/√(题数×重复数)，25 题跑 2 次约 ±14 个点。第 1 轮之前，它把噪声下限、提升空间、最小可上线提升三个数摆给你。"}, {"q": "train 涨了、test 没动，算不算进步？", "a": "不算，那是过拟合的信号。test 每轮都打分，但永远不给提改动的子 agent 看，最后只认 test 上相对 baseline 的涨幅。"}, {"q": "想降成本，不是提分？", "a": "走降本版的爬坡（cost-hillclimb.md）；cost-optimize 有了评测之后，也会把你引到这里。"}], "pairs": [{"name": "build-eval", "why": "上游：没有 eval，先去它那里建"}, {"name": "migrate", "why": "迁移后用它把质量找回来"}, {"name": "cost-optimize", "why": "有评测之后，降本走 cost-hillclimb.md"}, {"name": "preserved-thinking-migration", "why": "有 eval 之后，它的 Step 3 可以当 hillclimb 来跑"}], "sources": ["SKILL.md：hillclimb 一行", "eval-hillclimb.md：Step 0–5、Failure modes", "eval-audit.md：Step 0 和 Step 0.5 用到的检查"]}, {"name": "cost-optimize", "bucket": "qc", "invocation": "user", "command": "/claude-api cost-optimize", "costTag": "会花钱", "costWarn": true, "oneLiner": "在不牺牲输出质量的前提下，降低现有 Claude API 代码的运行成本；算的是「每完成一个任务花多少」，不是 token 单价。", "aliases": ["省钱", "降本", "成本", "账单", "缓存", "batch", "费用", "token", "便宜"], "whenToUse": ["账单偏高，想先看钱花在哪、先砍哪块", "agent 循环每轮重发整段历史，怀疑缓存没命中", "有夜间批处理、回填这类没人等结果的流量，想判断能不能走 batch"], "whenNotToUse": ["要换模型：转 migrate"], "usage": [{"cmd": "/claude-api cost-optimize", "note": "指南没定义参数；不点名就是项目里所有调用 Claude API 的地方。裸敲只出提议、不改代码。"}, {"cmd": "/claude-api cost-optimize 只看 jobs/nightly/", "note": "请求里点名的文件或目录就是范围。"}], "howItWorks": ["Step 0 定范围（按流量类别分开算，确认平台）、质量线（项目的评测或测试）和基线（每个任务花多少），写在报告开头。", "报价之前现抓官方 Pricing 页和 Cost Optimization 页，记下抓取时间；记得的价格不算来源。", "Step 1 token 画像：有 Admin API key 用 Usage/Cost API；有应用日志用 response.usage；都没有就读代码估算。", "按省钱上限给杠杆排序，重叠的扣掉，总和不超过账单。数字跟着数据来源分档：实测给美元区间，日志给账单百分比，纯读代码只给大、中、小。", "Step 2 按固定顺序过杠杆：先免费的（缓存、输入瘦身含 prompt-audit、循环卫生、输出、batch），再取舍的（effort 或预算、换模型）。", "Step 3 每个杠杆单独一个 diff；应用后同时看通过率和单任务成本，掉准确率就回退；不凭一两个用例的波动下结论。", "Step 4 报告：画像、排序表、逐杠杆 diff、跳过的项、待你批准的事。"], "outputs": ["成本画像和方案报告", "每个杠杆一个 diff，标「已应用并实测」「仅提议」或「需先有评测」", "必要时附一个缓存探针脚本：同一请求发两次，第二次没读到缓存就非零退出"], "cost": {"money": "会花钱：跑基线、每次验证、缓存探针都真实调用模型。读 Admin API 报表不耗 token。", "stops": ["真调模型之前：先报预估费用，经你同意；或者一次批一个「测量预算」", "线上影子运行约等于期间花费翻倍，要单独批准", "取舍类杠杆（effort、换模型）要你明确接受才应用", "交互式：缺上下文就问你，和你一起补"]}, "tips": ["没有评测分不清是省钱还是变差：免费杠杆照提，取舍杠杆只停在提案，并附一份最小评测配方（约 20–30 条真实请求）", "改 system、tools 或历史会让缓存失效，进行中的会话要付的代价写进报告", "前缀变小未必更省：模型可能多花几轮去查", "收紧 max_tokens 只会截断回答，单个已解决的任务并不更省"], "faq": [{"q": "小项目跑完清单是空的，是不是白跑？", "a": "不是。小账单上清单为空也算成功，\"no changes recommended\" 是合法结论。"}, {"q": "为什么它只说「大、中、小」，不给具体金额？", "a": "数字跟着数据来源分档：有 Admin API 实测才给美元区间，只有日志给账单百分比，纯读代码只给大、中、小。"}], "keyTerms": [{"term": "每任务成本", "zh": "完成一个任务总共花多少钱，是它衡量的基线，不是 token 单价"}, {"term": "测量预算", "zh": "一次批下的一笔试跑额度，用来替代逐次报价确认"}], "quote": {"en": "never trade accuracy for cost silently", "from": "shared/cost-optimization.md"}, "pairs": [{"name": "prompt-audit", "why": "当子流程调用，负责输入瘦身"}, {"name": "migrate", "why": "要换模型就转过去"}, {"name": "preserved-thinking-migration", "why": "动历史、system、tools 时参考它；两边都会让缓存在改动处断掉"}, {"name": "hillclimb", "why": "有评测之后，按 cost-hillclimb.md 继续压成本"}], "sources": ["SKILL.md：cost-optimize 一行", "shared/cost-optimization.md：Step 0–1（L18、L32）、Rank the levers（L71）、§2.1–2.7（L100–178）、Step 3（L190）、Workload shape -> lever（L205）、Step 4（L223）"]}, {"name": "managed-agents-onboard", "bucket": "managed", "invocation": "user", "command": "/claude-api managed-agents-onboard", "costTag": "测试会话花钱", "costWarn": true, "oneLiner": "从零带你搭一个 Managed Agent（Anthropic 跑 agent 循环，每个会话配一个沙箱容器，按 API 计费）：面试式，先谈价值，后要凭据。", "aliases": ["托管", "managed agents", "agent", "定时", "模板", "quickstart", "ant", "部署", "沙箱"], "whenToUse": ["把一件具体的活（每周简报、客服答疑、代码巡检）做成可复用、可定时的托管 agent", "从 Console 的 13 个模板之一起步", "手上有官方文档、示例仓库或方案页，想按它的设计落成自己的文件"], "whenNotToUse": ["要自己部署、要 Claude Code 那套读写文件和 bash 工具：那是 Claude Agent SDK，这个 Skill 不生成它的代码", "一次性的单次调用（分类、摘要、抽取、问答）：先从简单的开始，用 Claude API 就够"], "usage": [{"cmd": "/claude-api managed-agents-onboard", "note": "不带参数：面试。先问做什么、谁或什么来触发。"}, {"cmd": "/claude-api managed-agents-onboard deep-researcher", "note": "带模板名：文件名主干或 console_key 都认，大小写、空格、下划线会规整成连字符。13 个模板见下文表格。"}, {"cmd": "/claude-api managed-agents-onboard <网址>", "note": "带网址：网址要是整条请求的全部内容，才可能按官方来源原样照抄。"}], "howItWorks": ["开放式提问：做什么、谁或什么来触发；等你说完。", "据你的描述起草 agent 提案，行内给建议：web 工具默认关；要接的 MCP 标出各自需要的凭据；预置 skills；单一产出物默认用 outcome 并起草 rubric；默认模型 claude-opus-5-5；大并行的活才加 dynamic workflows。之后最多一次批量追问。", "环境：复用或新建，网络默认 limited；通常零到一个问题。", "到这一步才收凭据：先静默跑可行性检查，再选怎么开工（outcome、消息或定时 deployment）。", "交出两块代码：写文件加 ant apply，和运行时的 SDK 代码。描述完如果有合适的模板，会提一次。"], "outputs": ["写好的 agent、环境（定时的话还有 deployment）文件，交给 ant apply 创建", "运行时的 SDK 代码", "ant apply 生成的 claude-lock.json"], "cost": {"money": "会花钱：Managed Agents 按 API 计费，测试会话也是真跑。模板用法的测试会话默认上限 $5.00，模板自带的定时部署每次运行也最多 $5.00；不带参数和带网址的用法，指南没给默认上限。预算按公开标价累计，到顶是暂停（budget_reached），不是终止。", "stops": ["凭据：到跑测试会话那步才收，由你在自己的终端输入，不进聊天", "ant apply 之前：先 --dry-run -v，读出组织和工作区；没有终端时必须加 --yes，那是你的批准，不是它的", "不自行加 --force 或 --prune，只点名刚写的文件", "定时部署创建后立刻暂停，等你同意才开", "带网址时：出提案后必须停下，等你回话", "ant 缺失或过旧：问你装不装"]}, "tips": ["ant 版本门槛两处写法不同：不带参数写 ≥1.30.0，网址和模板用法写 ≥1.34.0（第一个让 ant apply 管 vault 的版本）", "Claude Platform on AWS 上 ant 没有 SigV4，改走 SDK", "claude-lock.json 必须和文件一起提交，否则下次 ant apply 会重复创建", "别把 agents.create() 和 sessions.create() 放进同一段没有保护的代码：每次运行都会新建一个 agent，指南称之为 \"#1 anti-pattern\""], "extras": [{"title": "带模板名时", "items": [{"v": "照 Console 的顺序：agent、environment、vault、测试会话、定时、集成，用 agents/ 下的文件加 ant 命令做出同一个 agent"}, {"v": "停问点多是选项题：用不用这个模板；带 MCP 的，问执行前要不要确认（Run without asking 或 Judge risky actions），并列出凭据清单；选或建环境；每个没覆盖的 MCP 服务器选 Connect in the Console、Add a token from my terminal 或 Skip for now；Run a test session?；How often? 然后 Create deployment、Turn it on?"}, {"v": "明确不问语气、输出格式、模型，也不先要仓库或频道名"}]}, {"title": "带网址时", "items": [{"v": "流程是 fetch、extract、propose、write、apply；开工前查 ant 版本和 ant auth status"}, {"v": "先判来源档位：platform.claude.com/docs、claude.dev、GitHub 上 anthropics 和 anthropic-experimental 的 main 分支算官方，提示词可以照抄；其余只借设计，文字全部重写，并声明「这是重建」。两档都要核实厂商主机、URL 和包"}, {"v": "提案里有写入路径、凭据表（秘密、接收主机、哪步用、最窄范围）、你要自备的清单、定时和时区"}]}, {"title": "会写哪些文件", "items": [{"k": "不带参数", "v": "平铺的 agents/<name>.md、environments/<name>.yaml，定时再加 deployments/<name>.md"}, {"k": "模板和网址", "v": "agents/<name>/ 子目录：agent.md、environment.yaml、vault.yaml、session.yaml、deployment-*.yaml、memory_store-*.yaml、skills/*/SKILL.md、kickoff.yaml、data/"}, {"k": "都有", "v": "ant apply 生成的 claude-lock.json；密钥不落进任何文件"}]}], "faq": [{"q": "多 agent 能开多大？", "a": "multiagent_20261001 类型可以同时开 subagents（一层委派，同时最多 25 个子线程）、dynamic workflows（一次 run 同时约 64 个线程、总计约 1000 个，默认寿命 24 小时）和 advisor（中途请更强的模型给意见）。每个 agent 都花 token，要设会话预算。"}, {"q": "这里的 dynamic workflows 和 Claude Code 的 Workflow 工具是一回事吗？", "a": "不是一回事，文档特意分开说了。"}], "quote": {"en": "a proposal followed by files in the same turn is not a proposal", "from": "managed-agents-onboarding-from-url.md"}, "pairs": [], "pairsNote": "指南没写它和另外 7 个子命令怎么配合，在线路图上自成一条线。", "sources": ["SKILL.md：managed-agents-onboard 一行，多 agent 一节", "shared/managed-agents-onboarding.md：§1–§5", "shared/managed-agents-onboarding-from-quickstart.md：§0–§7", "shared/managed-agents-onboarding-from-url.md：§0–§6", "shared/managed-agents-quickstarts/*.md：frontmatter"]}], "generated": "2026-10-10"}</script>
+<script>(() => {
+  'use strict';
+  const DATA = JSON.parse(document.getElementById('skills-data').textContent);
+  const CARDS = DATA.cards;
+  const BY = Object.fromEntries(CARDS.map((c) => [c.name, c]));
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const ORDER = {
+    gen: ['migrate', 'preserved-thinking-migration', 'upgrade', 'prompt-audit'],
+    qc: ['build-eval', 'hillclimb', 'cost-optimize'],
+    managed: ['managed-agents-onboard'],
+  };
+  const BUCKET = {
+    gen: { name: '换代', note: '换 SDK、换模型，以及换完之后审提示词、修历史。' },
+    qc: { name: '质量与成本', note: '先建尺子，再提分或降本。' },
+    managed: { name: '托管 Agent', note: '让 Anthropic 跑 agent 循环，每个会话配一个沙箱。' },
+  };
+  const LINE = {
+    upgrade: 'gen', migrate: 'gen', 'preserved-thinking-migration': 'gen', 'prompt-audit': 'gen',
+    'build-eval': 'qual', hillclimb: 'qual', 'cost-optimize': 'cost', 'managed-agents-onboard': 'managed',
+  };
+  const LINE_NAME = { gen: '换代线', qual: '提质线', cost: '省钱线', managed: '托管线' };
+  const STATION_NOTE = { 'prompt-audit': '换乘站：换代线和省钱线', hillclimb: '换乘站：提质线和省钱线' };
+  const lineOf = (name) => LINE[name] || 'free';
+  const stationOf = (name) => STATION_NOTE[name] || LINE_NAME[lineOf(name)] || '';
+
+  const SCENARIOS = [
+    { group: '换代', items: [
+      { id: 'model', label: '要换到新模型', route: ['migrate', 'prompt-audit'], note: '在命令里点名文件和目标模型。它先确认范围，再按目标模型那一章改：[BLOCKS] 是不改就 400 的，[TUNE] 列成清单让你逐条取舍；改完按 prompt-audit 审一遍为旧模型写的提示词。没说目标模型时它会问你；你没选别的，默认迁到最新的 Opus（claude-opus-5-5）。' },
+      { id: 'bound', label: '换完模型，报 "The block is bound to a different conversation"', route: ['preserved-thinking-migration'], note: '这是 preserved thinking 在核对历史：你的程序改了历史，旧的 thinking block 对不上了。它先测哪些改动在丢推理、丢了多少，再逐个修成只追加不改写。别拿 drop_block 了事，那只是把报错换成静默丢推理。' },
+      { id: 'sdk', label: 'Python SDK 还停在 0.x', route: ['upgrade'], note: '目前只覆盖 Python anthropic 0.x → 1.x，只升 SDK，不换模型。命令末尾带上路径（比如 upgrade python src/），否则它先问范围。别的语言没有对应指南，它会直说，并指去那个 SDK 的 CHANGELOG。' },
+      { id: 'regress', label: '换完模型，回答变了（拒答多、工具调用少、回复变长）', route: ['migrate', 'build-eval', 'hillclimb'], note: 'migrate 的做法是：报了行为回归，先建 eval，再用 eval 有依据地调，不凭感觉改提示词。' },
+    ] },
+    { group: '提示词和质量', items: [
+      { id: 'claudemd', label: 'CLAUDE.md 越写越长，规则互相打架', route: ['prompt-audit'], note: '它查每一行的来历（git blame），问模型是不是本来就会，出一份带 file:line 和置信度的报告，外加只含高、中置信项的建议 diff。默认只提议；你明说要改（比如 clean it up）才动文件。~/.claude/ 下的文件要你点名才审。' },
+      { id: 'eval', label: '不知道改提示词是变好还是变差', route: ['build-eval'], note: '它用面试的方式帮你建一套能反复跑的评测：题集和打分法都要你亲口说 yes，终点是 baseline 分数和一份 report.html。' },
+      { id: 'climb', label: '已经有评测，想把分数提上去', route: ['hillclimb'], note: '先证明这把尺子量得出变化，再定改什么、什么不许动、预算和停止条件；计划批准后循环：读失败对话、改一处、重跑、记录。最后只认 test 上的涨幅。' },
+    ] },
+    { group: '成本', items: [
+      { id: 'bill', label: '账单太高', route: ['cost-optimize'], note: '先定范围、质量线和每个任务花多少，再按固定顺序过杠杆：先免费的（缓存、输入瘦身、循环卫生、输出、batch），后取舍的（effort、换模型）。取舍的要你明确接受才应用。' },
+      { id: 'cache', label: 'agent 每轮重发整段历史，缓存好像没命中', route: ['cost-optimize', 'preserved-thinking-migration'], note: 'cost-optimize 先看钱花在哪，必要时附一个缓存探针脚本。改历史的地方，缓存也在同一处断掉；这类改动 preserved-thinking-migration 能逐个找出来。' },
+    ] },
+    { group: '托管 Agent', items: [
+      { id: 'managed', label: '想让 Anthropic 托管一个定时跑的 agent', route: ['managed-agents-onboard'], note: '不带参数就是面试：先问做什么、谁来触发，再起草 agent 提案；凭据到跑测试会话那步才收。最后给你两块代码：写文件加 ant apply，和运行时的 SDK 代码。' },
+      { id: 'template', label: 'Console 里看中了一个模板', route: ['managed-agents-onboard'], note: '带上模板名（比如 deep-researcher），它照 Console 的顺序问几道选项题，用 agents/ 下的文件加 ant 命令做出同一个 agent。模板的测试会话默认最多花 $5。', link: { href: '#templates', text: '看 13 个模板' } },
+      { id: 'url', label: '手上有官方示例，想照着搭', route: ['managed-agents-onboard'], note: '整条请求只放这个网址。官方来源（platform.claude.com/docs、claude.dev、GitHub 上 anthropics 和 anthropic-experimental 的 main 分支）的提示词可以照抄，别的来源只借设计、文字全部重写。出完提案它一定停下，等你回话。' },
+    ] },
+  ];
+  const SCENARIO_BY = {};
+  SCENARIOS.forEach((g) => g.items.forEach((s) => { SCENARIO_BY[s.id] = s; }));
+
+  /* ---------- helpers ---------- */
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'text') n.textContent = v; else n.setAttribute(k, v === true ? '' : v);
+    }
+    for (const k of kids.flat(Infinity)) if (k != null && k !== false) n.append(k);
+    return n;
+  }
+  const hasItems = (a) => Array.isArray(a) && a.length > 0;
+  function chip(name) {
+    if (!BY[name]) return el('code', { text: String(name) });
+    return el('a', { class: 'sk', href: '#skill/' + name, 'data-line': lineOf(name), text: name });
+  }
+  // 把一段文字里的子命令名变成可点的站名；文件名、连字符拼出来的别的词不算
+  const NAME_RE = new RegExp('(' + CARDS.map((c) => c.name).sort((a, b) => b.length - a.length).join('|') + ')', 'g');
+  function richText(text) {
+    const frag = document.createDocumentFragment();
+    const s = String(text);
+    let last = 0; let m;
+    NAME_RE.lastIndex = 0;
+    while ((m = NAME_RE.exec(s))) {
+      const before = s[m.index - 1] || '';
+      const after = s.slice(m.index + m[0].length, m.index + m[0].length + 2);
+      if (/[\w/.-]/.test(before) || /^[\w-]/.test(after) || /^\.\w/.test(after)) continue;
+      frag.append(s.slice(last, m.index), chip(m[1]));
+      last = m.index + m[0].length;
+    }
+    frag.append(s.slice(last));
+    return frag;
+  }
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+  }
+  function score(c, q) {
+    const name = c.name.toLowerCase();
+    if (name === q) return 100;
+    if (name.startsWith(q)) return 80;
+    if (name.includes(q)) return 60;
+    if ((c.aliases || []).some((a) => a.toLowerCase() === q)) return 70;
+    if ((c.aliases || []).join(' ').toLowerCase().includes(q)) return 50;
+    const hay = [c.oneLiner, ...(c.whenToUse || []), ...(c.keyTerms || []).map((t) => t.term + ' ' + t.zh)].join(' ').toLowerCase();
+    return hay.includes(q) ? 30 : 0;
+  }
+  const norm = (q) => q.trim().toLowerCase().replace(/^\//, '').replace(/^claude-api\s*/, '');
+
+  $$('a.sk[href^="#skill/"]').forEach((a) => {
+    if (!a.dataset.line) a.dataset.line = lineOf(a.getAttribute('href').slice(7));
+  });
+
+  /* ---------- router ---------- */
+  const sitList = $('#sit-list');
+  const routeBox = $('#route');
+  function selectScenario(id) {
+    const s = SCENARIO_BY[id];
+    if (!s) return;
+    $$('.sit', sitList).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+    routeBox.textContent = '';
+    routeBox.append(...[
+      el('h3', { text: s.label }),
+      el('ol', { class: 'route-line', 'aria-label': '先后顺序' }, s.route.map((n) => el('li', null, chip(n)))),
+      el('p', { class: 'note' }, richText(s.note)),
+      s.link ? el('p', { class: 'note' }, el('a', { href: s.link.href, text: s.link.text })) : null,
+      el('p', { class: 'src', text: '出处：各子命令的指南。点站名看详解。' }),
+    ].filter(Boolean));
+  }
+  SCENARIOS.forEach((g) => {
+    sitList.append(el('div', { class: 'sit-group' },
+      el('h3', { text: g.group }),
+      g.items.map((s) => {
+        const b = el('button', { class: 'sit', type: 'button', 'data-id': s.id, 'aria-pressed': 'false', text: s.label });
+        b.addEventListener('click', () => selectScenario(s.id));
+        return b;
+      })));
+  });
+  selectScenario('model');
+
+  /* ---------- catalog ---------- */
+  const groupsBox = $('#cat-groups');
+  for (const [bucket, names] of Object.entries(ORDER)) {
+    const b = BUCKET[bucket];
+    const rows = names.map((n) => BY[n]).filter(Boolean);
+    groupsBox.append(el('div', { class: 'cat-group' },
+      el('h3', null, b.name, el('span', { class: 'n', text: `${rows.length} 个` })),
+      el('p', { class: 'gnote', text: b.note }),
+      el('ul', { class: 'rows' }, rows.map((c) => el('li', { class: 'row' },
+        el('a', { href: '#skill/' + c.name, 'data-line': lineOf(c.name) },
+          el('span', { class: 'dot', 'aria-hidden': 'true' }),
+          el('span', { class: 'cmd', text: c.name }),
+          el('span', { class: 'tags' }, el('span', { class: c.costWarn ? 'tag cost' : 'tag', text: c.costTag })),
+          el('span', { class: 'one', text: c.oneLiner })))))));
+  }
+
+  /* ---------- drawer ---------- */
+  const drawer = $('#drawer');
+  const scrim = $('#scrim');
+  let lastFocus = null;
+  let prevHash = '';
+  function sec(title, ...kids) {
+    return el('div', { class: 'd-sec' }, title ? el('h3', { text: title }) : null, kids);
+  }
+  function listSec(title, items, ordered) {
+    if (!hasItems(items)) return null;
+    return sec(title, el(ordered ? 'ol' : 'ul', null, items.map((t) => el('li', null, richText(t)))));
+  }
+  function extraSec(x) {
+    if (!x || !hasItems(x.items)) return null;
+    if (x.items.every((i) => i.k)) {
+      return sec(x.title, el('dl', { class: 'd-models' }, x.items.map((i) => [el('dt', { text: i.k }), el('dd', null, richText(i.v))])));
+    }
+    return sec(x.title, el('ul', null, x.items.map((i) => el('li', null, i.k ? el('strong', { text: i.k + '：' }) : null, richText(i.v)))));
+  }
+  function renderDrawer(c) {
+    $('#d-title').textContent = c.command;
+    const meta = $('#d-meta');
+    meta.textContent = '';
+    meta.append(
+      el('span', { class: 'tag solid', text: '你敲的' }),
+      el('span', { class: 'tag', text: stationOf(c.name) }),
+      el('span', { class: c.costWarn ? 'tag cost' : 'tag', text: c.costTag }));
+    $('#d-one').textContent = c.oneLiner || '';
+    const body = $('#d-body');
+    body.textContent = '';
+    const parts = [];
+    parts.push(listSec('什么时候用', c.whenToUse));
+    parts.push(listSec('什么时候别用', c.whenNotToUse));
+    if (hasItems(c.usage)) {
+      parts.push(sec('怎么敲', el('ul', { class: 'usage' }, c.usage.map((u) =>
+        el('li', null, el('code', { text: u.cmd }), u.note ? el('p', null, richText(u.note)) : null)))));
+    }
+    parts.push(listSec('按什么步骤做', c.howItWorks, true));
+    parts.push(listSec('你会拿到', c.outputs));
+    if (c.cost) {
+      parts.push(el('div', { class: 'd-sec cost' }, el('h3', { text: '花钱和确认点' }),
+        el('div', { class: 'd-cost' },
+          el('p', null, el('strong', { text: '花不花钱：' }), richText(c.cost.money)),
+          hasItems(c.cost.stops) ? [el('h4', { text: '停下来等你的地方' }), el('ul', null, c.cost.stops.map((t) => el('li', null, richText(t))))] : null)));
+    }
+    parts.push(listSec('坑', c.tips));
+    (c.extras || []).forEach((x) => parts.push(extraSec(x)));
+    if (hasItems(c.faq)) {
+      parts.push(sec('常见问题', c.faq.map((f) => el('details', { class: 'faq' },
+        el('summary', null, richText(f.q)), el('p', null, richText(f.a))))));
+    }
+    if (hasItems(c.keyTerms)) {
+      parts.push(sec('这个子命令里的词', el('dl', { class: 'd-terms' },
+        c.keyTerms.map((t) => [el('dt', { text: t.term }), el('dd', null, richText(t.zh))]))));
+    }
+    if (c.quote && c.quote.en) {
+      parts.push(sec('原文一句', el('blockquote', { class: 'd-quote' },
+        '“' + c.quote.en + '”', el('cite', { text: c.quote.from || '' }))));
+    }
+    const pairs = (c.pairs || []).filter((p) => BY[p.name]);
+    if (pairs.length) {
+      parts.push(sec('和谁配合', el('ul', { class: 'pairs' }, pairs.map((p) => el('li', null, chip(p.name), richText(p.why))))));
+    } else if (c.pairsNote) {
+      parts.push(sec('和谁配合', el('p', null, c.pairsNote)));
+    }
+    const inRoutes = [];
+    SCENARIOS.forEach((g) => g.items.forEach((s) => { if (s.route.includes(c.name)) inRoutes.push(s); }));
+    if (inRoutes.length) {
+      parts.push(sec('在「我现在要……」里', el('ul', null, inRoutes.map((s) => {
+        const a = el('a', { href: '#router', text: s.label });
+        a.addEventListener('click', () => { selectScenario(s.id); closeDrawer(true); });
+        return el('li', null, a);
+      }))));
+    }
+    if (hasItems(c.sources)) parts.push(sec('出处（Skill 里的文件和小标题）', el('div', { class: 'd-src' }, el('ul', null, c.sources.map((s) => el('li', { text: s }))))));
+    parts.filter(Boolean).forEach((p) => body.append(p));
+    body.scrollTop = 0;
+  }
+  function openDrawer(name) {
+    const c = BY[name];
+    if (!c) return false;
+    if (!drawer.classList.contains('on')) lastFocus = document.activeElement;
+    renderDrawer(c);
+    drawer.classList.add('on');
+    scrim.classList.add('on');
+    document.documentElement.classList.add('lock');
+    $('#d-close').focus({ preventScroll: true });
+    return true;
+  }
+  function closeDrawer(keepHashNav) {
+    if (!drawer.classList.contains('on')) return;
+    drawer.classList.remove('on');
+    scrim.classList.remove('on');
+    document.documentElement.classList.remove('lock');
+    if (!keepHashNav && location.hash.startsWith('#skill/')) {
+      history.replaceState(null, '', prevHash || location.pathname + location.search);
+    }
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+  }
+  function fromHash(oldUrl) {
+    const h = decodeURIComponent(location.hash);
+    if (h.startsWith('#skill/')) {
+      if (oldUrl !== undefined) {
+        const i = oldUrl.indexOf('#');
+        const old = i >= 0 ? oldUrl.slice(i) : '';
+        if (!old.startsWith('#skill/')) prevHash = old;
+      }
+      if (!openDrawer(h.slice(7))) toast('没有找到这个子命令');
+    } else {
+      closeDrawer(true);
+    }
+  }
+  window.addEventListener('hashchange', (e) => fromHash(e.oldURL));
+  $('#d-close').addEventListener('click', () => closeDrawer(false));
+  scrim.addEventListener('click', () => closeDrawer(false));
+  $$('.d-auto a').forEach((a) => a.addEventListener('click', () => closeDrawer(true)));
+  $('#d-copy').addEventListener('click', async () => {
+    const cmd = $('#d-title').textContent;
+    try {
+      await navigator.clipboard.writeText(cmd);
+      toast('已复制 ' + cmd);
+    } catch {
+      toast('浏览器没给剪贴板权限，请手动选中复制：' + cmd);
+    }
+  });
+  drawer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = $$('a[href], button:not([disabled]), summary, input', drawer).filter((x) => x.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0]; const last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  fromHash();
+
+  /* ---------- top search ---------- */
+  const qi = $('#qs-input');
+  const ql = $('#qs-list');
+  let hits = []; let active = -1;
+  function paintHits() {
+    ql.textContent = '';
+    if (!qi.value.trim()) { ql.classList.remove('on'); qi.setAttribute('aria-expanded', 'false'); qi.removeAttribute('aria-activedescendant'); return; }
+    if (!hits.length) {
+      ql.append(el('li', { class: 'empty', role: 'option', 'aria-disabled': 'true', text: '没有匹配的子命令，试试英文名，或者「省钱」「评测」「托管」' }));
+    }
+    hits.forEach((c, i) => {
+      const li = el('li', { role: 'option', id: 'qs-' + c.name, 'aria-selected': String(i === active) },
+        el('span', { class: 'cmd', text: c.name }), el('span', { class: 'one', text: c.oneLiner || '' }));
+      li.addEventListener('mousedown', (e) => e.preventDefault());
+      li.addEventListener('click', () => pick(c));
+      ql.append(li);
+    });
+    ql.classList.add('on');
+    qi.setAttribute('aria-expanded', 'true');
+    if (active >= 0 && hits[active]) qi.setAttribute('aria-activedescendant', 'qs-' + hits[active].name);
+    else qi.removeAttribute('aria-activedescendant');
+  }
+  function pick(c) {
+    qi.value = ''; hits = []; active = -1; paintHits(); qi.blur();
+    location.hash = 'skill/' + c.name;
+  }
+  qi.addEventListener('input', () => {
+    const q = norm(qi.value);
+    hits = q ? CARDS.map((c) => [score(c, q), c]).filter((x) => x[0] > 0)
+      .sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name)).slice(0, 8).map((x) => x[1]) : [];
+    active = hits.length ? 0 : -1;
+    paintHits();
+  });
+  qi.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' && hits.length) { e.preventDefault(); active = (active + 1) % hits.length; paintHits(); }
+    else if (e.key === 'ArrowUp' && hits.length) { e.preventDefault(); active = (active - 1 + hits.length) % hits.length; paintHits(); }
+    else if (e.key === 'Enter' && hits[active]) { e.preventDefault(); pick(hits[active]); }
+    else if (e.key === 'Escape') { qi.value = ''; hits = []; paintHits(); }
+  });
+  qi.addEventListener('blur', () => { ql.classList.remove('on'); qi.setAttribute('aria-expanded', 'false'); });
+  qi.addEventListener('focus', () => { if (qi.value.trim()) paintHits(); });
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const typing = t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || (t && t.isContentEditable);
+    if (e.key === '/' && !typing && !drawer.classList.contains('on')) { e.preventDefault(); qi.focus(); }
+  });
+
+  /* ---------- toc highlight ---------- */
+  const tocLinks = $$('#toc-list a');
+  const tocMap = Object.fromEntries(tocLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      tocLinks.forEach((a) => a.removeAttribute('aria-current'));
+      const a = tocMap[en.target.id];
+      if (a) a.setAttribute('aria-current', 'true');
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  $$('main .section').forEach((s) => io.observe(s));
+})();
+</script>
+</body>
+</html>
