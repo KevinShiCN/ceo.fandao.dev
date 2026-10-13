@@ -9,6 +9,7 @@ import Hero from './c/Hero.astro';
 import Latest from './c/Latest.astro';
 import Points from './c/Points.astro';
 import Watch from './c/Watch.astro';
+import Why from './c/Why.astro';
 import { feature, point } from './c/pick';
 import Shot from '../Shot.astro';
 import '../../styles/scroll-motion.css';
@@ -29,6 +30,11 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 
 <main id="main" class="home-c">
 	<Hero />
+
+	<div class="group">
+		<h2>为什么做</h2>
+	</div>
+	<Why />
 
 	<div class="group">
 		<h2>手表上</h2>
