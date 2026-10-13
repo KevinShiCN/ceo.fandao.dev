@@ -1,5 +1,5 @@
 ---
-// 为什么做：我用过、等过的几个，为什么还是自己做，以及饭耳的三条规矩（免费、先照我的需要做、你也可以提）。
+// 为什么做：我用过、等过的几个，为什么还是自己做，以及饭耳的几条规矩（免费、饭导五常大米、先照我的需要做）。
 // 写法像一封短信，不做对比表；文案和出处在 src/lib/why.ts。
 import { WHY } from '../../../lib/why';
 ---
@@ -106,10 +106,11 @@ import { WHY } from '../../../lib/why';
 			font-size: 30px;
 		}
 
-		/* 电脑：三条规矩并排 */
+		/* 电脑：几条规矩就并排几列 */
 		.why-terms {
 			display: grid;
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-auto-columns: minmax(0, 1fr);
+			grid-auto-flow: column;
 			gap: var(--s-6);
 		}
 

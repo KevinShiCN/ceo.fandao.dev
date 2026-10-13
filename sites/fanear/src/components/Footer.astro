@@ -1,6 +1,6 @@
 ---
 // 页脚：两份条款、更新记录，和作者的博客（从博客也能点回来）。
-import { AUTHOR, LEGAL, SITE, STATUS } from '../lib/site';
+import { AUTHOR, LEGAL, MAKER, SITE, STATUS } from '../lib/site';
 import { withBase } from '../lib/url';
 import Logo from './Logo.astro';
 ---
@@ -12,6 +12,7 @@ import Logo from './Logo.astro';
 			<p>
 				<strong>{SITE.title}</strong>
 				<span class="footer-status">{STATUS.label}：{STATUS.text}</span>
+				<span class="footer-status">{MAKER.line}</span>
 			</p>
 		</div>
 		<nav class="footer-links" aria-label="条款和其他">
