@@ -1,0 +1,21 @@
+---
+// 目录里的步骤列表。手机上点开的那份和电脑左边那份各渲染一次，同一时间只显示其中一份（样式在 styles/toc.css）。
+interface Props {
+	items: readonly { id: string; title: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ol class="toc-list">
+	{
+		items.map((item, i) => (
+			<li>
+				<a href={`#${item.id}`} data-toc-link={item.id} data-toc-title={item.title}>
+					<span class="step-no">{i + 1}</span>
+					<span>{item.title}</span>
+				</a>
+			</li>
+		))
+	}
+</ol>

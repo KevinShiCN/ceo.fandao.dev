@@ -1,0 +1,119 @@
+---
+// 页内目录：有进度、能跳。现在用在使用说明（7 步）。
+// 手机、平板：钉在屏幕顶上的一条，写着读到第几步、哪一步，下面一条分成几格的进度条（跟 App 一天的时间条一个画法）；
+//   点开是全部步骤，点哪步跳到哪步。
+// 电脑（≥1024 宽）：左边一列跟着滚，上面同一条进度条，下面是步骤，读到的那步点亮。
+// 读到哪一步：屏幕从上往下 30% 那条线落在哪一步里就算哪一步，这一步读了多少，进度条那一格就填多少；滚到页底算全部读完。
+// 没有 JavaScript 时目录照样能点开、能跳，只是没有进度。样式在 styles/toc.css。
+import '../styles/toc.css';
+import TocLinks from './TocLinks.astro';
+
+interface Props {
+	items: readonly { id: string; title: string }[];
+	/** 读屏软件念的目录名，比如「步骤」 */
+	label: string;
+}
+
+const { items, label } = Astro.props;
+const total = `共 ${items.length} 步`;
+---
+
+<nav class="toc" aria-label={label} data-toc style={`--toc-n:${items.length}`}>
+	<details class="toc-bar">
+		<summary class="toc-summary">
+			<span class="toc-now">
+				<span class="toc-count" data-toc-count></span>
+				<span class="toc-name" data-toc-name data-total={total}>{total}</span>
+			</span>
+			<span class="toc-open">目录</span>
+			<span class="toc-progress" aria-hidden="true">{items.map(() => <span class="toc-seg" />)}</span>
+		</summary>
+		<TocLinks items={items} />
+	</details>
+
+	<div class="toc-rail">
+		<p class="toc-rail-head" data-toc-head data-total={total}>{total}</p>
+		<span class="toc-progress" aria-hidden="true">{items.map(() => <span class="toc-seg" />)}</span>
+		<TocLinks items={items} />
+	</div>
+</nav>
+
+<script>
+	const LINE = 0.3;
+
+	for (const toc of document.querySelectorAll<HTMLElement>('[data-toc]')) {
+		const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]')];
+		const ids = [...new Set(links.map((a) => a.dataset.tocLink ?? ''))];
+		const steps = ids.map((id) => document.getElementById(id));
+		// 锚点对不上就不接管，目录照样能跳
+		if (steps.some((step) => step === null)) continue;
+		const titles = ids.map((id) => links.find((a) => a.dataset.tocLink === id)?.dataset.tocTitle ?? '');
+		const rows = [...toc.querySelectorAll('.toc-progress')].map((bar) => [...bar.children] as HTMLElement[]);
+		const count = toc.querySelector<HTMLElement>('[data-toc-count]');
+		const name = toc.querySelector<HTMLElement>('[data-toc-name]');
+		const head = toc.querySelector<HTMLElement>('[data-toc-head]');
+		const bar = toc.querySelector('details');
+		let shown = -2;
+
+		const update = () => {
+			const line = window.innerHeight * LINE;
+			let at = -1;
+			let part = 0;
+			steps.forEach((step, i) => {
+				const box = (step as HTMLElement).getBoundingClientRect();
+				if (box.top <= line) {
+					at = i;
+					part = Math.min(1, (line - box.top) / box.height);
+				}
+			});
+			if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+				at = steps.length - 1;
+				part = 1;
+			}
+			for (const row of rows) {
+				row.forEach((seg, i) => seg.style.setProperty('--fill', String(i < at ? 1 : i === at ? Math.round(part * 1000) / 1000 : 0)));
+			}
+			if (at === shown) return;
+			shown = at;
+			for (const a of links) {
+				const i = ids.indexOf(a.dataset.tocLink ?? '');
+				a.dataset.state = i < at ? 'done' : i === at ? 'current' : 'todo';
+				if (i === at) a.setAttribute('aria-current', 'step');
+				else a.removeAttribute('aria-current');
+			}
+			if (count) count.textContent = at < 0 ? '' : `${at + 1}/${steps.length}`;
+			if (name) name.textContent = at < 0 ? (name.dataset.total ?? '') : titles[at];
+			if (head) head.textContent = at < 0 ? (head.dataset.total ?? '') : `第 ${at + 1} 步，共 ${steps.length} 步`;
+		};
+
+		let queued = false;
+		const schedule = () => {
+			if (queued) return;
+			queued = true;
+			requestAnimationFrame(() => {
+				queued = false;
+				update();
+			});
+		};
+		window.addEventListener('scroll', schedule, { passive: true });
+		window.addEventListener('resize', schedule);
+		window.addEventListener('load', schedule);
+		update();
+		toc.dataset.live = '';
+
+		// 手机上点开的目录：点了哪步就收起来；按 Esc、点目录外面也收起来
+		if (bar) {
+			bar.addEventListener('click', (event) => {
+				if ((event.target as Element).closest('a')) bar.open = false;
+			});
+			bar.addEventListener('keydown', (event) => {
+				if (event.key !== 'Escape' || !bar.open) return;
+				bar.open = false;
+				bar.querySelector('summary')?.focus();
+			});
+			document.addEventListener('click', (event) => {
+				if (bar.open && !bar.contains(event.target as Node)) bar.open = false;
+			});
+		}
+	}
+</script>

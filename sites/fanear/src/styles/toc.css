@@ -1,0 +1,225 @@
+/* 页内目录（components/Toc.astro）：手机、平板上钉在屏幕顶上的一条，电脑上左边一列。
+   颜色、间距都取 tokens.css；只在用了目录的页面上加载。 */
+:root {
+	/* 手机上那一条的高度：点目录跳到某一步时，标题停在它下面，不被盖住 */
+	--toc-bar-h: 64px;
+}
+
+/* 点目录跳过去时慢慢滚；设了「减弱动态效果」就直接跳 */
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+.toc {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	background: var(--c-paper);
+}
+
+/* 进度条：几步就几格，跟 App 一天的时间条一个画法。读完的格子填满，正在读的那格按读了多少填 */
+.toc-progress {
+	display: grid;
+	grid-template-columns: repeat(var(--toc-n), minmax(0, 1fr));
+	gap: 3px;
+	height: 4px;
+}
+
+.toc:not([data-live]) .toc-progress {
+	display: none;
+}
+
+.toc-seg {
+	overflow: hidden;
+	border-radius: 1px;
+	background: var(--c-line);
+}
+
+.toc-seg::before {
+	content: '';
+	display: block;
+	height: 100%;
+	background: var(--c-me);
+	transform: scaleX(var(--fill, 0));
+	transform-origin: left center;
+}
+
+.toc-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.toc-list a {
+	display: flex;
+	align-items: center;
+	gap: var(--s-3);
+	color: var(--c-ink-2);
+	line-height: 1.35;
+	text-decoration: none;
+}
+
+.toc-list a:hover {
+	color: var(--c-ink);
+}
+
+.toc .step-no {
+	width: 22px;
+	height: 22px;
+	font-size: 13px;
+}
+
+/* 有了进度以后：读完的步骤号是深墨方块，正在读的是我蓝，还没读到的是空心方块 */
+.toc[data-live] a[data-state='current'] {
+	color: var(--c-ink);
+	font-weight: 600;
+}
+
+.toc[data-live] a[data-state='current'] .step-no {
+	background: var(--c-me);
+}
+
+.toc[data-live] a[data-state='todo'] .step-no {
+	background: var(--c-paper);
+	box-shadow: inset 0 0 0 1.5px var(--c-ink-3);
+	color: var(--c-ink-3);
+}
+
+/* 手机、平板：顶上一条。左边「3/7 允许读健康数据」，右边「目录」，下面进度条；点开在下面展开全部步骤 */
+.toc-rail {
+	display: none;
+}
+
+.toc-bar {
+	position: relative;
+	border-bottom: 1px solid var(--c-line);
+}
+
+.toc-summary {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: var(--s-2) var(--s-4);
+	min-height: var(--toc-bar-h);
+	padding: var(--s-3) 0;
+	list-style: none;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.toc-summary::-webkit-details-marker {
+	display: none;
+}
+
+.toc-now {
+	display: flex;
+	align-items: baseline;
+	gap: var(--s-2);
+	min-width: 0;
+}
+
+.toc-count {
+	flex: none;
+	color: var(--c-me);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.toc-count:empty {
+	display: none;
+}
+
+.toc-name {
+	overflow: hidden;
+	color: var(--c-ink);
+	font-size: 16px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.toc-open {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--s-2);
+	color: var(--c-ink-2);
+	font-size: 15px;
+}
+
+.toc-open::after {
+	content: '';
+	width: 7px;
+	height: 7px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: translateY(-2px) rotate(45deg);
+	transition: transform 150ms ease;
+}
+
+.toc-bar[open] .toc-open::after {
+	transform: translateY(2px) rotate(225deg);
+}
+
+.toc-bar .toc-progress {
+	grid-column: 1 / -1;
+}
+
+.toc-bar .toc-list {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	left: 0;
+	max-height: min(70vh, 480px);
+	overflow-y: auto;
+	padding: var(--s-2) 0;
+	border: 1px solid var(--c-line);
+	border-top: 0;
+	border-radius: 0 0 var(--r-card) var(--r-card);
+	background: var(--c-paper);
+	box-shadow: 0 12px 24px var(--c-shadow);
+}
+
+.toc-bar .toc-list a {
+	min-height: 48px;
+	padding: 0 var(--s-4);
+	font-size: 16px;
+}
+
+.toc-bar .toc-list a:active {
+	background: var(--c-wash);
+}
+
+/* 电脑：左边一列跟着滚（使用说明页的 .guide 是两栏，目录在第一栏） */
+@media (min-width: 1024px) {
+	.toc {
+		top: var(--s-5);
+		z-index: auto;
+		padding-top: var(--s-7);
+		background: none;
+	}
+
+	.toc-bar {
+		display: none;
+	}
+
+	.toc-rail {
+		display: block;
+	}
+
+	.toc-rail-head {
+		color: var(--c-ink-3);
+		font-size: 14px;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.toc-rail .toc-progress {
+		margin: var(--s-2) 0 var(--s-4);
+	}
+
+	.toc-rail .toc-list a {
+		gap: var(--s-2);
+		min-height: 40px;
+		font-size: 15px;
+	}
+}

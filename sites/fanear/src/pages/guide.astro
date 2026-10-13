@@ -3,6 +3,7 @@
 // 按钮名、设置项名照 App 界面上的字写（fanear 仓库 Apps/iOS、Apps/Watch），改了 App 文案这里也要跟着改。
 import PageIntro from '../components/PageIntro.astro';
 import Shot from '../components/Shot.astro';
+import Toc from '../components/Toc.astro';
 import Base from '../layouts/Base.astro';
 import { SHOTS_NOTE } from '../lib/shots';
 import { STATUS } from '../lib/site';
@@ -26,20 +27,7 @@ const steps = [
 		</PageIntro>
 
 		<div class="guide">
-			<nav class="steps-nav" aria-label="步骤">
-				<ol>
-					{
-						steps.map((step, i) => (
-							<li>
-								<a href={`#${step.id}`}>
-									<span class="step-no">{i + 1}</span>
-									{step.title}
-								</a>
-							</li>
-						))
-					}
-				</ol>
-			</nav>
+			<Toc items={steps} label="步骤" />
 
 			<ol class="steps">
 				<li id="install" class="step">
@@ -157,10 +145,6 @@ const steps = [
 		padding: 0 var(--gutter);
 	}
 
-	.steps-nav {
-		display: none;
-	}
-
 	.steps {
 		margin: 0;
 		padding: 0;
@@ -170,7 +154,8 @@ const steps = [
 	.step {
 		padding: var(--s-7) 0;
 		border-top: 1px solid var(--c-line);
-		scroll-margin-top: var(--s-4);
+		/* 点目录跳过来时，标题停在手机上那条目录下面 */
+		scroll-margin-top: calc(var(--toc-bar-h) + var(--s-3));
 	}
 
 	.step-text,
@@ -185,20 +170,11 @@ const steps = [
 		font-size: 26px;
 	}
 
-	/* 步骤号：深墨方块里的白字，跟 App 的说话人色块同一种方形 */
-	.step-no {
-		display: inline-flex;
-		flex: none;
-		align-items: center;
-		justify-content: center;
+	/* 标题里的步骤号（方块本身的样子在 base.css，目录里也用） */
+	h2 .step-no {
 		width: 1.35em;
 		height: 1.35em;
-		border-radius: var(--r-tag);
-		background: var(--c-ink);
-		color: var(--c-paper);
 		font-size: 0.8em;
-		font-weight: 700;
-		line-height: 1;
 		transform: translateY(-0.08em);
 	}
 
@@ -293,7 +269,14 @@ const steps = [
 		font-size: 15px;
 	}
 
-	/* 电脑：左边一列步骤目录（跟着滚），右边正文；带截图的步骤文字和截图并排 */
+	/* 手机、平板上目录那一条自带下边线，第一步就不再画上边线 */
+	@media (max-width: 1023px) {
+		.step:first-child {
+			border-top: 0;
+		}
+	}
+
+	/* 电脑：左边一列是目录（components/Toc.astro，跟着滚），右边正文；带截图的步骤文字和截图并排 */
 	@media (min-width: 1024px) {
 		.guide {
 			display: grid;
@@ -302,39 +285,8 @@ const steps = [
 			align-items: start;
 		}
 
-		.steps-nav {
-			display: block;
-			position: sticky;
-			top: var(--s-5);
-			padding-top: var(--s-7);
-		}
-
-		.steps-nav ol {
-			margin: 0;
-			padding: 0;
-			list-style: none;
-		}
-
-		.steps-nav a {
-			display: flex;
-			align-items: center;
-			gap: var(--s-2);
-			min-height: 40px;
-			color: var(--c-ink-2);
-			font-size: 15px;
-			line-height: 1.35;
-			text-decoration: none;
-		}
-
-		.steps-nav a:hover {
-			color: var(--c-ink);
-		}
-
-		.steps-nav .step-no {
-			font-size: 13px;
-			width: 22px;
-			height: 22px;
-			transform: none;
+		.step {
+			scroll-margin-top: var(--s-4);
 		}
 
 		.step.has-shots {

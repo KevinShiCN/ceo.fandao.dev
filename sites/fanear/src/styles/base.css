@@ -185,6 +185,19 @@ a:hover {
 	box-shadow: inset 0 0 0 1px var(--c-ink);
 }
 
+/* 步骤号：深墨方块里的白字，跟 App 的说话人色块同一种方形。使用说明的标题和目录都用，大小各自定 */
+.step-no {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--r-tag);
+	background: var(--c-ink);
+	color: var(--c-paper);
+	font-weight: 700;
+	line-height: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
