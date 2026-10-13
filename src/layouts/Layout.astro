@@ -7,7 +7,7 @@ import avatar from '../assets/avatar.jpg';
 import BaseHead from '../components/BaseHead.astro';
 import Search from '../components/Search.astro';
 import SearchIcon from '../components/SearchIcon.astro';
-import { AUTHOR, LINKS } from '../consts';
+import { APPS, AUTHOR, LINKS } from '../consts';
 import { navItems } from '../lib/nav';
 import { withBase } from '../lib/url';
 
@@ -88,6 +88,7 @@ const nav = navItems(Astro.url.pathname).filter((item) => item.href !== home);
 				<p class="footer-links">
 					<a href={LINKS.x.href}>X {LINKS.x.handle}</a>
 					<a href={withBase('/tools/')}>工具库</a>
+					{APPS.map((app) => <a href={app.href}>{app.name}</a>)}
 					<a href={withBase('/about/')}>关于</a>
 					<a href={LINKS.rss.href}>RSS</a>
 				</p>

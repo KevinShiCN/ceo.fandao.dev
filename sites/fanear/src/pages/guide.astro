@@ -1,0 +1,362 @@
+---
+// 使用说明：从装 App 到改「这句是谁说的」，按先后一步一步写，所以用编号。
+// 按钮名、设置项名照 App 界面上的字写（fanear 仓库 Apps/iOS、Apps/Watch），改了 App 文案这里也要跟着改。
+import PageIntro from '../components/PageIntro.astro';
+import Shot from '../components/Shot.astro';
+import Base from '../layouts/Base.astro';
+import { SHOTS_NOTE } from '../lib/shots';
+import { STATUS } from '../lib/site';
+import { withBase } from '../lib/url';
+
+const steps = [
+	{ id: 'install', title: '装 App' },
+	{ id: 'accounts', title: '填你自己的转文字和大模型账号' },
+	{ id: 'health', title: '允许读健康数据' },
+	{ id: 'record', title: '打开手表上的饭耳，开始录' },
+	{ id: 'today', title: '看今天' },
+	{ id: 'commitments', title: '确认答应的事' },
+	{ id: 'speaker', title: '改「这句是谁说的」' },
+];
+---
+
+<Base title="使用说明" description="饭耳怎么用：装 App，填你自己的转文字和大模型账号，手表怎么录，看今天，确认答应的事，改「这句是谁说的」。">
+	<main id="main" class="wrap">
+		<PageIntro title="使用说明">
+			<p>从装好到用顺，一共 7 步。按钮和设置项的名字都照 App 上的字写。</p>
+		</PageIntro>
+
+		<div class="guide">
+			<nav class="steps-nav" aria-label="步骤">
+				<ol>
+					{
+						steps.map((step, i) => (
+							<li>
+								<a href={`#${step.id}`}>
+									<span class="step-no">{i + 1}</span>
+									{step.title}
+								</a>
+							</li>
+						))
+					}
+				</ol>
+			</nav>
+
+			<ol class="steps">
+				<li id="install" class="step">
+					<h2><span class="step-no">1</span>装 App</h2>
+					<div class="note-box" role="note">
+						<p><strong>现在还装不了。</strong>饭耳{STATUS.label}，{STATUS.text}</p>
+						<p>苹果开发者账号开通后先上 TestFlight，到时候这一步会放加入测试的链接。</p>
+					</div>
+					<p>需要一部 iPhone 和配好对的 Apple Watch。手表上的饭耳跟着手机上的一起装；手表上没出现的话，到 iPhone 上的「Watch」App 里找到饭耳，点「安装」。</p>
+				</li>
+
+				<li id="accounts" class="step">
+					<h2><span class="step-no">2</span>填你自己的转文字和大模型账号</h2>
+					<p>饭耳没有自己的服务器。转文字和整理对话，都由手机直接发到你自己的账号，费用也从你的账号走。打开手机上的饭耳，点底部的「设置」：</p>
+					<h3>转文字：火山转写</h3>
+					<ol class="substeps">
+						<li>在火山引擎控制台开通「豆包录音文件识别模型 2.0」。</li>
+						<li>点「火山转写」那一行，把控制台里的 APP ID 填进「App Key」，Access Token 填进「Access Key」。「资源 ID」和「接口地址」已经填好，一般不用改。</li>
+						<li>点「测试转文字连接」。它只送 1 秒静音过去，不会上传你的录音。</li>
+					</ol>
+					<h3>整理对话的大模型</h3>
+					<ol class="substeps">
+						<li>「地址」填你用的大模型服务的接口地址，要支持 OpenAI 的 Responses 接口（饭耳会在地址后面接 /responses）。比如 OpenAI 官方是 https://api.openai.com/v1。</li>
+						<li>「模型」填模型名。点「密钥」那一行，在「新密钥」里填这个服务给你的 Key。</li>
+						<li>点「测试大模型连接」。它只发一句「请只回复两个字：收到」。</li>
+					</ol>
+					<p class="hint">密钥存在手机的钥匙串里。每块录音多长（默认 15 分钟）、原始录音留几天（默认 7 天）、要不要自动调响度（默认开），也都在「设置」里改，改了马上生效。</p>
+				</li>
+
+				<li id="health" class="step">
+					<h2><span class="step-no">3</span>允许读健康数据</h2>
+					<p>在「设置」里点「允许读取健康数据」，系统会列出心率、睡眠、步数、环境音量等全部类型，建议全部打开。</p>
+					<p>打开以后，每段对话上面会画出同一段时间你的心率；整理对话时，同一段时间的健康数据也会一起交给大模型。不开也能用，只是没有这部分。</p>
+				</li>
+
+				<li id="record" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">4</span>打开手表上的饭耳，开始录</h2>
+						<p class="consent"><strong>录别人说话之前，先告诉对方、征得同意。</strong></p>
+						<ul>
+							<li>打开手表上的饭耳就开始录，屏幕上写「正在录」和今天已录多久。只要不是你自己停的、电量也够，每次打开都会接着录。</li>
+							<li>想停就按「停止录音」。自己停的不会自动接着录，再录要点「开始录音」。</li>
+							<li>被来电、Siri、闹钟打断时，手表震一下、发一条通知，整块屏变蓝，写「录音停了，点一下继续」。点一下就接着录。</li>
+							<li>电量低于 10% 时，饭耳先存好正在录的这一块再停，充上电再点继续。</li>
+							<li>录音每 15 分钟一块传到手机，「待传 2 块」就是还有 2 块没传到。手机收到了，表上那一块才删。</li>
+						</ul>
+					</div>
+					<div class="step-shots watch-pair">
+						<Shot id="watchRecording" />
+						<Shot id="watchInterrupted" />
+					</div>
+				</li>
+
+				<li id="today" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">5</span>看今天</h2>
+						<p>手机上的「今天」从上往下是：</p>
+						<ul>
+							<li>一句话：今天录了多久、断了几次、几块转写完、几块失败。</li>
+							<li>一天的时间条：彩色是对话，黑块是没录到，斜纹是没转成文字。没转成文字的，点「重试」再转一次。</li>
+							<li>「件事等你确认」：点「去确认」。</li>
+							<li>今天的对话，新的在上面。点进一段，看逐句原话、谁说的、几点说的，上面是同一段时间的心率。</li>
+						</ul>
+						<p class="hint">整理没完成的对话会写「还没整理」或「整理失败」，失败的点「重试」。</p>
+					</div>
+					<div class="step-shots">
+						<Shot id="today" />
+					</div>
+				</li>
+
+				<li id="commitments" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">6</span>确认答应的事</h2>
+						<p>「待确认」里分两类：「我答应别人的」「别人答应我的」。每件事写着到期日和原话，下面三个键：</p>
+						<dl class="keys">
+							<dt>不是</dt>
+							<dd>这件事不算。点错了，5 秒内点「撤销」。</dd>
+							<dt>补充</dt>
+							<dd>补点什么，比如数量、找谁、改到哪天。存下后这件事算进待办，带着你补的话。</dd>
+							<dt>进待办</dt>
+							<dd>算数，进待办。</dd>
+						</dl>
+						<p>24 小时没回的，自动进待办。</p>
+					</div>
+					<div class="step-shots">
+						<Shot id="commitments" />
+					</div>
+				</li>
+
+				<li id="speaker" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">7</span>改「这句是谁说的」</h2>
+						<p>认不准的人先显示「说话人 1」「说话人 2」，那几句下面有「这句是谁说的」；别的句子长按也能改。</p>
+						<ol class="substeps">
+							<li>点「这句是谁说的」，选一个人；不在里面的，在「别人（写名字）」里写上名字，比如「王经理」，点「就是他」。</li>
+							<li>上面的开关打开是「这段里这个人说的每一句都改」，关上是「只改这一句」。</li>
+						</ol>
+						<p>改完马上生效，以后重新整理也不会改回去。</p>
+					</div>
+					<div class="step-shots">
+						<Shot id="conversation" />
+					</div>
+				</li>
+			</ol>
+		</div>
+
+		<p class="shots-note">{SHOTS_NOTE}还有问题，先看<a href={withBase('/features/')}>功能</a>和<a href={withBase('/changelog/')}>更新记录</a>。</p>
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.steps-nav {
+		display: none;
+	}
+
+	.steps {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.step {
+		padding: var(--s-7) 0;
+		border-top: 1px solid var(--c-line);
+		scroll-margin-top: var(--s-4);
+	}
+
+	.step-text,
+	.step > :not(.step-shots) {
+		max-width: var(--measure);
+	}
+
+	h2 {
+		display: flex;
+		align-items: baseline;
+		gap: var(--s-3);
+		font-size: 26px;
+	}
+
+	/* 步骤号：深墨方块里的白字，跟 App 的说话人色块同一种方形 */
+	.step-no {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 1.35em;
+		height: 1.35em;
+		border-radius: var(--r-tag);
+		background: var(--c-ink);
+		color: var(--c-paper);
+		font-size: 0.8em;
+		font-weight: 700;
+		line-height: 1;
+		transform: translateY(-0.08em);
+	}
+
+	h3 {
+		margin-top: var(--s-5);
+		font-size: 19px;
+	}
+
+	.step p,
+	.step ul,
+	.step ol.substeps,
+	.step dl {
+		margin-top: var(--s-3);
+	}
+
+	.step ul,
+	.substeps {
+		padding-left: 1.3em;
+	}
+
+	/* 步骤本身是 <ol>，里面的 <ul> 默认会变成空心圈，这里写回实心点 */
+	.step ul {
+		list-style: disc;
+	}
+
+	.step li + li {
+		margin-top: var(--s-2);
+	}
+
+	.step li::marker {
+		color: var(--c-ink-3);
+	}
+
+	.hint {
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	.note-box {
+		padding: var(--s-4) var(--s-5);
+		border: 1px solid var(--c-line);
+		border-radius: var(--r-card);
+		background: var(--c-wash);
+	}
+
+	.note-box p + p {
+		margin-top: var(--s-2);
+	}
+
+	.consent {
+		padding: var(--s-3) var(--s-4);
+		border-radius: var(--r-btn);
+		background: var(--c-ink);
+		color: var(--c-paper);
+	}
+
+	.keys {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--s-2) var(--s-4);
+	}
+
+	.keys dt {
+		font-weight: 700;
+		white-space: nowrap;
+	}
+
+	.keys dd {
+		margin: 0;
+		color: var(--c-ink-2);
+	}
+
+	.step-shots {
+		width: min(300px, 76%);
+		margin: var(--s-6) auto 0;
+	}
+
+	.watch-pair {
+		display: flex;
+		gap: var(--s-4);
+		width: min(420px, 100%);
+	}
+
+	.watch-pair > :global(*) {
+		flex: 1;
+	}
+
+	.shots-note {
+		padding-top: var(--s-6);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-3);
+		font-size: 15px;
+	}
+
+	/* 电脑：左边一列步骤目录（跟着滚），右边正文；带截图的步骤文字和截图并排 */
+	@media (min-width: 1024px) {
+		.guide {
+			display: grid;
+			grid-template-columns: 220px minmax(0, 1fr);
+			column-gap: var(--s-7);
+			align-items: start;
+		}
+
+		.steps-nav {
+			display: block;
+			position: sticky;
+			top: var(--s-5);
+			padding-top: var(--s-7);
+		}
+
+		.steps-nav ol {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		.steps-nav a {
+			display: flex;
+			align-items: center;
+			gap: var(--s-2);
+			min-height: 40px;
+			color: var(--c-ink-2);
+			font-size: 15px;
+			line-height: 1.35;
+			text-decoration: none;
+		}
+
+		.steps-nav a:hover {
+			color: var(--c-ink);
+		}
+
+		.steps-nav .step-no {
+			font-size: 13px;
+			width: 22px;
+			height: 22px;
+			transform: none;
+		}
+
+		.step.has-shots {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 280px;
+			column-gap: var(--s-7);
+			align-items: start;
+		}
+
+		.step.has-shots .watch-pair {
+			flex-direction: column;
+			width: 200px;
+			justify-self: center;
+		}
+
+		.step-shots {
+			width: 100%;
+			margin: 0;
+		}
+
+		h2 {
+			font-size: 28px;
+		}
+	}
+</style>

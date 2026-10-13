@@ -1,0 +1,155 @@
+---
+// 更新记录：内容全部来自 src/data/CHANGELOG.md（fanear 仓库 CHANGELOG.md 的原样副本，由同步命令复制过来），
+// 这里只负责排版。未发布和已发布分开放，未发布在上面。格式不对时构建直接失败（见 src/lib/changelog.mjs）。
+import PageIntro from '../components/PageIntro.astro';
+import raw from '../data/CHANGELOG.md?raw';
+import Base from '../layouts/Base.astro';
+import { parseChangelog } from '../lib/changelog.mjs';
+import { STATUS } from '../lib/site';
+
+const log = parseChangelog(raw);
+const groups = [
+	{ id: 'unreleased', title: '未发布', hint: '在做的和做完还没发出去的都写在这里。', versions: log.unreleased },
+	{ id: 'released', title: '已发布', hint: '上了 TestFlight 或 App Store 的版本。', versions: log.released },
+];
+const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
+---
+
+<Base title="更新记录" description="饭耳每个版本改了什么，已发布和还没发布的都记。">
+	<main id="main" class="wrap">
+		<PageIntro title="更新记录">
+			<p>每发一个版本，先写在这里。已发布和还没发布的都记，新的在上面。</p>
+		</PageIntro>
+
+		{
+			groups.map((group) => (
+				<section class="group" aria-labelledby={`h-${group.id}`}>
+					<div class="group-head">
+						<h2 id={`h-${group.id}`}>{group.title}</h2>
+						<p>{group.hint}</p>
+					</div>
+					{group.versions.length === 0 ? (
+						<p class="empty">
+							还没有。{STATUS.next}
+						</p>
+					) : (
+						group.versions.map((v) => (
+							<article id={v.anchor} class="version">
+								<header class="version-head">
+									<h3>
+										<a href={`#${v.anchor}`}>{v.version}</a>
+									</h3>
+									{v.note && <p class="version-note">{v.note}</p>}
+								</header>
+								<ul class="items">
+									{v.items.map((item) => (
+										<li>
+											{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
+											<span>{item.text}</span>
+										</li>
+									))}
+								</ul>
+							</article>
+						))
+					)}
+				</section>
+			))
+		}
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--measure) + 160px + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.group {
+		padding: var(--s-6) 0 var(--s-5);
+		border-top: 1px solid var(--c-line);
+	}
+
+	.group-head h2 {
+		font-size: 24px;
+	}
+
+	.group-head p {
+		margin-top: var(--s-1);
+		color: var(--c-ink-3);
+		font-size: 15px;
+	}
+
+	.empty {
+		margin-top: var(--s-4);
+		color: var(--c-ink-2);
+	}
+
+	.version {
+		margin-top: var(--s-5);
+		scroll-margin-top: var(--s-4);
+	}
+
+	.version-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--s-1) var(--s-3);
+	}
+
+	h3 {
+		font-size: 30px;
+		font-weight: 800;
+		letter-spacing: 0.01em;
+	}
+
+	h3 a {
+		color: var(--c-ink);
+		text-decoration: none;
+	}
+
+	h3 a:hover {
+		color: var(--c-me);
+	}
+
+	.version-note {
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	.items {
+		margin: var(--s-4) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	/* 一条一行：日期在左（等宽一列），说明在右；手机上日期在上 */
+	.items li {
+		display: grid;
+		gap: 2px;
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.items time {
+		color: var(--c-ink-3);
+		font-size: 14px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	@media (min-width: 640px) {
+		.items li {
+			grid-template-columns: 88px minmax(0, 1fr);
+			column-gap: var(--s-4);
+		}
+
+		.items time {
+			padding-top: 2px;
+		}
+
+		.items li > span:only-child {
+			grid-column: 2;
+		}
+	}
+</style>

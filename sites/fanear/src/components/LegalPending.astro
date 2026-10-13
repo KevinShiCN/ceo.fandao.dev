@@ -1,0 +1,33 @@
+---
+// 两份条款（使用条款与免责声明、隐私说明）定稿前的占位：只说「定稿后放这里」，不自己写条款内容。
+// 全文由另一个会话定稿，跟 App 里的一字不差；定稿后把这个组件换成原文。
+import PageIntro from './PageIntro.astro';
+import { withBase } from '../lib/url';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<main id="main" class="wrap">
+	<PageIntro title={title}>
+		<p>全文正在定稿。定稿后原文放在这里，跟 App 里的一字不差。</p>
+	</PageIntro>
+	<p class="back">饭耳现在的情况，看<a href={withBase('/changelog/')}>更新记录</a>。</p>
+</main>
+
+<style>
+	.wrap {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.back {
+		padding-top: var(--s-5);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+	}
+</style>

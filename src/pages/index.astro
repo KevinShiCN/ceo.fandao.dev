@@ -6,7 +6,7 @@ import Bio from '../components/Bio.astro';
 import EmptyPosts from '../components/EmptyPosts.astro';
 import Search from '../components/Search.astro';
 import TitleText from '../components/TitleText.astro';
-import { AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, TOOLS } from '../consts';
+import { APPS, AUTHOR, LINKS, SITE_DESCRIPTION, SITE_INTRO, TOOLS } from '../consts';
 import Layout from '../layouts/Layout.astro';
 import { getSortedPosts, groupPosts, isoDate, listDateText, postHref, sourceInfo } from '../lib/posts';
 import { withBase } from '../lib/url';
@@ -44,6 +44,30 @@ const groups = groupPosts(await getSortedPosts());
 			{/* 站内搜索：有搜索词时下面的列表藏起来，结果排在搜索框下面（见 Search.astro） */}
 			<Search id="home-search" variant="inline" hides="home-lists" class="home-search" />
 			<div id="home-lists">
+				{/* 在做的 App：官网在各自的子域名上（饭耳 fanear.fandao.dev） */}
+				<section class="block" aria-labelledby="h-apps">
+					<h2 id="h-apps" class="block-title">在做的 App</h2>
+					<ul class="list">
+						{
+							APPS.map((app) => (
+								<li>
+									<a class="item app" href={app.href}>
+										<Image class="app-icon" src={app.icon} alt="" width={96} height={96} />
+										<span class="app-text">
+											<span class="item-title">{app.title}</span>
+											<span class="item-desc">{app.description}</span>
+											<span class="item-meta">
+												<span class="item-src">{app.status}</span>
+												<span>{new URL(app.href).hostname}</span>
+											</span>
+										</span>
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</section>
+
 				<section class="block" aria-labelledby="h-tools">
 					<h2 id="h-tools" class="block-title">工具库</h2>
 					<ul class="list">
@@ -266,6 +290,27 @@ const groups = groupPosts(await getSortedPosts());
 		font-weight: 600;
 	}
 
+	/* 在做的 App：左边 App 图标（iOS 图标的圆角 22.37%），右边名字和一句话。
+	   写成 .item.app 压过下面宽屏时 .item 的两栏网格，网格改由 .app-text 来排 */
+	.item.app {
+		display: flex;
+		gap: var(--s-3);
+		align-items: flex-start;
+	}
+
+	.app :global(.app-icon) {
+		flex: none;
+		width: 48px;
+		height: 48px;
+		margin-top: 2px;
+		border-radius: 22.37%;
+		box-shadow: 0 0 0 1px var(--c-line);
+	}
+
+	.app-text {
+		min-width: 0;
+	}
+
 	/* 工具库区块末尾的「全部工具 →」：接在最后一条下面，和条目之间一样用分隔线隔开 */
 	.block-more {
 		margin: 0;
@@ -375,6 +420,18 @@ const groups = groupPosts(await getSortedPosts());
 			order: 1;
 			min-width: 4.6em;
 			text-align: right;
+		}
+
+		.item.app {
+			display: flex;
+		}
+
+		.app-text {
+			display: grid;
+			flex: 1;
+			grid-template-columns: minmax(0, 1fr) auto;
+			column-gap: var(--s-7);
+			align-items: baseline;
 		}
 	}
 </style>

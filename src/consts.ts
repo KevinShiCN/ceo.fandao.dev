@@ -1,4 +1,5 @@
 // 全站共用的身份和文案。改简介只改这里。
+import fanearIcon from './assets/fanear-icon.png';
 import { TOOL_PAGES } from './lib/tools.mjs';
 import { withBase } from './lib/url';
 
@@ -34,3 +35,16 @@ export const TOOLS_INTRO = '拿来就能用的交互讲解页：自己查，也�
 
 /** 工具库：原样放在 public/ 下的独立网页，清单在 src/lib/tools.mjs（sitemap 也从那里取），这里加上部署前缀 */
 export const TOOLS = TOOL_PAGES.map(({ path, title, description }) => ({ href: withBase(path), title, description }));
+
+/** 在做的 App：首页「在做的 App」区块和页脚。官网各在自己的子域名上，源码在本仓库 sites/<名字>/，单独发布 */
+export const APPS = [
+	{
+		href: 'https://fanear.fandao.dev/',
+		name: '饭耳',
+		title: '饭耳 FanEar',
+		description: 'Apple Watch 全天录音，iPhone 记下谁说了什么、谁答应了什么。功能介绍、使用说明和更新记录都在官网。',
+		/** 跟饭耳官网 sites/fanear/src/lib/site.ts 的 STATUS.label 一致；上了 TestFlight 两边一起改 */
+		status: '开发中',
+		icon: fanearIcon,
+	},
+] as const;

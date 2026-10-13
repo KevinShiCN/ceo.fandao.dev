@@ -1,0 +1,80 @@
+---
+// 饭耳 LOGO：几根高低不一的声音电平条拼成一个「耳」字，蓝、橙两根长条是正在对话的两个人。
+// 图形照抄 fanear 仓库 scripts/icon/logo-c-ear.svg（由设计稿 direction-c.html 的 #c-g-ear 抽出），颜色走 CSS 变量。
+// tile：画成 App 图标的样子（白底圆角方块，iOS 图标圆角 22.37%），size 是边长；不加就只画「耳」字，size 是高度。
+interface Props {
+	size?: number;
+	tile?: boolean;
+	class?: string;
+	/** 单独出现、要读屏念出来时传；跟「饭耳」两个字放一起时不传（当装饰） */
+	label?: string;
+}
+
+const { size = 32, tile = false, class: className, label } = Astro.props;
+// 不画底块时裁掉四周留白，只留「耳」字本身（x 201–823、y 172–852），size 指高度
+const viewBox = tile ? '0 0 1024 1024' : '201 172 622 680';
+const width = tile ? size : Math.round((size * 622) / 680);
+const squares = [
+	[201, 172],
+	[385, 172],
+	[477, 172],
+	[569, 172],
+	[753, 172],
+	[385, 344],
+	[477, 344],
+	[569, 344],
+	[385, 516],
+	[477, 516],
+	[569, 516],
+	[385, 712],
+	[477, 680],
+	[569, 648],
+	[753, 584],
+];
+---
+
+<svg
+	class:list={['logo', tile && 'logo-tile', className]}
+	width={width}
+	height={size}
+	viewBox={viewBox}
+	role={label ? 'img' : undefined}
+	aria-label={label}
+	aria-hidden={label ? undefined : 'true'}
+	focusable="false"
+>
+	{label && <title>{label}</title>}
+	{tile && <rect class="logo-bg" width="1024" height="1024" rx="229" />}
+	<g class="logo-ink">
+		{squares.map(([x, y]) => <rect x={x} y={y} width="70" height="64" rx="16" />)}
+	</g>
+	<rect class="logo-me" x="293" y="172" width="70" height="604" rx="16" />
+	<rect class="logo-p1" x="661" y="172" width="70" height="680" rx="16" />
+</svg>
+
+<style>
+	.logo {
+		display: block;
+		flex: none;
+	}
+
+	.logo-tile {
+		filter: drop-shadow(0 1px 2px var(--c-shadow));
+	}
+
+	.logo-bg {
+		fill: var(--c-paper);
+	}
+
+	.logo-ink {
+		fill: var(--c-ink);
+	}
+
+	.logo-me {
+		fill: var(--c-me);
+	}
+
+	.logo-p1 {
+		fill: var(--c-p1);
+	}
+</style>

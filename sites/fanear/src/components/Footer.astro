@@ -1,0 +1,89 @@
+---
+// 页脚：两份条款、更新记录，和作者的博客（从博客也能点回来）。
+import { AUTHOR, LEGAL, SITE, STATUS } from '../lib/site';
+import { withBase } from '../lib/url';
+import Logo from './Logo.astro';
+---
+
+<footer class="site-footer">
+	<div class="footer-inner">
+		<div class="footer-brand">
+			<Logo size={20} />
+			<p>
+				<strong>{SITE.title}</strong>
+				<span class="footer-status">{STATUS.label}：{STATUS.text}</span>
+			</p>
+		</div>
+		<nav class="footer-links" aria-label="条款和其他">
+			{LEGAL.map((item) => <a href={withBase(item.path)}>{item.label}</a>)}
+			<a href={withBase('/changelog/')}>更新记录</a>
+			<a href={AUTHOR.blog}>作者 {AUTHOR.name} 的博客</a>
+		</nav>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		margin-top: var(--s-9);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.footer-inner {
+		display: grid;
+		gap: var(--s-4);
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: var(--s-6) var(--gutter) var(--s-7);
+	}
+
+	.footer-brand {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--s-3);
+	}
+
+	.footer-brand :global(.logo) {
+		margin-top: 3px;
+	}
+
+	.footer-brand strong {
+		display: block;
+		color: var(--c-ink);
+	}
+
+	.footer-status {
+		display: block;
+		color: var(--c-ink-3);
+	}
+
+	.footer-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--s-5);
+	}
+
+	.footer-links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		color: var(--c-ink-2);
+	}
+
+	.footer-links a:hover {
+		color: var(--c-ink);
+	}
+
+	@media (min-width: 900px) {
+		.footer-inner {
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: start;
+		}
+
+		.footer-links {
+			justify-content: flex-end;
+		}
+	}
+</style>

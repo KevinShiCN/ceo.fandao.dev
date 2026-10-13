@@ -1,0 +1,51 @@
+---
+// 全站外框：<head>、跳到正文、页头、页脚。每页传自己的标题和一句简介。
+import '../styles/tokens.css';
+import '../styles/base.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../lib/site';
+import { withBase } from '../lib/url';
+
+interface Props {
+	/** 不传就是首页：标签上只写站名 */
+	title?: string;
+	description?: string;
+	/** 404 页不写 canonical */
+	canonical?: boolean;
+}
+
+const { title, description = SITE.description, canonical = true } = Astro.props;
+const fullTitle = title ? `${title}｜${SITE.title}` : `${SITE.title}：${SITE.tagline}`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(withBase('/og-icon.png'), Astro.site);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		{canonical && <link rel="canonical" href={canonicalURL} />}
+		<link rel="icon" href={withBase('/favicon.ico')} sizes="48x48" />
+		<link rel="icon" href={withBase('/favicon.png')} type="image/png" />
+		<link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+		<meta name="theme-color" content="#ffffff" />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={SITE.title} />
+		<meta property="og:title" content={title ?? SITE.title} />
+		<meta property="og:description" content={description} />
+		{canonical && <meta property="og:url" content={canonicalURL} />}
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="generator" content={Astro.generator} />
+	</head>
+	<body>
+		<a class="skip-link" href="#main">跳到正文</a>
+		<Header />
+		<slot />
+		<Footer />
+	</body>
+</html>

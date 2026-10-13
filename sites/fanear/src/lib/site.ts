@@ -1,0 +1,48 @@
+// 全站共用的名字、状态和导航。改文案只改这里。
+// 规矩：只写真事。App 现在的状态以 fanear 仓库的 CHANGELOG.md 为准（这里的状态句跟它的「未发布」写法对得上）。
+
+export const SITE = {
+	name: '饭耳',
+	nameEn: 'FanEar',
+	/** 浏览器标签和分享卡片上的站名 */
+	title: '饭耳 FanEar',
+	/** 一句话：它是什么 */
+	tagline: '手表全天录音，手机记下谁说了什么、谁答应了什么。',
+	/** 搜索结果和分享卡片的简介 */
+	description:
+		'饭耳 FanEar：Apple Watch 全天录音，iPhone 转成文字、分清谁在说话，挑出「我答应别人的」「别人答应我的」给你确认。转文字和大模型都用你自己的账号。',
+} as const;
+
+/** App 现在的状态。上了 TestFlight 或 App Store 以后改这里，再在使用说明的「装 App」一步放链接。 */
+export const STATUS = {
+	/** 页头和首页上的短标签 */
+	label: '开发中',
+	/** 一句话说清现在能不能用 */
+	text: '还没上 TestFlight，也还没对外发布，现在只装在开发者自己的手机上测试。',
+	/** 等什么 */
+	next: '苹果开发者账号开通后先上 TestFlight，到时候在使用说明里放加入测试的链接。',
+} as const;
+
+export interface NavItem {
+	path: `/${string}/`;
+	label: string;
+}
+
+/** 页头导航（首页不在里面，点 LOGO 回首页） */
+export const NAV: readonly NavItem[] = [
+	{ path: '/features/', label: '功能' },
+	{ path: '/guide/', label: '使用说明' },
+	{ path: '/changelog/', label: '更新记录' },
+];
+
+/** 页脚的两份条款。全文由另一个会话定稿（跟 App 里的一字不差），定稿前页面只写「定稿后放这里」 */
+export const LEGAL: readonly NavItem[] = [
+	{ path: '/terms/', label: '使用条款与免责声明' },
+	{ path: '/privacy/', label: '隐私说明' },
+];
+
+/** 作者的博客：饭耳官网的源码也在博客仓库里 */
+export const AUTHOR = {
+	name: '干饭CEO',
+	blog: 'https://ceo.fandao.dev/',
+} as const;

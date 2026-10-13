@@ -6,3 +6,7 @@ staging/
 .env.*
 spec.md
 交付页/
+.worktrees/
+# 饭耳官网：几版首页的预览构建、截图和各自的构建缓存
+sites/fanear/.preview/
+sites/fanear/**/.cache-*/

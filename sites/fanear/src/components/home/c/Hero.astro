@@ -1,0 +1,227 @@
+---
+// 第 C 版首屏：App 图标、名字、一句话、状态、两个按钮；旁边（手机上是下面）一组大的真机：
+// 手机「今天」在前当主角，手表「正在录」压在它左下角。全页只有这一处进场动画。
+import { SHOTS_NOTE } from '../../../lib/shots';
+import { SITE, STATUS } from '../../../lib/site';
+import { withBase } from '../../../lib/url';
+import Logo from '../../Logo.astro';
+import Shot from '../../Shot.astro';
+
+// 一句话在第一个逗号后断开：电脑上分两行，手机上照常折行
+const cut = SITE.tagline.indexOf('，') + 1;
+const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] : [SITE.tagline];
+---
+
+<section class="hero" aria-labelledby="h-c-name">
+	<div class="hero-text">
+		<div class="hero-name">
+			<Logo tile size={72} />
+			<h1 id="h-c-name">{SITE.name}<span lang="en">{SITE.nameEn}</span></h1>
+		</div>
+		<p class="hero-tagline">{tagline.map((part) => <span>{part}</span>)}</p>
+		<p class="hero-status"><strong>{STATUS.label}</strong>{STATUS.text}</p>
+		<div class="hero-actions">
+			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
+			<a class="btn btn-line" href={withBase('/features/')}>看全部功能</a>
+		</div>
+	</div>
+
+	<figure class="stage">
+		<div class="stage-devices">
+			<Shot
+				id="today"
+				caption={false}
+				eager
+				class="stage-phone"
+				sizes="(min-width: 1100px) 300px, (min-width: 768px) 280px, 58vw"
+			/>
+			<Shot
+				id="watchRecording"
+				caption={false}
+				eager
+				class="stage-watch"
+				sizes="(min-width: 768px) 180px, 34vw"
+			/>
+		</div>
+		<figcaption>左边手表「正在录」，右边手机「今天」。{SHOTS_NOTE}</figcaption>
+	</figure>
+</section>
+
+<style>
+	.hero {
+		padding-top: var(--s-6);
+	}
+
+	.hero-name {
+		display: flex;
+		align-items: center;
+		gap: var(--s-4);
+	}
+
+	h1 {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0 var(--s-3);
+		font-size: 44px;
+		font-weight: 800;
+		line-height: 1.1;
+	}
+
+	h1 span {
+		color: var(--c-ink-3);
+		font-size: 22px;
+		font-weight: 600;
+	}
+
+	.hero-tagline {
+		max-width: 16em;
+		margin-top: var(--s-5);
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1.45;
+	}
+
+	.hero-status {
+		max-width: 30em;
+		margin-top: var(--s-4);
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	.hero-status strong {
+		margin-right: var(--s-2);
+		color: var(--c-ink);
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-3);
+		margin-top: var(--s-5);
+	}
+
+	/* 真机这一组：手机上整屏宽的浅底，手表压在手机左下角 */
+	.stage {
+		margin: var(--s-6) calc(-1 * var(--gutter)) 0;
+		padding: var(--s-6) var(--gutter) var(--s-5);
+		background: var(--c-wash);
+	}
+
+	.stage-devices {
+		position: relative;
+		width: 80vw;
+		margin: 0 auto;
+		padding-left: 22vw;
+	}
+
+	.stage :global(.stage-phone) {
+		width: 58vw;
+	}
+
+	.stage :global(.stage-watch) {
+		position: absolute;
+		bottom: 9%;
+		left: 0;
+		width: 34vw;
+	}
+
+	.stage figcaption {
+		margin-top: var(--s-5);
+		color: var(--c-ink-3);
+		font-size: 14px;
+		line-height: 1.6;
+		text-align: center;
+	}
+
+	/* 全页唯一的进场：手机先往上起，手表跟上。只动位置不动透明度，半路截图也不会是半透明的；
+	   系统设了「减弱动态效果」就不动 */
+	@media (prefers-reduced-motion: no-preference) {
+		.stage :global(.stage-phone),
+		.stage :global(.stage-watch) {
+			animation: c-rise 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+		}
+
+		.stage :global(.stage-watch) {
+			animation-delay: 100ms;
+		}
+	}
+
+	@keyframes c-rise {
+		from {
+			transform: translateY(32px);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.hero {
+			padding-top: var(--s-8);
+		}
+
+		h1 {
+			font-size: 56px;
+		}
+
+		h1 span {
+			font-size: 26px;
+		}
+
+		.hero-tagline {
+			font-size: 30px;
+		}
+
+		.hero-status {
+			font-size: 17px;
+		}
+
+		.stage-devices {
+			width: 400px;
+			padding-left: 120px;
+		}
+
+		.stage :global(.stage-phone) {
+			width: 280px;
+		}
+
+		.stage :global(.stage-watch) {
+			width: 180px;
+		}
+	}
+
+	/* 电脑上左右两栏：左边字，右边真机 */
+	@media (min-width: 960px) {
+		.hero {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+			align-items: center;
+			gap: var(--s-7);
+			padding-top: var(--s-7);
+		}
+
+		.hero-tagline {
+			max-width: none;
+		}
+
+		.hero-tagline span {
+			display: block;
+		}
+
+		.stage {
+			margin: 0;
+			padding: var(--s-7) var(--s-5) var(--s-5);
+			border-radius: var(--r-card);
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.stage-devices {
+			width: 430px;
+			padding-left: 130px;
+		}
+
+		.stage :global(.stage-phone) {
+			width: 300px;
+		}
+	}
+</style>

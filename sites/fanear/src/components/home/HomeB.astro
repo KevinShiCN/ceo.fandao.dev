@@ -1,0 +1,437 @@
+---
+// 首页第 B 版「一句话」：首屏讲清「说过的一句话 → 变成一件等你确认的事」。
+// 主角是 14:00 和王经理那通电话（HTML 排的几句原话 + 抓出来的那张卡，见 b/CallFigure.astro），
+// 下面安静地放：功能清单（带图标的一列）、真机截图（手机、手表分两组）、最近更新。
+// 事实只取 src/lib/ 下的 site.ts、demo.ts、features.ts、shots.ts 和更新记录。
+import raw from '../../data/CHANGELOG.md?raw';
+import { parseChangelog } from '../../lib/changelog.mjs';
+import { FEATURES } from '../../lib/features';
+import { SHOTS_NOTE } from '../../lib/shots';
+import { SITE, STATUS } from '../../lib/site';
+import { withBase } from '../../lib/url';
+import Shot from '../Shot.astro';
+import CallFigure from './b/CallFigure.astro';
+import Icon, { type IconName } from './b/Icon.astro';
+
+const log = parseChangelog(raw);
+const latest = log.unreleased[0] ?? log.released[0];
+const itemCount = [...log.unreleased, ...log.released].reduce((n, v) => n + v.items.length, 0);
+const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
+
+/** 功能清单每条配的图标；新加一条功能要在这里配上，不然构建报错 */
+const featureIcon: Record<string, IconName> = {
+	record: 'watch',
+	transcribe: 'text',
+	organize: 'person',
+	commitments: 'caught',
+	today: 'ribbon',
+	health: 'heart',
+	'own-account': 'key',
+};
+for (const f of FEATURES) {
+	if (!(f.id in featureIcon)) throw new Error(`HomeB：功能「${f.id}」还没配图标`);
+}
+---
+
+<main id="main" class="home-b">
+	<section class="hero" aria-labelledby="h-hero">
+		<div class="hero-text">
+			<h1 id="h-hero">你说过的一句话，<br />变成一件等你点一下的事。</h1>
+			<p class="lead">
+				<strong>{SITE.name}</strong>：Apple Watch 全天录音，iPhone 转成文字、分清谁在说话，把「我答应别人的」「别人答应我的」挑出来给你确认。
+			</p>
+		</div>
+		<div class="hero-call">
+			<CallFigure />
+		</div>
+		<div class="hero-actions">
+			<div class="actions">
+				<a class="btn" href={withBase('/guide/')}>看使用说明</a>
+				<a class="btn btn-line" href={withBase('/features/')}>看有哪些功能</a>
+			</div>
+			<p class="status"><strong>{STATUS.label}</strong>：{STATUS.text}</p>
+		</div>
+	</section>
+
+	<section class="features" aria-labelledby="h-features">
+		<h2 id="h-features">饭耳能做的事</h2>
+		<ul class="feature-list">
+			{
+				FEATURES.map((feature) => (
+					<li>
+						<a href={withBase(`/features/#${feature.id}`)}>
+							<Icon name={featureIcon[feature.id]} size={24} class="feature-icon" />
+							<span class="feature-title">{feature.title}</span>
+							<span class="feature-lead">{feature.lead}</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<section class="shots" aria-labelledby="h-shots">
+		<div class="shots-head">
+			<h2 id="h-shots">App 现在的样子</h2>
+			<p class="shots-note">{SHOTS_NOTE}</p>
+		</div>
+		<h3 class="shots-group">手机</h3>
+		<div class="shots-phones">
+			<Shot id="commitments" sizes="(min-width: 900px) 280px, 64vw" />
+			<Shot id="conversation" sizes="(min-width: 900px) 280px, 64vw" />
+			<Shot id="today" sizes="(min-width: 900px) 280px, 64vw" />
+		</div>
+		<h3 class="shots-group">手表</h3>
+		<div class="shots-watches">
+			<Shot id="watchRecording" sizes="(min-width: 900px) 180px, 30vw" />
+			<Shot id="watchInterrupted" sizes="(min-width: 900px) 180px, 30vw" />
+			<Shot id="watchStopped" sizes="(min-width: 900px) 180px, 30vw" />
+		</div>
+	</section>
+
+	{
+		latest && (
+			<section class="latest" aria-labelledby="h-latest">
+				<div class="latest-head">
+					<h2 id="h-latest">最近更新</h2>
+					<p class="latest-version">
+						<strong>{latest.version}</strong>
+						{latest.note}
+					</p>
+				</div>
+				<ul class="latest-list">
+					{latest.items.slice(0, 3).map((item) => (
+						<li>
+							{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
+							<span>{item.text}</span>
+						</li>
+					))}
+				</ul>
+				<a class="btn btn-line latest-all" href={withBase('/changelog/')}>
+					看全部 {itemCount} 条更新
+				</a>
+			</section>
+		)
+	}
+</main>
+
+<style>
+	.home-b > section {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+	}
+
+	/* 首屏：手机上从上往下是 大字 → 那通电话和卡 → 按钮和状态；电脑上大字和按钮在上，电话铺满版心 */
+	.hero {
+		padding-top: var(--s-5);
+		padding-bottom: var(--s-7);
+	}
+
+	h1 {
+		font-size: 26px;
+		font-weight: 800;
+		line-height: 1.35;
+	}
+
+	.lead {
+		max-width: 34em;
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+		font-size: 17px;
+		line-height: 1.7;
+	}
+
+	.lead strong {
+		color: var(--c-ink);
+	}
+
+	.hero-call {
+		margin-top: var(--s-5);
+	}
+
+	.hero-actions {
+		margin-top: var(--s-6);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-3);
+	}
+
+	.status {
+		max-width: 34em;
+		margin-top: var(--s-3);
+		color: var(--c-ink-3);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.status strong {
+		color: var(--c-ink);
+	}
+
+	h2 {
+		font-size: 23px;
+		line-height: 1.35;
+	}
+
+	/* 功能：一列，每条前面一个图标，整条点进功能页对应的一节 */
+	.features {
+		padding-top: var(--s-7);
+	}
+
+	.feature-list {
+		margin: var(--s-4) 0 0;
+		padding: 0;
+		border-bottom: 1px solid var(--c-line);
+		list-style: none;
+	}
+
+	.feature-list a {
+		display: grid;
+		grid-template-columns: 24px minmax(0, 1fr);
+		column-gap: var(--s-3);
+		row-gap: 2px;
+		padding: var(--s-4) 0;
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink);
+		text-decoration: none;
+	}
+
+	.feature-list :global(.feature-icon) {
+		margin-top: 2px;
+		color: var(--c-ink-2);
+	}
+
+	.feature-title {
+		color: var(--c-me);
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1.45;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+	}
+
+	.feature-lead {
+		grid-column: 2;
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	.feature-list a:hover .feature-title {
+		color: var(--c-me-press);
+		text-decoration-thickness: 2px;
+	}
+
+	.feature-list a:active {
+		background: var(--c-wash);
+	}
+
+	/* 截图：手机三张一组、手表三张一组 */
+	.shots {
+		padding-top: var(--s-8);
+	}
+
+	.shots-note {
+		margin-top: var(--s-1);
+		color: var(--c-ink-3);
+		font-size: 14px;
+	}
+
+	.shots-group {
+		margin-top: var(--s-5);
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	/* 手机上三张手机截图横着滑 */
+	.shots-phones {
+		display: flex;
+		gap: var(--s-5);
+		margin: 0 calc(-1 * var(--gutter));
+		padding: var(--s-4) var(--gutter) var(--s-5);
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.shots-phones > :global(*) {
+		flex: none;
+		width: 64vw;
+		max-width: 280px;
+		scroll-snap-align: start;
+	}
+
+	.shots-watches {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--s-3);
+		padding-top: var(--s-4);
+	}
+
+	.shots-watches :global(figcaption) {
+		font-size: 14px;
+	}
+
+	/* 最近更新 */
+	.latest {
+		padding-top: var(--s-8);
+		padding-bottom: var(--s-4);
+	}
+
+	.latest-version {
+		margin-top: var(--s-2);
+		color: var(--c-ink-2);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.latest-version strong {
+		display: block;
+		color: var(--c-ink);
+		font-size: 24px;
+		font-weight: 800;
+		line-height: 1.3;
+	}
+
+	.latest-all {
+		margin-top: var(--s-4);
+	}
+
+	.latest-list {
+		margin: var(--s-4) 0 0;
+		padding: 0;
+		border-bottom: 1px solid var(--c-line);
+		list-style: none;
+	}
+
+	.latest-list li {
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+		font-size: 16px;
+		line-height: 1.65;
+	}
+
+	.latest-list time {
+		display: block;
+		color: var(--c-ink-3);
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	@media (min-width: 768px) {
+		h1 {
+			font-size: 40px;
+			line-height: 1.25;
+		}
+
+		.lead {
+			font-size: 19px;
+		}
+
+		h2 {
+			font-size: 27px;
+		}
+
+		.feature-list a {
+			grid-template-columns: 24px 11em minmax(0, 1fr);
+			column-gap: var(--s-4);
+			align-items: baseline;
+		}
+
+		.feature-list :global(.feature-icon) {
+			align-self: start;
+		}
+
+		.feature-lead {
+			grid-column: 3;
+		}
+	}
+
+	@media (min-width: 900px) {
+		.hero {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas:
+				'text actions'
+				'call call';
+			column-gap: var(--s-7);
+			align-items: end;
+			padding-top: var(--s-8);
+		}
+
+		.hero-text {
+			grid-area: text;
+		}
+
+		.hero-actions {
+			grid-area: actions;
+			max-width: 360px;
+			margin-top: 0;
+		}
+
+		.hero-call {
+			grid-area: call;
+			margin-top: var(--s-7);
+		}
+
+		h1 {
+			font-size: 46px;
+		}
+
+		.shots-head {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: var(--s-2) var(--s-5);
+		}
+
+		.shots-phones {
+			justify-content: space-between;
+			margin: 0;
+			padding: var(--s-5) 0 var(--s-6);
+			overflow: visible;
+		}
+
+		.shots-phones > :global(*) {
+			width: 280px;
+		}
+
+		.shots-watches {
+			grid-template-columns: repeat(3, 180px);
+			justify-content: space-between;
+			padding: var(--s-5) 50px 0;
+		}
+
+		.latest {
+			display: grid;
+			grid-template-columns: 300px minmax(0, 1fr);
+			grid-template-rows: auto 1fr;
+			column-gap: var(--s-8);
+			align-items: start;
+		}
+
+		.latest-head {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		.latest-all {
+			grid-column: 1;
+			grid-row: 2;
+			justify-self: start;
+		}
+
+		.latest-list {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+			margin-top: 0;
+		}
+	}
+</style>

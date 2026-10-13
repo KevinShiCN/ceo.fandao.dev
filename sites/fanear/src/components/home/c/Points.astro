@@ -1,0 +1,28 @@
+---
+// 一项功能下面的几句细节：一句一行，行与行之间一道细线，像说明书里的条目。
+interface Props {
+	items: readonly string[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="points">
+	{items.map((text) => <li>{text}</li>)}
+</ul>
+
+<style>
+	.points {
+		margin: var(--s-4) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.points li {
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+</style>

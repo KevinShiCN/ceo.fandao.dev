@@ -1,0 +1,51 @@
+---
+// 栏目页开头：大标题和一两句导语。导语里可以放链接，用 slot 传。
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<header class="page-intro">
+	<h1>{title}</h1>
+	<div class="page-lead"><slot /></div>
+</header>
+
+<style>
+	.page-intro {
+		padding: var(--s-7) 0 var(--s-6);
+	}
+
+	h1 {
+		font-size: 34px;
+		line-height: 1.25;
+		letter-spacing: 0.02em;
+	}
+
+	.page-lead {
+		max-width: var(--measure);
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+		font-size: 18px;
+		line-height: 1.7;
+	}
+
+	.page-lead :global(p + p) {
+		margin-top: var(--s-2);
+	}
+
+	@media (min-width: 768px) {
+		.page-intro {
+			padding: var(--s-8) 0 var(--s-7);
+		}
+
+		h1 {
+			font-size: 44px;
+		}
+
+		.page-lead {
+			font-size: 19px;
+		}
+	}
+</style>

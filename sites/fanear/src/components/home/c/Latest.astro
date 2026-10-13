@@ -1,0 +1,111 @@
+---
+// 最近更新：最新一个版本的前三条，再链到更新记录页。取数跟第 A 版一样。
+import raw from '../../../data/CHANGELOG.md?raw';
+import { parseChangelog } from '../../../lib/changelog.mjs';
+import { withBase } from '../../../lib/url';
+
+const log = parseChangelog(raw);
+const latest = log.unreleased[0] ?? log.released[0];
+const itemCount = [...log.unreleased, ...log.released].reduce((n, v) => n + v.items.length, 0);
+const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
+---
+
+{
+	latest && (
+		<section class="latest" aria-labelledby="h-c-latest">
+			<div class="latest-head">
+				<h2 id="h-c-latest">最近更新</h2>
+				<p class="latest-version">
+					<strong>{latest.version}</strong>
+					<span>{latest.note}</span>
+				</p>
+				<a class="btn btn-line" href={withBase('/changelog/')}>
+					看全部 {itemCount} 条更新
+				</a>
+			</div>
+			<ul>
+				{latest.items.slice(0, 3).map((item) => (
+					<li>
+						{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
+						<span>{item.text}</span>
+					</li>
+				))}
+			</ul>
+		</section>
+	)
+}
+
+<style>
+	.latest {
+		padding-top: var(--s-8);
+		padding-bottom: var(--s-8);
+	}
+
+	h2 {
+		font-size: 26px;
+		font-weight: 800;
+	}
+
+	.latest-version {
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.latest-version strong {
+		display: block;
+		color: var(--c-ink);
+		font-size: 30px;
+		font-weight: 800;
+		line-height: 1.2;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.latest-head .btn {
+		margin-top: var(--s-5);
+	}
+
+	ul {
+		margin: var(--s-6) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		padding: var(--s-4) 0;
+		border-top: 1px solid var(--c-line);
+		font-size: 16px;
+		line-height: 1.65;
+	}
+
+	time {
+		display: block;
+		color: var(--c-ink-3);
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	@media (min-width: 768px) {
+		.latest {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+			gap: var(--s-8);
+			padding-top: var(--s-9);
+			padding-bottom: var(--s-9);
+		}
+
+		h2 {
+			font-size: 34px;
+		}
+
+		ul {
+			margin-top: 0;
+		}
+
+		li:first-child {
+			padding-top: 0;
+			border-top: 0;
+		}
+	}
+</style>

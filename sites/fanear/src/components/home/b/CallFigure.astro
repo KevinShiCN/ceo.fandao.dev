@@ -1,0 +1,545 @@
+---
+// 首页 B 版首屏的主角：14:00 和王经理那通电话的几句原话，和从「行，新米下来了……」那句抓出来的卡。
+// 这是 App 界面的示意（HTML 排的，不是图片），网页上不能点：三个键和「这句是谁说的」都 aria-hidden、不可聚焦。
+// 数据全部来自 src/lib/demo.ts 的 CALL（跟 App 演示数据和截图同一份，人名对话是编的）。
+import { CALL, minutes, type Fill } from '../../../lib/demo';
+import Icon from './Icon.astro';
+
+const fillClass: Record<Fill, string> = {
+	me: 'who-me',
+	p1: 'who-p1',
+	p2: 'who-p2',
+	p3: 'who-p3',
+	gap: 'who-gap',
+	fail: 'who-fail',
+};
+
+/** 这块录音 15 分钟（手表 15 分钟一块），细条按秒画 */
+const BLOCK_SECONDS = 15 * 60;
+const start = minutes(CALL.lines[0].time);
+const clock = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+const ticks = [0, 5, 10, 15].map((m) => ({ at: (m * 60 * 100) / BLOCK_SECONDS, label: clock(start + m) }));
+const pct = (s: number) => (s / BLOCK_SECONDS) * 100;
+
+/** 名字还是「说话人 N」的，就是还没认出是谁 */
+const unknown = (name: string) => /^说话人\s*\d+$/.test(name);
+
+const lines = CALL.lines.map((line) => {
+	const person = CALL.people[line.who];
+	return { ...line, name: person.name, fill: fillClass[person.fill], unknown: unknown(person.name) };
+});
+const hitIndex = lines.findIndex((line) => 'card' in line && line.card);
+if (hitIndex < 0) throw new Error('demo.ts 的 CALL.lines 里没有标 card: true 的那句');
+const before = lines.slice(0, hitIndex + 1);
+const after = lines.slice(hitIndex + 1);
+const hit = lines[hitIndex];
+const toPerson = CALL.people.find((p) => p.name === CALL.card.to);
+if (!toPerson) throw new Error(`demo.ts 的 CALL.card.to「${CALL.card.to}」不在 CALL.people 里`);
+const stripLabel = `这 15 分钟里谁在说：${lines.map((l) => `${l.time} ${l.name}`).join('，')}`;
+---
+
+<figure class="call">
+	<figcaption class="call-note">App 里的样子，人名和对话都是编的演示数据。</figcaption>
+
+	<div class="call-head">
+		<p class="call-title">{CALL.title}</p>
+		<p class="call-sub">{CALL.subtitle}</p>
+	</div>
+
+	<div class="call-strip">
+		<p class="strip-label">谁在说</p>
+		<div class="strip-bar" role="img" aria-label={stripLabel}>
+			{
+				lines.map((line) => (
+					<span
+						class:list={['strip-seg', line.fill]}
+						style={`left:${pct(line.from)}%;width:${pct(line.to) - pct(line.from)}%`}
+					/>
+				))
+			}
+		</div>
+		<div class="strip-ticks" aria-hidden="true">
+			{ticks.map((t) => <span style={`left:${t.at}%`}>{t.label}</span>)}
+		</div>
+		<ul class="strip-legend">
+			{
+				CALL.people.map((p) => (
+					<li>
+						<span class:list={['who', fillClass[p.fill]]} />
+						{p.name}
+					</li>
+				))
+			}
+		</ul>
+	</div>
+
+	<ol class="lines lines-before">
+		{
+			before.map((line) => (
+				<li class:list={['line', { 'line-hit': line === hit }]}>
+					<p class="line-head">
+						<span class:list={['who', line.fill]} />
+						<strong>{line.name}</strong>
+						<time>{line.time}</time>
+						{'emotion' in line && line.emotion && <span class="tag">{line.emotion}</span>}
+						{line.unknown && <span class="line-unknown">还没认出是谁</span>}
+					</p>
+					<p class="line-text">{line.text}</p>
+					{line === hit && (
+						<p class="line-caught">
+							<Icon name="caught" size={18} />
+							已抓成一件待确认
+						</p>
+					)}
+				</li>
+			))
+		}
+	</ol>
+
+	<div class="catch">
+		<div class="card">
+			<p class="card-top">
+				<span class="card-to">
+					<span class:list={['who', fillClass[toPerson.fill]]} />
+					答应{CALL.card.to}
+				</span>
+				<span class="card-kind">{CALL.card.kind}</span>
+			</p>
+			<p class="card-title">{CALL.card.summary}</p>
+			<p class="card-due">到期 <strong>{CALL.card.due}</strong></p>
+			<div class="card-quote">
+				<p class="quote-from">来自 {CALL.title}</p>
+				<p class="quote-text">
+					<span class:list={['who', hit.fill]} />
+					<span>「{CALL.card.quote}」</span>
+				</p>
+			</div>
+			<p class="visually-hidden">卡片下面三个键：不是、补充、进待办。</p>
+			<div class="keys" aria-hidden="true">
+				<span class="key"><Icon name="no" size={18} />不是</span>
+				<span class="key"><Icon name="note" size={18} />补充</span>
+				<span class="key key-solid"><Icon name="todo" size={18} />进待办</span>
+			</div>
+		</div>
+		<p class="catch-note">这是示意，网页上点不了。</p>
+	</div>
+
+	<ol class="lines lines-after" start={hitIndex + 2}>
+		{
+			after.map((line) => (
+				<li class="line">
+					<p class="line-head">
+						<span class:list={['who', line.fill]} />
+						<strong>{line.name}</strong>
+						<time>{line.time}</time>
+						{'emotion' in line && line.emotion && <span class="tag">{line.emotion}</span>}
+						{line.unknown && <span class="line-unknown">还没认出是谁</span>}
+					</p>
+					<p class="line-text">{line.text}</p>
+					{line.unknown && (
+						<span class="fake-btn" aria-hidden="true">
+							<Icon name="edit" size={16} />
+							这句是谁说的
+						</span>
+					)}
+				</li>
+			))
+		}
+	</ol>
+</figure>
+
+<style>
+	/* 手机上一栏：原话 → 卡 → 后面的原话，「谁在说」细条放在最后（跟 App「今天」列表里一样在对话下面） */
+	.call {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		cursor: default;
+	}
+
+	.call-note {
+		padding-bottom: var(--s-3);
+		border-bottom: 1px solid var(--c-line);
+		color: var(--c-ink-3);
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	.call-head {
+		padding-top: var(--s-4);
+	}
+
+	.call-title {
+		font-size: 21px;
+		font-weight: 700;
+		line-height: 1.35;
+	}
+
+	.call-sub {
+		color: var(--c-ink-3);
+		font-size: 15px;
+	}
+
+	/* 谁在说：这 15 分钟按秒画，哪种颜色长，谁说得多 */
+	.call-strip {
+		order: 1;
+		margin-top: var(--s-4);
+		padding-top: var(--s-3);
+		border-top: 1px solid var(--c-line);
+	}
+
+	.strip-label {
+		margin-bottom: var(--s-2);
+		color: var(--c-ink-2);
+		font-size: 14px;
+		font-weight: 700;
+	}
+
+	.strip-bar {
+		position: relative;
+		height: 14px;
+		overflow: hidden;
+		border-radius: var(--r-tag);
+		background: var(--c-line);
+	}
+
+	.strip-seg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+	}
+
+	.strip-ticks {
+		position: relative;
+		height: 20px;
+		margin-top: var(--s-1);
+		color: var(--c-ink-3);
+		font-size: 13px;
+		line-height: 20px;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.strip-ticks span {
+		position: absolute;
+		transform: translateX(-50%);
+		white-space: nowrap;
+	}
+
+	.strip-ticks span:first-child {
+		transform: none;
+	}
+
+	.strip-ticks span:last-child {
+		transform: translateX(-100%);
+	}
+
+	.strip-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-1) var(--s-4);
+		margin: var(--s-1) 0 0;
+		padding: 0;
+		color: var(--c-ink-2);
+		font-size: 14px;
+		list-style: none;
+	}
+
+	.strip-legend li {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+	}
+
+	/* 逐句原话：跟 App 一段对话页一样，色块 + 名字 + 时间，下面是原话 */
+	.lines {
+		margin: var(--s-3) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.lines-after {
+		margin-top: var(--s-5);
+	}
+
+	.line {
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.line-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 2px var(--s-2);
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	.line-head strong {
+		font-size: 15px;
+	}
+
+	.line-head time {
+		color: var(--c-ink-3);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.tag {
+		padding: 0 6px;
+		border: 1px solid var(--c-ink-3);
+		border-radius: var(--r-tag);
+		color: var(--c-ink-2);
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	.line-unknown {
+		color: var(--c-ink-3);
+		font-size: 13px;
+	}
+
+	.line-text {
+		margin-top: 2px;
+		color: var(--c-ink-2);
+		font-size: 17px;
+		line-height: 1.6;
+	}
+
+	/* 被抓成卡的那一句：全页最显眼的东西从这里开始 */
+	.line-hit .line-text {
+		color: var(--c-ink);
+		font-size: 20px;
+		font-weight: 700;
+		line-height: 1.5;
+	}
+
+	.line-caught {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: var(--s-2);
+		color: var(--c-me);
+		font-size: 15px;
+		font-weight: 600;
+	}
+
+	.fake-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: var(--s-2);
+		padding: 4px 12px;
+		border: 1.5px solid var(--c-ink-2);
+		border-radius: var(--r-btn);
+		color: var(--c-ink-2);
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.5;
+	}
+
+	/* 抓出来的那张卡 */
+	.catch {
+		position: relative;
+		padding-top: var(--s-5);
+	}
+
+	/* 手机上从那句往下接一根线到卡上 */
+	.catch::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 4px;
+		width: 2px;
+		height: var(--s-5);
+		background: var(--c-me);
+	}
+
+
+	.card {
+		padding: var(--s-4);
+		border: 1px solid var(--c-line);
+		border-radius: var(--r-card);
+		background: var(--c-paper);
+		box-shadow: 0 16px 40px var(--c-shadow);
+	}
+
+	.card-top {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 2px var(--s-3);
+	}
+
+	.card-to {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--c-ink-2);
+		font-size: 15px;
+		font-weight: 600;
+	}
+
+	.card-kind {
+		color: var(--c-ink-3);
+		font-size: 14px;
+	}
+
+	.card-title {
+		margin-top: 2px;
+		font-size: 20px;
+		font-weight: 700;
+		line-height: 1.4;
+		/* 手机上别折出单独一个字（iOS 17.4 起支持，不支持的照常折行） */
+		text-wrap: balance;
+	}
+
+	.card-due {
+		margin-top: 2px;
+		color: var(--c-ink-2);
+		font-size: 15px;
+	}
+
+	.card-due strong {
+		color: var(--c-ink);
+	}
+
+	.card-quote {
+		margin-top: var(--s-3);
+		padding: var(--s-2) var(--s-3);
+		border-radius: var(--r-btn);
+		background: var(--c-wash);
+	}
+
+	.quote-from {
+		color: var(--c-ink-3);
+		font-size: 14px;
+	}
+
+	.quote-text {
+		display: flex;
+		align-items: baseline;
+		gap: 4px;
+		font-size: 16px;
+		line-height: 1.55;
+	}
+
+	.quote-text .who {
+		position: relative;
+		top: 0.08em;
+	}
+
+	.catch-note {
+		margin-top: var(--s-3);
+		color: var(--c-ink-3);
+		font-size: 14px;
+		text-align: center;
+	}
+
+	/* 三个键：App 里的样子，网页上不能点（不是按钮元素，读屏跳过，鼠标也不变手形） */
+	.keys {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--s-2);
+		margin-top: var(--s-3);
+		user-select: none;
+	}
+
+	.key {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		min-height: 44px;
+		border: 2px solid var(--c-ink);
+		border-radius: var(--r-btn);
+		color: var(--c-ink);
+		font-size: 16px;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+
+	.key-solid {
+		background: var(--c-ink);
+		color: var(--c-paper);
+	}
+
+	/* 电脑上：原话在左，卡在右边，卡的底边跟那句话对齐，中间一根线接过去 */
+	@media (min-width: 900px) {
+		.call {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 440px;
+			column-gap: var(--s-8);
+			align-items: start;
+		}
+
+		.call-note {
+			grid-column: 1 / -1;
+			grid-row: 1;
+		}
+
+		.call-head {
+			grid-column: 1;
+			grid-row: 2;
+		}
+
+		.call-strip {
+			grid-column: 1;
+			grid-row: 3;
+			margin-top: var(--s-3);
+			padding-top: 0;
+			border-top: 0;
+		}
+
+		.lines-before {
+			grid-column: 1;
+			grid-row: 4;
+		}
+
+		.lines-after {
+			grid-column: 1;
+			grid-row: 5;
+			margin-top: 0;
+		}
+
+		.catch {
+			grid-column: 2;
+			grid-row: 2 / span 3;
+			align-self: end;
+			padding-top: var(--s-4);
+		}
+
+		.catch::before {
+			display: none;
+		}
+
+		/* 「已抓成一件待确认」后面一根线，穿过两栏中间接到卡上 */
+		.line-caught::after {
+			content: '';
+			flex: 1;
+			height: 2px;
+			margin-left: var(--s-2);
+			margin-right: calc(-1 * var(--s-8));
+			background: var(--c-me);
+		}
+
+		.line-hit .line-text {
+			font-size: 23px;
+		}
+
+		.card {
+			padding: var(--s-5);
+		}
+
+		.card-title {
+			font-size: 23px;
+		}
+
+		.catch-note {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 100%;
+		}
+	}
+</style>

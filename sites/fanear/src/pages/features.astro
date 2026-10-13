@@ -1,0 +1,132 @@
+---
+// 功能：一条一节，左边文字、右边截图；同一张截图只放第一次，后面几节不重复。
+import PageIntro from '../components/PageIntro.astro';
+import Shot from '../components/Shot.astro';
+import Base from '../layouts/Base.astro';
+import { FEATURES } from '../lib/features';
+import { SHOTS_NOTE, type ShotId } from '../lib/shots';
+import { STATUS } from '../lib/site';
+import { withBase } from '../lib/url';
+
+const shown = new Set<ShotId>();
+const rows = FEATURES.map((feature) => {
+	const shot = feature.shot && !shown.has(feature.shot) ? feature.shot : undefined;
+	if (shot) shown.add(shot);
+	return { ...feature, shot };
+});
+---
+
+<Base title="功能" description="饭耳能做什么：手表全天录，转成文字分清谁在说，整理对话，挑出答应的事等你确认，心率和对话对上。">
+	<main id="main" class="wrap">
+		<PageIntro title="功能">
+			<p>下面写的是 0.1.0 已经做进去的功能。这一版还在{STATUS.label}，{STATUS.text}</p>
+			<p>{SHOTS_NOTE}想知道怎么一步步用起来，看<a href={withBase('/guide/')}>使用说明</a>。</p>
+		</PageIntro>
+
+		{
+			rows.map((feature) => (
+				<section id={feature.id} class:list={['feature', feature.shot && 'has-shot', feature.shot === 'watchRecording' && 'has-watch']} aria-labelledby={`h-${feature.id}`}>
+					<div class="feature-text">
+						<h2 id={`h-${feature.id}`}>{feature.title}</h2>
+						<p class="feature-lead">{feature.lead}</p>
+						<ul>
+							{feature.points.map((point) => (
+								<li>{point}</li>
+							))}
+						</ul>
+					</div>
+					{feature.shot === 'watchRecording' ? (
+						<div class="feature-shots watch-pair">
+							<Shot id="watchRecording" />
+							<Shot id="watchInterrupted" />
+						</div>
+					) : (
+						feature.shot && (
+							<div class="feature-shots">
+								<Shot id={feature.shot} />
+							</div>
+						)
+					)}
+				</section>
+			))
+		}
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.feature {
+		padding: var(--s-7) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.feature-text {
+		max-width: var(--measure);
+	}
+
+	h2 {
+		font-size: 26px;
+	}
+
+	.feature-lead {
+		margin-top: var(--s-3);
+		font-size: 19px;
+		line-height: 1.65;
+	}
+
+	ul {
+		margin: var(--s-4) 0 0;
+		padding-left: 1.2em;
+		color: var(--c-ink-2);
+	}
+
+	li + li {
+		margin-top: var(--s-2);
+	}
+
+	li::marker {
+		color: var(--c-ink-3);
+	}
+
+	.feature-shots {
+		width: min(300px, 76%);
+		margin: var(--s-6) auto 0;
+	}
+
+	.watch-pair {
+		display: flex;
+		gap: var(--s-4);
+		width: min(440px, 100%);
+	}
+
+	.watch-pair > :global(*) {
+		flex: 1;
+	}
+
+	@media (min-width: 900px) {
+		.feature.has-shot {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 320px;
+			column-gap: var(--s-8);
+			align-items: start;
+		}
+
+		.feature.has-watch {
+			grid-template-columns: minmax(0, 1fr) 440px;
+		}
+
+		.feature-shots {
+			width: 100%;
+			margin: 0;
+		}
+
+		h2 {
+			font-size: 30px;
+		}
+	}
+</style>

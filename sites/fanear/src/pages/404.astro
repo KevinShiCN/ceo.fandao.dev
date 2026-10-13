@@ -1,0 +1,21 @@
+---
+import PageIntro from '../components/PageIntro.astro';
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+---
+
+<Base title="没有这一页" canonical={false}>
+	<main id="main" class="wrap">
+		<PageIntro title="没有这一页">
+			<p>地址可能打错了。回<a href={withBase('/')}>首页</a>，或者看<a href={withBase('/changelog/')}>更新记录</a>。</p>
+		</PageIntro>
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+</style>

@@ -1,0 +1,108 @@
+---
+// 手机上的一屏讲一件事：上面写这是 App 里哪一屏，标题、一句话、细节；旁边是这一屏的真机截图。
+// flip 让截图换到左边，几节交替着排。手机上一律字在上、图在下。
+interface Props {
+	id: string;
+	/** App 里这一屏叫什么，跟截图下面那行字一样 */
+	screen: string;
+	title: string;
+	lead: string;
+	flip?: boolean;
+}
+
+const { id, screen, title, lead, flip = false } = Astro.props;
+---
+
+<section class:list={['chapter', flip && 'chapter-flip']} aria-labelledby={id}>
+	<div class="chapter-text">
+		<p class="chapter-screen">App 里的「{screen}」</p>
+		<h3 id={id}>{title}</h3>
+		<p class="chapter-lead">{lead}</p>
+		<slot />
+	</div>
+	<div class="chapter-figure">
+		<slot name="figure" />
+	</div>
+</section>
+
+<style>
+	.chapter {
+		padding-top: var(--s-8);
+	}
+
+	.chapter-screen {
+		color: var(--c-ink-3);
+		font-size: 15px;
+		font-weight: 600;
+	}
+
+	h3 {
+		margin-top: var(--s-2);
+		font-size: 26px;
+		font-weight: 800;
+		line-height: 1.3;
+	}
+
+	.chapter-lead {
+		margin-top: var(--s-3);
+		font-size: 18px;
+		line-height: 1.65;
+	}
+
+	.chapter-figure {
+		width: 64vw;
+		max-width: 280px;
+		margin: var(--s-6) auto 0;
+	}
+
+	@media (min-width: 768px) {
+		.chapter {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 280px;
+			align-items: center;
+			gap: var(--s-8);
+			padding-top: var(--s-9);
+		}
+
+		.chapter-flip {
+			grid-template-columns: 280px minmax(0, 1fr);
+		}
+
+		.chapter-flip .chapter-figure {
+			order: -1;
+		}
+
+		.chapter-text {
+			max-width: 34em;
+		}
+
+		h3 {
+			font-size: 34px;
+		}
+
+		.chapter-lead {
+			font-size: 20px;
+		}
+
+		.chapter-figure {
+			width: 280px;
+			max-width: none;
+			margin: 0;
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.chapter {
+			grid-template-columns: minmax(0, 1fr) 300px;
+			column-gap: var(--s-9);
+		}
+
+		.chapter-flip {
+			grid-template-columns: 300px minmax(0, 1fr);
+		}
+
+		.chapter-figure {
+			width: 300px;
+		}
+	}
+</style>

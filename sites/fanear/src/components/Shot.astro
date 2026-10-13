@@ -1,0 +1,105 @@
+---
+// App 截图套一个机身框：手机是深墨边框加灵动岛，手表是表壳色圆角框。框都用 CSS 画，宽度跟着外面的容器走。
+// 截图来源和说明见 src/lib/shots.ts。
+import { Image } from 'astro:assets';
+import { SHOTS, type ShotId } from '../lib/shots';
+
+interface Props {
+	id: ShotId;
+	/** 截图下面写不写那一行字 */
+	caption?: boolean;
+	/** 首屏的图传 true，先加载 */
+	eager?: boolean;
+	/** 给 <img sizes>：这张图在页面上大概多宽 */
+	sizes?: string;
+	class?: string;
+}
+
+const { id, caption = true, eager = false, sizes, class: className } = Astro.props;
+const shot = SHOTS[id];
+const phone = shot.device === 'phone';
+const widths = phone ? [320, 480, 640, 960] : [200, 300, 416];
+const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768px) 200px, 46vw';
+---
+
+<figure class:list={['shot', phone ? 'shot-phone' : 'shot-watch', className]}>
+	<div class="shot-frame">
+		<div class="shot-screen">
+			<Image
+				src={shot.src}
+				alt={shot.alt}
+				widths={widths}
+				sizes={sizes ?? defaultSizes}
+				quality={88}
+				loading={eager ? 'eager' : 'lazy'}
+				fetchpriority={eager ? 'high' : undefined}
+			/>
+			{phone && <span class="shot-island" aria-hidden="true" />}
+		</div>
+	</div>
+	{caption && <figcaption>{shot.caption}</figcaption>}
+</figure>
+
+<style>
+	.shot {
+		margin: 0;
+	}
+
+	/* 机身边框：padding 用百分比（相对宽度），四边一样粗 */
+	.shot-frame {
+		filter: drop-shadow(0 12px 28px var(--c-shadow));
+	}
+
+	.shot-phone .shot-frame {
+		padding: 3.4%;
+		border-radius: 15% / 7%;
+		background: var(--c-ink);
+	}
+
+	.shot-watch .shot-frame {
+		padding: 6%;
+		border-radius: 27% / 23%;
+		background: var(--c-watch-case);
+	}
+
+	.shot-screen {
+		position: relative;
+		overflow: hidden;
+		background: var(--c-paper);
+	}
+
+	/* 圆角按「横向 % / 纵向 %」写，宽高比不同也接近正圆 */
+	.shot-phone .shot-screen {
+		border-radius: 12.5% / 5.8%;
+	}
+
+	.shot-watch .shot-screen {
+		border-radius: 21% / 17.6%;
+		background: var(--c-ink);
+	}
+
+	.shot-screen :global(img) {
+		width: 100%;
+		height: auto;
+	}
+
+	/* 灵动岛：iPhone 17 Pro Max 上约 126×37 点，离顶 11 点（屏幕 440×956 点） */
+	.shot-island {
+		position: absolute;
+		top: 1.15%;
+		left: 35.7%;
+		width: 28.6%;
+		height: 3.87%;
+		border-radius: 999px;
+		background: var(--c-ink);
+	}
+
+	figcaption {
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 1.4;
+		text-align: center;
+	}
+</style>

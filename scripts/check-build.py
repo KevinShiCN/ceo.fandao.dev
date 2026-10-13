@@ -305,7 +305,8 @@ def main() -> int:
     for source, text in report.checked:
         print(f'    {source}：{text}（{PAGEFIND_CHECKED[text]}）')
     unseen = sorted(set(PAGEFIND_CHECKED) - {text for _, text in report.checked})
-    if unseen:
+    # 没有站内搜索的站（如 sites/fanear）不提醒放行清单
+    if unseen and (out_dir / 'pagefind').is_dir():
         print(f'    放行清单里这些没在构建产物里出现，Pagefind 可能升级了，清单该更新：{"、".join(unseen)}')
     print(f'  需要处理：坏链 {len(report.broken)}，外站资源 {len(report.external_resources)}，脚本里用途不明的外链 {len(js_bad)}')
     return 1 if report.broken or report.external_resources or js_bad else 0

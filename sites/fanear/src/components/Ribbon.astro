@@ -1,0 +1,129 @@
+---
+// 一天的时间条（跟 App「今天」最上面那条同一个画法）：有对话的块按说得最多那个人的颜色，
+// 黑块是没录到，斜纹是没转成文字，没人说话的时段留浅底。下面一排整点刻度，再下面是图例。
+// 只画 src/lib/demo.ts 里的演示数据，不是装饰。
+import { DAY, percentOf, type Fill } from '../lib/demo';
+
+interface Props {
+	/** 条的高度（px） */
+	height?: number;
+	/** 写不写图例 */
+	legend?: boolean;
+	class?: string;
+}
+
+const { height = 20, legend = true, class: className } = Astro.props;
+const fillClass: Record<Fill, string> = {
+	me: 'who-me',
+	p1: 'who-p1',
+	p2: 'who-p2',
+	p3: 'who-p3',
+	gap: 'who-gap',
+	fail: 'who-fail',
+};
+const hourLabel = (hhmm: string) => `${Number(hhmm.slice(0, 2))}点`;
+---
+
+<div class:list={['ribbon', className]}>
+	<div class="ribbon-bar" style={`height:${height}px`} role="img" aria-label={`演示的一天：${DAY.summary}`}>
+		{
+			DAY.ribbon.map((span) => (
+				<span
+					class:list={['ribbon-seg', fillClass[span.fill]]}
+					style={`left:${percentOf(span.from)}%;width:${percentOf(span.to) - percentOf(span.from)}%`}
+				/>
+			))
+		}
+	</div>
+	<div class="ribbon-ticks" aria-hidden="true">
+		{DAY.ticks.map((t) => <span style={`left:${percentOf(t)}%`}>{hourLabel(t)}</span>)}
+	</div>
+	{
+		legend && (
+			<ul class="ribbon-legend">
+				<li>
+					<span class="who who-me" />
+					<span class="who who-p1" />
+					对话
+				</li>
+				<li>
+					<span class="who who-gap" />
+					没录到
+				</li>
+				<li>
+					<span class="who who-fail" />
+					没转成文字
+				</li>
+			</ul>
+		)
+	}
+</div>
+
+<style>
+	.ribbon-bar {
+		position: relative;
+		overflow: hidden;
+		border-radius: var(--r-tag);
+		background: var(--c-line);
+	}
+
+	.ribbon-seg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+	}
+
+	/* 色块紧挨着时（17:11 和 17:26 两块）中间留一道白缝，看得出是两块 */
+	.ribbon-seg + .ribbon-seg {
+		box-shadow: -1px 0 0 var(--c-paper);
+	}
+
+	.ribbon-seg.who-fail {
+		box-shadow: none;
+	}
+
+	.ribbon-ticks {
+		position: relative;
+		height: 22px;
+		margin-top: var(--s-1);
+		color: var(--c-ink-3);
+		font-size: 13px;
+		line-height: 22px;
+	}
+
+	/* 刻度字以刻度为中心；首尾两个往里收，不出框 */
+	.ribbon-ticks span {
+		position: absolute;
+		transform: translateX(-50%);
+		white-space: nowrap;
+	}
+
+	.ribbon-ticks span:first-child {
+		transform: none;
+	}
+
+	.ribbon-ticks span:last-child {
+		transform: translateX(-100%);
+	}
+
+	.ribbon-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-1) var(--s-4);
+		margin: var(--s-2) 0 0;
+		padding: 0;
+		color: var(--c-ink-2);
+		font-size: 14px;
+		list-style: none;
+	}
+
+	.ribbon-legend li {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+	}
+
+	.ribbon-legend li .who:last-of-type {
+		margin-right: 3px;
+	}
+</style>
