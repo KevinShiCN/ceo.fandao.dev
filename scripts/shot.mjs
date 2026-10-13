@@ -1,8 +1,13 @@
 // 本机预览截图：用 Chrome 无头模式 + CDP 设定视口（无头 Chrome 的窗口最窄只有 500px，手机宽度要靠 CDP）。
 //
 //   node scripts/shot.mjs <url> <输出.png> [--width 390] [--height 844] [--dpr 1] [--full] [--search <词>]
+//                         [--scroll 0,900,1800] [--probe <表达式>] [--reduced-motion]
 //
 // --full：整页截图。先把视口拉到整页高度，等所有图片加载完再截，懒加载的图也能截到。
+// --scroll：看滚动动画用。视口不变，依次滚到这几个位置（像素）各截一张，文件名后面加「-位置」。
+//   滚动驱动的动画只看滚动位置，同一个位置截出来每次都一样。不能和 --full 一起用。
+// --probe：每个滚动位置在页面里算一次这个表达式（结果要能转成 JSON），放进输出，用来核对动画走到哪了。
+// --reduced-motion：模拟系统设了「减弱动态效果」。
 // --search：站内搜索。点首页的搜索框（别的页面先点顶栏「搜索」），像键盘输入一样打进这个词，
 //   等结果出来再截图，输出里带上结果条数和各条标题。
 import { spawn } from 'node:child_process';
@@ -16,15 +21,22 @@ const MAX_FULL_HEIGHT = 16000;
 function parseArgs(argv) {
 	const [url, out, ...rest] = argv;
 	if (!url || !out) {
-		throw new Error('用法：node scripts/shot.mjs <url> <输出.png> [--width 390] [--height 844] [--dpr 1] [--full] [--search <词>]');
+		throw new Error(
+			'用法：node scripts/shot.mjs <url> <输出.png> [--width 390] [--height 844] [--dpr 1] [--full] [--search <词>] [--scroll 0,900] [--probe <表达式>] [--reduced-motion]',
+		);
 	}
-	const opts = { url, out, width: 390, height: 844, dpr: 1, full: false, search: '' };
+	const opts = { url, out, width: 390, height: 844, dpr: 1, full: false, search: '', scroll: [], probe: '', reducedMotion: false };
 	for (let i = 0; i < rest.length; i++) {
 		const key = rest[i].replace(/^--/, '');
 		if (key === 'full') opts.full = true;
+		else if (key === 'reduced-motion') opts.reducedMotion = true;
 		else if (key === 'search') opts.search = rest[++i] ?? '';
+		else if (key === 'probe') opts.probe = rest[++i] ?? '';
+		else if (key === 'scroll') opts.scroll = (rest[++i] ?? '').split(',').map(Number);
 		else opts[key] = Number(rest[++i]);
 	}
+	if (opts.scroll.some((y) => !Number.isFinite(y) || y < 0)) throw new Error('--scroll 要写成逗号隔开的像素数，比如 0,900,1800');
+	if (opts.scroll.length && opts.full) throw new Error('--scroll 和 --full 不能一起用');
 	return opts;
 }
 
@@ -148,6 +160,9 @@ async function main() {
 		});
 		await cdp.send('Page.enable', {}, sessionId);
 		await cdp.send('Emulation.setDeviceMetricsOverride', metrics(opts.height), sessionId);
+		if (opts.reducedMotion) {
+			await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }, sessionId);
+		}
 		const loaded = cdp.waitFor('Page.loadEventFired', sessionId);
 		await cdp.send('Page.navigate', { url: opts.url }, sessionId);
 		await loaded;
@@ -177,11 +192,28 @@ async function main() {
 			await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: opts.width - 1, y: opts.height - 1 }, sessionId);
 			search = { query: opts.search, via: kind, ...(await evalJSON(WAIT_SEARCH)) };
 		}
-		const shot = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
-		await writeFile(opts.out, Buffer.from(shot.data, 'base64'));
-		console.log(
-			JSON.stringify({ out: opts.out, viewport: opts.width, pageHeight: info.height, scrollWidth: info.width, broken: info.broken, search }),
-		);
+		if (opts.scroll.length) {
+			const shots = [];
+			for (const y of opts.scroll) {
+				const probe = opts.probe ? `(${opts.probe})` : 'null';
+				const at = await evalJSON(`(async () => {
+					window.scrollTo(0, ${y});
+					await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+					return JSON.stringify({ y: window.scrollY, probe: ${probe} });
+				})()`);
+				const out = opts.out.replace(/(\.png)?$/, `-${y}.png`);
+				const shot = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
+				await writeFile(out, Buffer.from(shot.data, 'base64'));
+				shots.push({ out, ...at });
+			}
+			console.log(JSON.stringify({ viewport: opts.width, pageHeight: info.height, scrollWidth: info.width, broken: info.broken, shots }));
+		} else {
+			const shot = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
+			await writeFile(opts.out, Buffer.from(shot.data, 'base64'));
+			console.log(
+				JSON.stringify({ out: opts.out, viewport: opts.width, pageHeight: info.height, scrollWidth: info.width, broken: info.broken, search }),
+			);
+		}
 		cdp.ws.close();
 	} finally {
 		const exited = chrome.exitCode !== null ? Promise.resolve() : new Promise((resolve) => chrome.once('exit', resolve));
