@@ -12,12 +12,17 @@ interface Props {
 	eager?: boolean;
 	/** 给 <img sizes>：这张图在页面上大概多宽 */
 	sizes?: string;
+	/** 同一个机身里叠在 id 这屏上面的几屏，按顺序一层压一层（首页电脑上滚动时一屏一屏换上来）。只能是同一种设备 */
+	stack?: ShotId[];
 	class?: string;
 }
 
-const { id, caption = true, eager = false, sizes, class: className } = Astro.props;
+const { id, caption = true, eager = false, sizes, stack = [], class: className } = Astro.props;
 const shot = SHOTS[id];
 const phone = shot.device === 'phone';
+const layers = [id, ...stack];
+const mixed = layers.find((layer) => SHOTS[layer].device !== shot.device);
+if (mixed) throw new Error(`截图「${mixed}」跟「${id}」不是同一种设备，不能叠在一个机身里`);
 const widths = phone ? [320, 480, 640, 960] : [200, 300, 416];
 const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768px) 200px, 46vw';
 ---
@@ -25,15 +30,21 @@ const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768
 <figure class:list={['shot', phone ? 'shot-phone' : 'shot-watch', className]}>
 	<div class="shot-frame">
 		<div class="shot-screen">
-			<Image
-				src={shot.src}
-				alt={shot.alt}
-				widths={widths}
-				sizes={sizes ?? defaultSizes}
-				quality={88}
-				loading={eager ? 'eager' : 'lazy'}
-				fetchpriority={eager ? 'high' : undefined}
-			/>
+			{
+				layers.map((layer) => (
+					<div class="shot-layer" data-shot={layer}>
+						<Image
+							src={SHOTS[layer].src}
+							alt={SHOTS[layer].alt}
+							widths={widths}
+							sizes={sizes ?? defaultSizes}
+							quality={88}
+							loading={eager ? 'eager' : 'lazy'}
+							fetchpriority={eager ? 'high' : undefined}
+						/>
+					</div>
+				))
+			}
 			{phone && <span class="shot-island" aria-hidden="true" />}
 		</div>
 	</div>
@@ -81,6 +92,17 @@ const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768
 	.shot-screen :global(img) {
 		width: 100%;
 		height: auto;
+	}
+
+	/* 叠上来的几屏跟第一屏一样大，盖在它上面。平时藏着、只露第一屏；
+	   首页电脑上滚动时由 styles/scroll-motion.css 接手，一屏一屏换上来 */
+	.shot-layer + .shot-layer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		visibility: hidden;
 	}
 
 	/* 灵动岛：iPhone 17 Pro Max 上约 126×37 点，离顶 11 点（屏幕 440×956 点） */

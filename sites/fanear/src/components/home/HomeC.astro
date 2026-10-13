@@ -11,6 +11,7 @@ import Points from './c/Points.astro';
 import Watch from './c/Watch.astro';
 import { feature, point } from './c/pick';
 import Shot from '../Shot.astro';
+import '../../styles/scroll-motion.css';
 
 const today = feature('today');
 const transcribe = feature('transcribe');
@@ -38,57 +39,72 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 		<h2>手机上</h2>
 	</div>
 
-	<Chapter id="h-c-today" screen={SHOTS.today.caption} title={today.title} lead={today.lead}>
-		<Points items={today.points} />
-		<Shot slot="figure" id="today" caption={false} sizes={phoneSizes} />
-	</Chapter>
+	<div class="story">
+		<Chapter id="h-c-today" screen={SHOTS.today.caption} title={today.title} lead={today.lead}>
+			<Points items={today.points} />
+			<Shot slot="figure" id="today" caption={false} sizes={phoneSizes} />
+		</Chapter>
 
-	<Chapter
-		id="h-c-conversation"
-		screen={SHOTS.conversation.caption}
-		title={transcribe.title}
-		lead={transcribe.lead}
-		flip
-	>
-		<Points items={[point(transcribe, '说话人')]} />
-		<div class="sub">
-			<h4>{organize.title}</h4>
-			<p>{organize.lead}</p>
-			<Points items={[point(organize, '最近'), point(organize, '认错')]} />
-		</div>
-		<div class="sub">
-			<h4>{health.title}</h4>
-			<p>{health.lead}</p>
-			<Points items={[point(health, '锁着')]} />
-		</div>
-		<Shot slot="figure" id="conversation" caption={false} sizes={phoneSizes} />
-	</Chapter>
+		<Chapter
+			id="h-c-conversation"
+			screen={SHOTS.conversation.caption}
+			title={transcribe.title}
+			lead={transcribe.lead}
+			flip
+		>
+			<Points items={[point(transcribe, '说话人')]} />
+			<div class="sub">
+				<h4>{organize.title}</h4>
+				<p>{organize.lead}</p>
+				<Points items={[point(organize, '最近'), point(organize, '认错')]} />
+			</div>
+			<div class="sub">
+				<h4>{health.title}</h4>
+				<p>{health.lead}</p>
+				<Points items={[point(health, '锁着')]} />
+			</div>
+			<Shot slot="figure" id="conversation" caption={false} sizes={phoneSizes} />
+		</Chapter>
 
-	<Chapter
-		id="h-c-commitments"
-		screen={SHOTS.commitments.caption}
-		title={commitments.title}
-		lead={commitments.lead}
-	>
-		<Points items={[point(commitments, '三个键'), point(commitments, '5 秒')]} />
-		<p class="auto">
-			<strong>{auto[1]}</strong>
-			<span>{auto[2]}</span>
-		</p>
-		<Shot slot="figure" id="commitments" caption={false} sizes={phoneSizes} />
-	</Chapter>
+		<Chapter
+			id="h-c-commitments"
+			screen={SHOTS.commitments.caption}
+			title={commitments.title}
+			lead={commitments.lead}
+		>
+			<Points items={[point(commitments, '三个键'), point(commitments, '5 秒')]} />
+			<p class="auto">
+				<strong>{auto[1]}</strong>
+				<span>{auto[2]}</span>
+			</p>
+			<Shot slot="figure" id="commitments" caption={false} sizes={phoneSizes} />
+		</Chapter>
+
+		{/* 电脑上往下滑时用的那一部手机：钉在右边不动，三屏跟着左边三节一屏一屏换（styles/scroll-motion.css）。
+		    手机、平板、不支持滚动动画的浏览器和设了「减弱动态效果」的不显示它，还是每节自带截图 */}
+		<div class="story-phone">
+			<div class="story-pin">
+				<Shot id="today" stack={['conversation', 'commitments']} caption={false} sizes="300px" class="story-shot" />
+			</div>
+		</div>
+	</div>
 
 	<Account />
 	<Latest />
 </main>
 
 <style>
-	.home-c > :global(section:not(.account)) {
+	.home-c > :global(section:not(.account)),
+	.story {
 		max-width: calc(var(--page-max) + 2 * var(--gutter));
 		margin-left: auto;
 		margin-right: auto;
 		padding-left: var(--gutter);
 		padding-right: var(--gutter);
+	}
+
+	.story-phone {
+		display: none;
 	}
 
 	/* 「手表上」「手机上」：一道深墨粗线开头，像说明书换一章 */
