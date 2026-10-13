@@ -1,6 +1,8 @@
 ---
 // 为什么做：我用过、等过的几个，为什么还是自己做，以及饭耳的几条规矩（免费、饭导五常大米、先照我的需要做）。
 // 写法像一封短信，不做对比表；文案和出处在 src/lib/why.ts。
+import { MAKER } from '../../../lib/site';
+import { withBase } from '../../../lib/url';
 import { WHY } from '../../../lib/why';
 ---
 
@@ -22,7 +24,16 @@ import { WHY } from '../../../lib/why';
 			WHY.terms.map((term) => (
 				<div>
 					<dt>{term.title}</dt>
-					<dd>{term.text}</dd>
+					<dd>
+						{term.text}
+						{term.shop && (
+							<div class="why-shop">
+								<img class="why-shop-qr" src={withBase(MAKER.shop.qr)} width="112" height="112" alt={MAKER.shop.qrAlt} loading="lazy" />
+								<span class="why-shop-hint">用微信扫一扫，或者点：</span>
+								<a href={MAKER.shop.url}>{MAKER.shop.label}</a>
+							</div>
+						)}
+					</dd>
 				</div>
 			))
 		}
@@ -76,12 +87,12 @@ import { WHY } from '../../../lib/why';
 		margin: var(--s-5) 0 0;
 	}
 
-	.why-terms div {
+	.why-terms > div {
 		padding: var(--s-3) 0;
 		border-top: 2px solid var(--c-ink);
 	}
 
-	.why-terms div + div {
+	.why-terms > div + div {
 		margin-top: var(--s-3);
 	}
 
@@ -97,7 +108,37 @@ import { WHY } from '../../../lib/why';
 		line-height: 1.6;
 	}
 
+	/* 小店入口：手机上只有链接（点了唤起微信），二维码留给电脑，用手机微信扫 */
+	.why-shop {
+		display: grid;
+		justify-items: start;
+		gap: var(--s-2);
+		margin-top: var(--s-2);
+	}
+
+	.why-shop a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+	.why-shop-qr,
+	.why-shop-hint {
+		display: none;
+	}
+
 	@media (min-width: 900px) {
+		.why-shop-qr {
+			display: block;
+			border: 1px solid var(--c-line);
+		}
+
+		.why-shop-hint {
+			display: block;
+			color: var(--c-ink-3);
+			font-size: 14px;
+		}
+
 		.why-lead {
 			font-size: 20px;
 		}
@@ -114,7 +155,7 @@ import { WHY } from '../../../lib/why';
 			gap: var(--s-6);
 		}
 
-		.why-terms div + div {
+		.why-terms > div + div {
 			margin-top: 0;
 		}
 	}

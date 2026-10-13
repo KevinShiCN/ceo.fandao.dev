@@ -14,6 +14,8 @@ export interface Other {
 export interface Term {
 	title: string;
 	text: string;
+	/** 这一条下面放小店入口（电脑上二维码 + 链接，手机上只有链接），只有「饭导五常大米」那条用 */
+	shop?: boolean;
 }
 
 // 「你的需要也可以提」等需求墙上线再加（10-13 本人 Q34 A）。
@@ -27,7 +29,7 @@ export const WHY = {
 	turn: '大家都不错。只是现在人人都能给自己做 App 了，我就给自己做了一个。',
 	terms: [
 		{ title: '免费', text: '饭耳不收钱。转文字和整理对话用你自己的账号，费用由那家服务商收。' },
-		{ title: '饭导五常大米', text: '做饭耳的我，平时在做饭导五常大米，给餐厅供米。' },
+		{ title: '饭导五常大米', text: '做饭耳的我，平时在做饭导五常大米，给餐厅供米。', shop: true },
 		{ title: '先照我的需要做', text: '功能按我自己每天要用的排。' },
 	] satisfies Term[],
 } as const;
