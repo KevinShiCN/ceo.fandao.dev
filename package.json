@@ -13,7 +13,7 @@
     "astro": "astro",
     "fanear:dev": "astro dev --root sites/fanear",
     "fanear:build": "astro build --root sites/fanear",
-    "fanear:check": "node --test scripts/fanear-changelog.test.mjs && SITE_URL=${SITE_URL:-https://fanear.fandao.dev} python3 scripts/check-build.py ${FANEAR_DIST:-sites/fanear/dist}"
+    "fanear:check": "node --test scripts/fanear-changelog.test.mjs scripts/fanear-legal.test.mjs && SITE_URL=${SITE_URL:-https://fanear.fandao.dev} python3 scripts/check-build.py ${FANEAR_DIST:-sites/fanear/dist} && python3 scripts/check-fanear-legal.py ${FANEAR_DIST:-sites/fanear/dist} sites/fanear/src/data/legal.json"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.3",
