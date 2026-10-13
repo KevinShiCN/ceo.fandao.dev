@@ -1,17 +1,9 @@
 ---
-// 首页。2026-10-13 出了三版给本人挑，构建时用环境变量 FANEAR_HOME=a|b|c 选（默认 a）；
-// 本人挑定后只留选中的那一版，删掉另外两版和这个开关。
-import HomeA from '../components/home/HomeA.astro';
-import HomeB from '../components/home/HomeB.astro';
+// 首页。10-13 本人从三版里选了 C 版「真机」（A「一天」、B「一句话」两版留在提交 fad0682）。
 import HomeC from '../components/home/HomeC.astro';
 import Base from '../layouts/Base.astro';
-
-const variant = process.env.FANEAR_HOME ?? 'a';
-const homes = { a: HomeA, b: HomeB, c: HomeC } as const;
-if (!(variant in homes)) throw new Error(`FANEAR_HOME 只能是 a、b、c，现在是「${variant}」`);
-const Home = homes[variant as keyof typeof homes];
 ---
 
 <Base>
-	<Home />
+	<HomeC />
 </Base>
