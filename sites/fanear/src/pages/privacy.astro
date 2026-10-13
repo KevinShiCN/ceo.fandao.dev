@@ -1,8 +1,23 @@
 ---
-import LegalPending from '../components/LegalPending.astro';
+// 隐私说明：全文来自 src/data/legal.json（同步命令从 fanear 仓库 LegalTexts.swift 生成），这里不写条款文字。
+// App Store 填的隐私政策网址就是这一页。
+import LegalDoc from '../components/LegalDoc.astro';
+import legal from '../data/legal.json';
 import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
 ---
 
-<Base title="隐私说明" description="饭耳的隐私说明。">
-	<LegalPending title="隐私说明" />
+<Base title={legal.privacy.title} description="饭耳的隐私说明：录音、文字和健康数据存在哪、发给谁、怎么删。跟 App 里的一字不差。">
+	<LegalDoc doc={legal.privacy}>
+		<p class="other">另一份：<a href={withBase('/terms/')}>{legal.terms.title}</a></p>
+	</LegalDoc>
 </Base>
+
+<style>
+	.other {
+		margin-top: var(--s-7);
+		padding-top: var(--s-5);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+	}
+</style>

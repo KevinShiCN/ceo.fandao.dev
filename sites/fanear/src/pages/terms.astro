@@ -1,8 +1,129 @@
 ---
-import LegalPending from '../components/LegalPending.astro';
+// 使用条款与免责声明：全文来自 src/data/legal.json（同步命令从 fanear 仓库 LegalTexts.swift 生成），这里不写条款文字。
+// 页尾附上第一次打开 App 时要逐条勾选的「使用前须知」：它是同意这两份条款的那一步，所以跟条款放一起；
+// 隐私说明那页只放隐私说明全文（App Store 填的隐私政策网址），不掺别的。
+import LegalDoc from '../components/LegalDoc.astro';
+import legal from '../data/legal.json';
 import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+
+const { points, healthOption, agreementLine, buttonNotice } = legal.consent;
 ---
 
-<Base title="使用条款与免责声明" description="饭耳的使用条款与免责声明。">
-	<LegalPending title="使用条款与免责声明" />
+<Base title={legal.terms.title} description="饭耳的使用条款与免责声明，和第一次打开时要逐条勾选的使用前须知。跟 App 里的一字不差。">
+	<LegalDoc doc={legal.terms}>
+		<section class="consent" id="consent" aria-labelledby="h-consent" data-legal-consent>
+			<h2 id="h-consent">附：使用前须知</h2>
+			<p class="consent-lead">第一次打开饭耳时，下面几条要逐条勾选，再勾最后一项，才能开始用。带「可选」的那条不勾也能用。</p>
+			<ol class="points">
+				{
+					points.map((point) => (
+						<li class="point" data-legal-point={point.id}>
+							<span class="box" aria-hidden="true" />
+							<div>
+								<p class="point-title" data-legal-field="title">{point.title}</p>
+								<p class="point-detail" data-legal-field="detail">{point.detail}</p>
+							</div>
+						</li>
+					))
+				}
+			</ol>
+			<div class="point optional" data-legal-point={healthOption.id}>
+				<span class="box" aria-hidden="true" />
+				<div>
+					<p class="point-title" data-legal-field="title">{healthOption.title}</p>
+					<p class="point-detail" data-legal-field="detail">{healthOption.detail}</p>
+				</div>
+			</div>
+			<div class="point" data-legal-point="agreement">
+				<span class="box" aria-hidden="true" />
+				<p class="point-title" data-legal-field="title">{agreementLine}</p>
+			</div>
+			<p class="button-notice"><span class="label">「同意并开始使用」按钮旁写着：</span><span data-legal-field="buttonNotice">{buttonNotice}</span></p>
+		</section>
+		<p class="other">另一份：<a href={withBase('/privacy/')}>{legal.privacy.title}</a></p>
+	</LegalDoc>
 </Base>
+
+<style>
+	.consent {
+		margin-top: var(--s-8);
+		padding-top: var(--s-6);
+		border-top: 1px solid var(--c-line);
+	}
+
+	.consent h2 {
+		font-size: 20px;
+		scroll-margin-top: var(--s-5);
+	}
+
+	.consent-lead {
+		margin-top: var(--s-2);
+		color: var(--c-ink-3);
+		font-size: 15px;
+	}
+
+	.points {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.point {
+		display: flex;
+		gap: var(--s-3);
+		margin-top: var(--s-3);
+		padding: var(--s-4);
+		background: var(--c-wash);
+		border-radius: var(--r-card);
+	}
+
+	.point.optional {
+		background: var(--c-paper);
+		border: 1px dashed var(--c-line);
+	}
+
+	/* 没法点的勾选框：只是示意 App 里要逐条勾 */
+	.box {
+		flex: none;
+		width: 20px;
+		height: 20px;
+		margin-top: 4px;
+		border: 2px solid var(--c-ink-3);
+		border-radius: 5px;
+	}
+
+	.point-title {
+		color: var(--c-ink);
+		font-weight: 700;
+	}
+
+	.point-detail {
+		margin-top: var(--s-1);
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	.button-notice {
+		margin-top: var(--s-4);
+		color: var(--c-ink-2);
+		font-size: 15px;
+	}
+
+	.button-notice .label {
+		color: var(--c-ink-3);
+	}
+
+	.other {
+		margin-top: var(--s-7);
+		padding-top: var(--s-5);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+	}
+
+	@media (min-width: 768px) {
+		.consent h2 {
+			font-size: 22px;
+		}
+	}
+</style>

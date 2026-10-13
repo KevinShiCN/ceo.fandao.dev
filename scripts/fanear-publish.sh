@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# 发布饭耳官网 fanear.fandao.dev：把饭耳仓库的 CHANGELOG.md 同步进来，构建、检查、推送，再核对线上页面。
+# 发布饭耳官网 fanear.fandao.dev：把饭耳仓库的 CHANGELOG.md 和两份条款同步进来，构建、检查、推送，再核对线上页面。
 # 平时不直接跑这个：在饭耳仓库根目录跑 scripts/sync-website.sh，它会把下面几个参数填好。
 #
-#   fanear-publish.sh --blog <博客仓库> --changelog <CHANGELOG.md> --deny <私有词表> [--dry-run] [--ref <分支>]
+#   fanear-publish.sh --blog <博客仓库> --changelog <CHANGELOG.md> --legal <饭耳仓库/Sources/FanEarCore> --deny <私有词表> [--dry-run] [--ref <分支>]
 #
 # 做的事（任何一步失败就停，不推送）：
 #   1. 从博客仓库 origin/main 新开一个临时 worktree（不碰你正在用的那份），装依赖
-#   2. 把 CHANGELOG.md 原样复制到 sites/fanear/src/data/CHANGELOG.md
-#   3. 构建；跑更新记录解析的测试、坏链和外站资源检查、公开仓库扫描（密钥、本机路径、私有词表）
-#   4. CHANGELOG 有变化就在博客仓库提交，推 main（源码）
+#   2. 把 CHANGELOG.md 原样复制到 sites/fanear/src/data/CHANGELOG.md；
+#      从 LegalTexts.swift、Consent.swift 生成 sites/fanear/src/data/legal.json（/terms/、/privacy/ 的全文，解析不了就停）
+#   3. 构建；跑更新记录和条款解析的测试、坏链和外站资源检查、条款逐段比对（页面 ↔ legal.json ↔ Swift 原文）、
+#      公开仓库扫描（密钥、本机路径、私有词表）
+#   4. CHANGELOG 或条款有变化就在博客仓库提交，推 main（源码）
 #   5. 把构建产物推到发布仓库（GitHub Pages 从它的 main 分支发布，绑 fanear.fandao.dev）
-#   6. 等 GitHub Pages 发布完，打开线上的更新记录页，确认最新一条已经在上面
+#   6. 等 GitHub Pages 发布完，打开线上的更新记录页和两份条款页，确认最新一条和条款版本、末段已经在上面
 # --dry-run 只做 1–3 步，再把要推的改动列出来，不推送；发布仓库还没建时跳过第 5 步。
 # --ref 换掉第 1 步的 origin/main（还没合进 main 的分支先试跑用），只能和 --dry-run 一起用。
 set -euo pipefail
@@ -19,6 +21,7 @@ SITE_REPO=KevinShiCN/fanear.fandao.dev
 SITE_URL=https://fanear.fandao.dev
 BLOG=''
 CHANGELOG=''
+LEGAL=''
 DENY="${PUBLIC_SCAN_DENY:-}"
 DRY_RUN=0
 REF=origin/main
@@ -27,6 +30,7 @@ while [ $# -gt 0 ]; do
 	case "$1" in
 		--blog) BLOG=$2; shift 2 ;;
 		--changelog) CHANGELOG=$2; shift 2 ;;
+		--legal) LEGAL=$2; shift 2 ;;
 		--deny) DENY=$2; shift 2 ;;
 		--dry-run) DRY_RUN=1; shift ;;
 		--ref) REF=$2; shift 2 ;;
@@ -41,12 +45,15 @@ quiet() { "$@" >"$WORK/step.log" 2>&1 || { tail -30 "$WORK/step.log" >&2; fail "
 
 [ -n "$BLOG" ] && git -C "$BLOG" rev-parse --git-dir >/dev/null 2>&1 || fail "--blog 要给博客仓库的路径"
 [ -f "$CHANGELOG" ] || fail "--changelog 要给 CHANGELOG.md 的路径，现在是「$CHANGELOG」"
+[ -f "$LEGAL/LegalTexts.swift" ] && [ -f "$LEGAL/Consent.swift" ] ||
+	fail "--legal 要给饭耳仓库 Sources/FanEarCore 的路径（里面有 LegalTexts.swift、Consent.swift），现在是「$LEGAL」"
 # 发到公开仓库前必须带私有词表扫一遍（词表里是公司域名、服务器地址这类不能公开的东西）
 [ -f "$DENY" ] || fail "--deny 要给私有词表的路径（或设 PUBLIC_SCAN_DENY），现在是「$DENY」"
 [ "$REF" = origin/main ] || [ "$DRY_RUN" = 1 ] || fail "--ref 只能和 --dry-run 一起用：正式发布只从 origin/main 发"
 
 BLOG=$(git -C "$BLOG" rev-parse --show-toplevel)
 CHANGELOG=$(realpath "$CHANGELOG")
+LEGAL=$(realpath "$LEGAL")
 DENY=$(realpath "$DENY")
 WORK="$BLOG/.worktrees/fanear-publish-$(date +%Y%m%d%H%M%S)"
 cleanup() {
@@ -63,8 +70,10 @@ cd "$WORK/blog"
 echo "博客 $REF：$(git rev-parse --short HEAD)"
 quiet npm ci --no-audit --no-fund
 
-step "2/6 复制 CHANGELOG.md"
+step "2/6 复制 CHANGELOG.md，生成条款"
 cp "$CHANGELOG" sites/fanear/src/data/CHANGELOG.md
+node scripts/fanear-legal.mjs "$LEGAL" sites/fanear/src/data/legal.json
+LEGAL_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('sites/fanear/src/data/legal.json','utf8')).version)")
 LATEST=$(node --input-type=module -e "
 import { readFileSync } from 'node:fs';
 import { parseChangelog } from './sites/fanear/src/lib/changelog.mjs';
@@ -74,20 +83,24 @@ if (!v) throw new Error('更新记录里一个版本都没有');
 console.log(JSON.stringify({ version: v.version, text: v.items[0].text }));
 ")
 VERSION=$(node -e "console.log(JSON.parse(process.argv[1]).version)" "$LATEST")
-echo "最新版本 $VERSION；改动 $(git status --short sites/fanear/src/data/CHANGELOG.md | wc -l) 个文件"
+echo "最新版本 $VERSION；改动 $(git status --short sites/fanear/src/data/CHANGELOG.md sites/fanear/src/data/legal.json | wc -l) 个文件"
 
 step "3/6 构建和检查"
 quiet npm run fanear:build
 npm run --silent fanear:check | grep -E '^ℹ (pass|fail)|坏链|外站资源|需要处理'
+python3 scripts/check-fanear-legal.py sites/fanear/dist sites/fanear/src/data/legal.json --swift "$LEGAL"
 python3 scripts/check-public.py --deny "$DENY" sites/fanear scripts
 
 step "4/6 提交源码"
-if git diff --quiet -- sites/fanear/src/data/CHANGELOG.md; then
-	echo "CHANGELOG 跟博客仓库里的一样，不用提交"
+SYNCED=()
+git diff --quiet -- sites/fanear/src/data/CHANGELOG.md || SYNCED+=("更新记录（$VERSION）")
+git diff --quiet -- sites/fanear/src/data/legal.json || SYNCED+=("条款（第 $LEGAL_VERSION 版）")
+if [ ${#SYNCED[@]} = 0 ]; then
+	echo "CHANGELOG 和条款都跟博客仓库里的一样，不用提交"
 	BLOG_PUSH=0
 else
-	git add sites/fanear/src/data/CHANGELOG.md
-	git commit --quiet -m "docs(fanear): 同步更新记录（$VERSION）"
+	git add sites/fanear/src/data/CHANGELOG.md sites/fanear/src/data/legal.json
+	git commit --quiet -m "docs(fanear): 同步$(IFS=、; echo "${SYNCED[*]}")"
 	echo "提交 $(git rev-parse --short HEAD)"
 	BLOG_PUSH=1
 fi
@@ -107,7 +120,7 @@ else
 	if git -C "$WORK/site" diff --cached --quiet; then
 		echo "构建产物跟线上一样，不用发布"
 	else
-		git -C "$WORK/site" commit --quiet -m "deploy: 构建自 ceo.fandao.dev main ${SOURCE:0:7}（更新记录 $VERSION）"
+		git -C "$WORK/site" commit --quiet -m "deploy: 构建自 ceo.fandao.dev main ${SOURCE:0:7}（更新记录 $VERSION，条款第 $LEGAL_VERSION 版）"
 		git -C "$WORK/site" show --stat --format='发布提交 %h %s' HEAD | tail -4
 		SITE_PUSH=1
 	fi
@@ -129,10 +142,23 @@ if [ "$SITE_PUSH" = 1 ]; then
 fi
 
 step "6/6 核对线上"
-python3 - "$SITE_REPO" "$SITE_URL/changelog/" "$LATEST" <<'PY'
+# 每页要等到的字：更新记录页的最新一条；两份条款页的版本行和最后一段
+EXPECT=$(node --input-type=module -e "
+import { readFileSync } from 'node:fs';
+import { versionLine } from './sites/fanear/src/lib/legal.mjs';
+const latest = JSON.parse(process.argv[1]);
+const legal = JSON.parse(readFileSync('sites/fanear/src/data/legal.json', 'utf8'));
+const last = (doc) => doc.sections.at(-1).paragraphs.at(-1).text;
+console.log(JSON.stringify([
+	{ path: '/changelog/', what: latest.version + ' 的最新一条', needles: [latest.text] },
+	{ path: '/terms/', what: '条款' + versionLine(legal), needles: [versionLine(legal), last(legal.terms)] },
+	{ path: '/privacy/', what: '隐私说明' + versionLine(legal), needles: [versionLine(legal), last(legal.privacy)] },
+]));
+" "$LATEST")
+python3 - "$SITE_REPO" "$SITE_URL" "$EXPECT" <<'PY'
 import html, json, subprocess, sys, time, urllib.request
 
-repo, url, latest = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])
+repo, site, pages = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])
 deadline = time.time() + 600
 while True:
     status = subprocess.run(
@@ -142,16 +168,21 @@ while True:
     if status == 'errored':
         sys.exit('失败：GitHub Pages 发布出错，去发布仓库的 Actions 页看原因')
     if status == 'built':
-        try:
-            req = urllib.request.Request(f'{url}?t={int(time.time())}', headers={'Cache-Control': 'no-cache'})
-            page = html.unescape(urllib.request.urlopen(req, timeout=30).read().decode('utf-8'))
-        except OSError as error:
-            page = ''
-            print(f'  打不开 {url}：{error}，等一会儿再试')
-        if latest['text'] in page:
-            print(f'线上已更新：{url} 有 {latest["version"]} 的最新一条')
+        for page in list(pages):
+            url = site + page['path']
+            try:
+                req = urllib.request.Request(f'{url}?t={int(time.time())}', headers={'Cache-Control': 'no-cache'})
+                body = html.unescape(urllib.request.urlopen(req, timeout=30).read().decode('utf-8'))
+            except OSError as error:
+                body = ''
+                print(f'  打不开 {url}：{error}，等一会儿再试')
+            if all(n in body for n in page['needles']):
+                print(f'线上已更新：{url} 有{page["what"]}')
+                pages.remove(page)
+        if not pages:
             break
     if time.time() > deadline:
-        sys.exit(f'失败：等了 10 分钟，线上更新记录页还没有最新一条（Pages 状态：{status or "查不到"}）')
+        left = '、'.join(p['path'] for p in pages)
+        sys.exit(f'失败：等了 10 分钟，线上 {left} 还没更新（Pages 状态：{status or "查不到"}）')
     time.sleep(15)
 PY

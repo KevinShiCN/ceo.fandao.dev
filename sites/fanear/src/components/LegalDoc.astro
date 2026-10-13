@@ -1,0 +1,110 @@
+---
+// 一份条款全文（使用条款与免责声明，或隐私说明）。文字全部来自 src/data/legal.json，
+// 由同步命令从 fanear 仓库的 LegalTexts.swift 生成，跟 App 里一字不差；这里只负责排版，不改一个字。
+// 排版照 App 的条款页（Apps/iOS/Onboarding/LegalDocumentView.swift）：每节一个小标题；
+// 免责、限制责任、要你自己担责的段落（notice）加粗、左边一条我蓝竖线，读屏前面念「重点提示」。
+// data-legal-* 属性给 scripts/check-fanear-legal.py 逐段比对原文用，别删。
+import { versionLine } from '../lib/legal.mjs';
+import legal from '../data/legal.json';
+import PageIntro from './PageIntro.astro';
+
+interface Props {
+	doc: (typeof legal)['terms'];
+}
+
+const { doc } = Astro.props;
+---
+
+<main id="main" class="wrap">
+	<PageIntro title={doc.title}>
+		<p class="version">{versionLine(legal)}</p>
+		<p>这里的全文跟饭耳 App 里的一字不差：第一次打开时要同意，之后在 App 的设置里随时能看。</p>
+	</PageIntro>
+
+	<!-- 这句图例照 App 条款页顶上那句（LegalDocumentView.swift），不是条款原文，不参与比对 -->
+	<p class="para notice legend">
+		<span class="visually-hidden">重点提示：</span><strong>加粗、左边带蓝线的是要特别留意的内容：数据去哪、免责和限制责任、要你自己承担的责任。</strong>
+	</p>
+
+	<article class="doc" data-legal-doc={doc.id}>
+		{
+			doc.sections.map((section, i) => (
+				<section class="section" id={`s${i + 1}`} aria-labelledby={`h-s${i + 1}`}>
+					<h2 id={`h-s${i + 1}`} data-legal-heading>
+						{section.heading}
+					</h2>
+					{section.paragraphs.map((para) =>
+						para.notice ? (
+							<p class="para notice" data-legal-para="notice">
+								<span class="visually-hidden">重点提示：</span>
+								<strong>{para.text}</strong>
+							</p>
+						) : (
+							<p class="para" data-legal-para="plain">
+								{para.text}
+							</p>
+						),
+					)}
+				</section>
+			))
+		}
+	</article>
+
+	<slot />
+</main>
+
+<style>
+	.wrap {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	.version {
+		color: var(--c-ink-3);
+		font-size: 15px;
+	}
+
+	.legend {
+		margin-bottom: var(--s-6);
+	}
+
+	.section {
+		padding-top: var(--s-6);
+	}
+
+	.section + .section {
+		margin-top: var(--s-2);
+	}
+
+	.section h2 {
+		font-size: 20px;
+		scroll-margin-top: var(--s-5);
+	}
+
+	.para {
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+	}
+
+	/* 跟 App 一样：加粗深墨字，左边 3px 我蓝竖线，竖线和字之间 10px */
+	.notice {
+		padding-left: 10px;
+		border-left: 3px solid var(--c-me);
+		color: var(--c-ink);
+	}
+
+	.notice strong {
+		font-weight: 700;
+	}
+
+	@media (min-width: 768px) {
+		.section h2 {
+			font-size: 22px;
+		}
+
+		.para {
+			margin-top: var(--s-4);
+		}
+	}
+</style>
