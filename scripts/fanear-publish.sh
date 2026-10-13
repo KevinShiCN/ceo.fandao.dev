@@ -60,7 +60,7 @@ git -C "$BLOG" fetch --quiet origin main
 mkdir -p "$WORK"
 git -C "$BLOG" worktree add --quiet --detach "$WORK/blog" "$REF"
 cd "$WORK/blog"
-echo "博客 main：$(git rev-parse --short HEAD)"
+echo "博客 $REF：$(git rev-parse --short HEAD)"
 quiet npm ci --no-audit --no-fund
 
 step "2/6 复制 CHANGELOG.md"

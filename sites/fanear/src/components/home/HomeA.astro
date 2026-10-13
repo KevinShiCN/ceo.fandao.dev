@@ -256,6 +256,8 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 		padding: var(--s-5) var(--gutter) var(--s-6);
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
+		/* 吸附按滚动区外沿对齐，留出跟左右内边距一样宽的吸附边距，第一张才不会贴到屏幕边上 */
+		scroll-padding: 0 var(--gutter);
 		-webkit-overflow-scrolling: touch;
 	}
 
