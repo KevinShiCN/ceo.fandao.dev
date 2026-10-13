@@ -197,7 +197,7 @@ async function main() {
 			for (const y of opts.scroll) {
 				const probe = opts.probe ? `(${opts.probe})` : 'null';
 				const at = await evalJSON(`(async () => {
-					window.scrollTo(0, ${y});
+					window.scrollTo({ top: ${y}, behavior: 'instant' });
 					await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 					return JSON.stringify({ y: window.scrollY, probe: ${probe} });
 				})()`);
