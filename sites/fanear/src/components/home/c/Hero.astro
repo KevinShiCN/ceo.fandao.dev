@@ -20,6 +20,7 @@ const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] 
 			<h1 id="h-c-name">{SITE.name}<span lang="en">{SITE.nameEn}</span></h1>
 		</div>
 		<p class="hero-tagline">{tagline.map((part) => <span>{part}</span>)}</p>
+		<p class="hero-pitch"><span class="who who-me" aria-hidden="true"></span>{SITE.pitch}</p>
 		<p class="hero-status"><strong>{STATUS.label}</strong>{STATUS.text}</p>
 		<div class="hero-actions">
 			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
@@ -81,6 +82,17 @@ const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] 
 		font-size: 24px;
 		font-weight: 700;
 		line-height: 1.45;
+	}
+
+	/* 「我给自己做的，免费。」前面那个蓝方块就是 App 里「我」的颜色 */
+	.hero-pitch {
+		display: flex;
+		align-items: baseline;
+		gap: var(--s-2);
+		margin-top: var(--s-3);
+		font-size: 19px;
+		font-weight: 600;
+		line-height: 1.5;
 	}
 
 	.hero-status {
@@ -170,6 +182,10 @@ const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] 
 
 		.hero-tagline {
 			font-size: 30px;
+		}
+
+		.hero-pitch {
+			font-size: 22px;
 		}
 
 		.hero-status {

@@ -1,0 +1,120 @@
+---
+// 为什么做：我用过、等过的几个，为什么还是自己做，以及饭耳的三条规矩（免费、先照我的需要做、你也可以提）。
+// 写法像一封短信，不做对比表；文案和出处在 src/lib/why.ts。
+import { WHY } from '../../../lib/why';
+---
+
+<section class="why" aria-label="为什么做">
+	<p class="why-lead">{WHY.lead}</p>
+	<dl class="why-others">
+		{
+			WHY.others.map((other) => (
+				<div>
+					<dt>{other.name}</dt>
+					<dd>{other.text}</dd>
+				</div>
+			))
+		}
+	</dl>
+	<p class="why-turn">{WHY.turn}</p>
+	<dl class="why-terms">
+		{
+			WHY.terms.map((term) => (
+				<div>
+					<dt>{term.title}</dt>
+					<dd>{term.text}</dd>
+				</div>
+			))
+		}
+	</dl>
+</section>
+
+<style>
+	.why {
+		padding-top: var(--s-5);
+	}
+
+	.why-lead {
+		max-width: var(--measure);
+		color: var(--c-ink-2);
+		font-size: 18px;
+	}
+
+	.why-others {
+		max-width: var(--measure);
+		margin: var(--s-3) 0 0;
+	}
+
+	.why-others div {
+		display: grid;
+		grid-template-columns: 4.5em minmax(0, 1fr);
+		gap: var(--s-3);
+		align-items: baseline;
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.why-others dt {
+		font-weight: 700;
+	}
+
+	.why-others dd {
+		margin: 0;
+		color: var(--c-ink-2);
+	}
+
+	/* 这一句是整节要说的话：字最大 */
+	.why-turn {
+		max-width: 20em;
+		margin-top: var(--s-6);
+		font-size: 22px;
+		font-weight: 700;
+		line-height: 1.5;
+	}
+
+	.why-terms {
+		margin: var(--s-5) 0 0;
+	}
+
+	.why-terms div {
+		padding: var(--s-3) 0;
+		border-top: 2px solid var(--c-ink);
+	}
+
+	.why-terms div + div {
+		margin-top: var(--s-3);
+	}
+
+	.why-terms dt {
+		font-size: 18px;
+		font-weight: 700;
+	}
+
+	.why-terms dd {
+		margin: var(--s-1) 0 0;
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	@media (min-width: 900px) {
+		.why-lead {
+			font-size: 20px;
+		}
+
+		.why-turn {
+			font-size: 30px;
+		}
+
+		/* 电脑：三条规矩并排 */
+		.why-terms {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: var(--s-6);
+		}
+
+		.why-terms div + div {
+			margin-top: 0;
+		}
+	}
+</style>
