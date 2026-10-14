@@ -22,6 +22,7 @@ const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] 
 		<p class="hero-tagline">{tagline.map((part) => <span>{part}</span>)}</p>
 		<p class="hero-pitch"><span class="who who-me" aria-hidden="true"></span>{SITE.pitch}</p>
 		<p class="hero-status"><strong>{STATUS.label}</strong>{STATUS.text}</p>
+		<p class="hero-status">{STATUS.follow}</p>
 		<div class="hero-actions">
 			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
 			<a class="btn btn-line" href={withBase('/features/')}>看全部功能</a>

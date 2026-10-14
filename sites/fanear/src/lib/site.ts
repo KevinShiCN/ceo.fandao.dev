@@ -15,14 +15,17 @@ export const SITE = {
 		'饭耳 FanEar：我给自己做的录音 App，免费。Apple Watch 全天录音，iPhone 转成文字、分清谁在说话，挑出「我答应别人的」「别人答应我的」给你确认。转文字和大模型都用你自己的账号。',
 } as const;
 
-/** App 现在的状态。上了 TestFlight 或 App Store 以后改这里，再在使用说明的「装 App」一步放链接。 */
+/** App 现在的状态。开外部测试或上了 App Store 以后改这里，再在使用说明的「装 App」一步放链接。
+ *  10-14 本人 XF7 A：TestFlight 内测只给开发者自己，状态改成「内测中，还没对外发布」；同日要「引导用户关注小红书账号」。 */
 export const STATUS = {
 	/** 页头和首页上的短标签 */
-	label: '开发中',
+	label: '内测中',
 	/** 一句话说清现在能不能用 */
-	text: '还没上 TestFlight，也还没对外发布，现在只装在开发者自己的手机上测试。',
+	text: '还没对外发布，现在只装在开发者自己的手机上（TestFlight 内测）。',
 	/** 等什么 */
-	next: '苹果开发者账号开通后先上 TestFlight，到时候在使用说明里放加入测试的链接。',
+	next: '开外部测试或上架 App Store 后，在使用说明里放链接。想第一时间知道，小红书关注「饭耳」。',
+	/** 首页和页脚的一句：去哪等消息。小红书不放链接，写账号名让人搜 */
+	follow: '想第一时间知道上架：小红书关注「饭耳」。',
 } as const;
 
 export interface NavItem {
