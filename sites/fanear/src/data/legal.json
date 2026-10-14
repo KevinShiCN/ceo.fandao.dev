@@ -204,7 +204,7 @@
             "notice": false
           },
           {
-            "text": "设置：火山 Access Key、腾讯 SecretId/SecretKey 和大模型 Key 存在这台手机的系统钥匙串里，不会同步或迁移到别的设备；接口地址、火山 App Key、模型名等其他设置存在饭耳自己的存储里。",
+            "text": "设置：火山 API Key、腾讯 SecretId/SecretKey 和大模型 Key 存在这台手机的系统钥匙串里，不会同步或迁移到别的设备；接口地址、模型名等其他设置存在饭耳自己的存储里。",
             "notice": false
           },
           {
