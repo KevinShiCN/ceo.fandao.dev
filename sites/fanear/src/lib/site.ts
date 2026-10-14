@@ -58,6 +58,13 @@ export const MAKER = {
 	},
 } as const;
 
+/** 需求墙（10-14 上线）：提需求、给别人的需求投票，做不做、为什么都写在上面。
+ *  提需求和投票要用微信扫码关注「饭导五常大米」登录；只看不用登录。 */
+export const WISH = {
+	url: 'https://wish.fanear.fandao.dev',
+	label: '去需求墙提需求',
+} as const;
+
 /** 作者的博客：饭耳官网的源码也在博客仓库里 */
 export const AUTHOR = {
 	name: '干饭CEO',
