@@ -1,24 +1,15 @@
 ---
 // 「我」：先介绍我，再介绍饭耳（跟 App 第一次打开的介绍页同一个顺序和原话，文案在 src/lib/why.ts）。
-// 顺序：ADHD 那段、心愿（首屏 A 才放这里；首屏 B 放在照片旁边）→ 饭耳做什么的四行 → 首发就支持中文 →
+// 顺序：（ADHD 那段、心愿在首屏照片旁边，HeroB.astro）→ 饭耳做什么的四行 → 首发就支持中文 →
 // 四条规矩（免费、饭导五常大米、先照我的需要做、你的需要也可以提）→ 我用过、等过的几个 → 最后两句。
 // 写法像一封短信，不做对比表；小标题只给读屏，页面上不放（同 App「不放小标题」）。
 import { MAKER, WISH, XHS } from '../../lib/site';
 import { withBase } from '../../lib/url';
 import { INTRO, splitPoint, WHY } from '../../lib/why';
-import Opening from './Opening.astro';
-
-interface Props {
-	/** 开头两句放不放在这里（首屏 B 已经放在照片旁边了） */
-	opening: boolean;
-}
-
-const { opening } = Astro.props;
 ---
 
 <section class="why" aria-labelledby="h-why">
 	<h2 id="h-why" class="visually-hidden">我为什么做饭耳</h2>
-	{opening && <Opening class="why-opening" />}
 
 	<ul class="why-points">
 		{
@@ -80,10 +71,6 @@ const { opening } = Astro.props;
 <style>
 	.why {
 		padding-top: var(--s-7);
-	}
-
-	.why :global(.why-opening) {
-		margin-bottom: var(--s-7);
 	}
 
 	/* 饭耳做什么：四行，每行前半句加粗；电脑上两列 */

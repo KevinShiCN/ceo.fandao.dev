@@ -4,13 +4,12 @@
    - 窗口至少 1024 宽（手机、平板不动）
    - 浏览器支持滚动驱动动画（Chrome、Edge 115 起，Safari 26 起）
    - 系统没设「减弱动态效果」
-   一共五处，每处都在讲产品本身：
-   1. 首屏 A：手表离你近、手机远，往下滑时手表比手机走得快，左边的字往上淡出（首屏 B 是照片，不动）
-   2. 「手表上」「手机上」两道粗线：滑到时从左往右画出来，像说明书翻到新的一章
-   3. 手表三种样子：一开始叠成一块表，往下滑就往两边发开，变成三种样子，字跟着出来
-   4. 手机四个页签：右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏，像点了底下的页签（淡入）；
+   一共四处，每处都在讲产品本身（首屏是照片，不动）：
+   1. 「手表上」「手机上」两道粗线：滑到时从左往右画出来，像说明书翻到新的一章
+   2. 手表三种样子：一开始叠成一块表，往下滑就往两边发开，变成三种样子，字跟着出来
+   3. 手机四个页签：右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏，像点了底下的页签（淡入）；
       没轮到的那一节，字变淡
-   5. 这一天：整节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，一根竖线跟着走；
+   4. 这一天：整节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，一根竖线跟着走；
       画到哪个时刻，时间条上那根线和下面那一条就亮起来——往下滑就是这一天往前过
    选择器里多写一两层类名，是为了压过各组件自己的样式（Astro 给组件样式加了一层属性，权重更高）。
    动画一律分开写（animation-name、animation-timeline……），不用 animation 简写：构建时的压缩会把简写和
@@ -18,54 +17,7 @@
 
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
-		/* ---------- 1. 首屏 ---------- */
-
-		.home .hero {
-			view-timeline: --fe-hero block;
-		}
-
-		.home .hero-text {
-			animation-name: fe-hero-text;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: --fe-hero;
-			animation-range: exit 0% exit 100%;
-		}
-
-		/* 动的是机身里面那层：机身外面那层留着打开页面时往上起的进场动画（Hero.astro） */
-		.home .stage-phone .shot-frame,
-		.home .stage-watch .shot-frame {
-			animation-name: fe-hero-phone;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: --fe-hero;
-			animation-range: exit 0% exit 100%;
-		}
-
-		.home .stage-watch .shot-frame {
-			animation-name: fe-hero-watch;
-		}
-
-		@keyframes fe-hero-text {
-			to {
-				translate: 0 -64px;
-				opacity: 0.15;
-			}
-		}
-
-		@keyframes fe-hero-phone {
-			to {
-				translate: 0 -48px;
-			}
-		}
-
-		@keyframes fe-hero-watch {
-			to {
-				translate: 0 -168px;
-			}
-		}
-
-		/* ---------- 2. 「手表上」「手机上」的粗线 ---------- */
+		/* ---------- 1. 「手表上」「手机上」的粗线 ---------- */
 
 		/* 原来的粗线改成透明，位置不变；在同一个位置画一条从左往右长出来的线 */
 		.home .group {
@@ -96,7 +48,7 @@
 			}
 		}
 
-		/* ---------- 3. 手表三种样子：一块表发成三块 ---------- */
+		/* ---------- 2. 手表三种样子：一块表发成三块 ---------- */
 
 		/* 三张表的列宽从这个盒子量（cqw），一开始都挪到中间那张的位置 */
 		.home .watch .states {
@@ -154,7 +106,7 @@
 			}
 		}
 
-		/* ---------- 4. 手机四个页签：一部手机，四屏跟着滑 ---------- */
+		/* ---------- 3. 手机四个页签：一部手机，四屏跟着滑 ---------- */
 
 		/* 左栏四节，每节一屏高、字竖着居中；右栏是钉住的手机。每节自带的截图收起来 */
 		.home .story {
@@ -246,7 +198,7 @@
 			}
 		}
 
-		/* ---------- 5. 这一天：时间条跟着滑画出来 ---------- */
+		/* ---------- 4. 这一天：时间条跟着滑画出来 ---------- */
 
 		/* 外面一截拉高到 260vh，里面一屏钉住；这一截在屏幕里滑过的进度就是这一天过到哪了 */
 		.home .day .day-track {

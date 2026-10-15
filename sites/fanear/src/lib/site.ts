@@ -8,15 +8,13 @@ export const SITE = {
 	title: '饭耳 FanEar',
 	/** 一句话：它是什么 */
 	tagline: '手表全天录音，手机记下谁说了什么、谁答应了什么。',
-	/** 首屏一句：谁做的、收不收钱（10-13 本人：「我们就是免费的」「做的就是符合我个人需求的产品」） */
-	pitch: '我给自己做的，免费。',
 	/** 搜索结果和分享卡片的简介 */
 	description:
 		'饭耳 FanEar：我给自己做的录音 App，免费。Apple Watch 全天录音，iPhone 转成文字，找出「我答应别人的」「别人答应我的」放进待办。转文字可以用手机本机的（免费），也可以用你自己的云端账号，云端能分清谁在说话。',
 } as const;
 
 /** 小红书账号：跟 App 第一次打开最后一页的邀请语一致（饭耳仓库 Sources/FanEarCore/ShareInvite.swift：「@饭耳 FanEar」）。
- *  10-15 改版把原来的「饭耳」改成「饭耳 FanEar」，待本人确认这就是最终账号名。小红书不放链接，写账号名让人搜。 */
+ *  本人 10-15 GW2 A 确认：饭耳 FanEar。小红书不放链接，写账号名让人搜。 */
 export const XHS = {
 	name: '饭耳 FanEar',
 	search: '小红书搜「饭耳 FanEar」',
