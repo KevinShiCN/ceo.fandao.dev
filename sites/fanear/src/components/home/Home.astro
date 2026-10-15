@@ -51,7 +51,7 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 			tabs.map((tab, i) => (
 				<Chapter id={tab.id} screen={tab.screen} title={tab.group.headline ?? tab.group.title} lead={tab.group.lead} flip={i % 2 === 1}>
 					<Points items={homePoints(tab.group)} />
-					<Shot slot="figure" id={tab.shot} caption={false} sizes={phoneSizes} />
+					<Shot slot="figure" id={tab.shot} caption={false} sizes={phoneSizes} motion />
 				</Chapter>
 			))
 		}
@@ -60,7 +60,7 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 		    手机、平板、不支持滚动动画的浏览器和设了「减弱动态效果」的不显示它，还是每节自带截图 */}
 		<div class="story-phone">
 			<div class="story-pin">
-				<Shot id={first.shot} stack={rest.map((t) => t.shot)} caption={false} sizes="300px" class="story-shot" />
+				<Shot id={first.shot} stack={rest.map((t) => t.shot)} caption={false} sizes="300px" class="story-shot" motion />
 			</div>
 		</div>
 	</div>
