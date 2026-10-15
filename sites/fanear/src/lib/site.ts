@@ -55,7 +55,8 @@ export const MAKER = {
 	line: '饭耳免费。作者在做饭导五常大米，给餐厅供米。',
 	shop: {
 		url: 'https://store.weixin.qq.com/shop/b/rKLGUz4XqmFKlfA?entrance_id=h5',
-		label: '去饭导五常大米的微信小店',
+		// 入口的字 10-15 本人改成「去买饭导五常大米」，和饭耳 App 设置页最上面那一行一致。
+		label: '去买饭导五常大米',
 		qr: '/shop-qr.svg',
 		qrAlt: '微信扫码，进饭导五常大米的微信小店',
 	},
