@@ -12,7 +12,7 @@ export const SITE = {
 	pitch: '我给自己做的，免费。',
 	/** 搜索结果和分享卡片的简介 */
 	description:
-		'饭耳 FanEar：我给自己做的录音 App，免费。Apple Watch 全天录音，iPhone 转成文字、分清谁在说话，找出「我答应别人的」「别人答应我的」放进待办。转文字可以用手机本机的，也可以用你自己的云端账号。',
+		'饭耳 FanEar：我给自己做的录音 App，免费。Apple Watch 全天录音，iPhone 转成文字，找出「我答应别人的」「别人答应我的」放进待办。转文字可以用手机本机的（免费），也可以用你自己的云端账号，云端能分清谁在说话。',
 } as const;
 
 /** 小红书账号：跟 App 第一次打开最后一页的邀请语一致（饭耳仓库 Sources/FanEarCore/ShareInvite.swift：「@饭耳 FanEar」）。
