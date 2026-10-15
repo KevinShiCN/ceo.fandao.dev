@@ -2,7 +2,9 @@
 // App 截图套一个机身框：手机是深墨边框加灵动岛，手表是表壳色圆角框。框都用 CSS 画，宽度跟着外面的容器走。
 // 截图来源和说明见 src/lib/shots.ts。
 import { Image } from 'astro:assets';
+import { MOTION_SHOTS } from '../lib/shot-motion';
 import { SHOTS, type ShotId } from '../lib/shots';
+import ShotMotion from './ShotMotion.astro';
 
 interface Props {
 	id: ShotId;
@@ -14,10 +16,12 @@ interface Props {
 	sizes?: string;
 	/** 同一个机身里叠在 id 这屏上面的几屏，按顺序一层压一层（首页电脑上滚动时一屏一屏换上来）。只能是同一种设备 */
 	stack?: ShotId[];
+	/** 首页「手机上」：待办、小耳两屏叠上滑动动效（ShotMotion.astro）；别处的同一张截图不动 */
+	motion?: boolean;
 	class?: string;
 }
 
-const { id, caption = true, eager = false, sizes, stack = [], class: className } = Astro.props;
+const { id, caption = true, eager = false, sizes, stack = [], motion = false, class: className } = Astro.props;
 const shot = SHOTS[id];
 const phone = shot.device === 'phone';
 const layers = [id, ...stack];
@@ -42,6 +46,7 @@ const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768
 							loading={eager ? 'eager' : 'lazy'}
 							fetchpriority={eager ? 'high' : undefined}
 						/>
+						{motion && MOTION_SHOTS.includes(layer) && <ShotMotion id={layer} widths={widths} sizes={sizes ?? defaultSizes} />}
 					</div>
 				))
 			}
@@ -92,6 +97,11 @@ const defaultSizes = phone ? '(min-width: 768px) 300px, 72vw' : '(min-width: 768
 	.shot-screen :global(img) {
 		width: 100%;
 		height: auto;
+	}
+
+	/* 动效那几块按这一屏叠上去 */
+	.shot-layer {
+		position: relative;
 	}
 
 	/* 叠上来的几屏跟第一屏一样大，盖在它上面。平时藏着、只露第一屏；

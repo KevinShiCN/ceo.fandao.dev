@@ -1,0 +1,160 @@
+---
+// 首页「手机上」待办、小耳两张截图上的滑动动效：叠在截图上的几块，静止时跟截图一模一样，看得见时才动。
+// 待办：手指按住最上面那张卡，先往左拖（整张变琥珀「要做 · 稍后提醒」）再往右拖（变绿「做完了 / 不用做 · 不再提醒」），
+//       过线松手，卡飞走，后面那张（App 演示数据里真正的下一张）长回原尺寸顶上来。
+// 小耳：手指把第一张卡的滑条拖到底，滑块变成对勾、字变白，这张卡淡出收起，下面的卡和「以前的」一起顶上来。
+// 两段都是播一轮、停一下再回到截图原样（待办淡回去，小耳倒回去），从头再播。坐标和数据在 lib/shot-motion.ts，动画在 styles/shot-motion.css。
+import { Image } from 'astro:assets';
+import { CARE_MOTION, CARE_TILES, TODO_MOTION, type Rect } from '../lib/shot-motion';
+import { SHOTS, type ShotId } from '../lib/shots';
+import '../styles/shot-motion.css';
+
+interface Props {
+	id: ShotId;
+	widths: number[];
+	sizes: string;
+}
+
+const { id, widths, sizes } = Astro.props;
+const shot = SHOTS[id];
+const box = (r: Rect) => `--l:${r.x};--t:${r.y};--w:${r.w};--h:${r.h}`;
+const T = TODO_MOTION;
+const C = CARE_MOTION;
+// 「以前的」小卡里各行的位置（相对卡顶，量自截图）：顶上一行、那句话第一行的基线，行距，「你回」比最后一行低多少
+const TILE = { pad: 12, w: 193, meta: 23.5, body: 50, pitch: 21, reply: 24.3 };
+const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.length - 1) * TILE.pitch + TILE.reply;
+---
+
+{
+	id === 'todoDeck' && (
+		// 0.2.0 待合：L4（滑卡左右滑、整张染色还在 todo-polish-020 分支）
+		<div class="sm sm-todo" data-shot-motion={id} aria-hidden="true">
+			<div class="sm-box sm-floor" style={box(T.card)} />
+			<div class="sm-box sm-b" style={box(T.card)}>
+				<Image src={T.next} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				<span class="sm-b-edge" />
+			</div>
+			<div class="sm-box sm-a" style={box(T.drag)}>
+				<div class="sm-crop sm-fill">
+					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				</div>
+				<span class="sm-tint sm-tint-done" />
+				<span class="sm-tint sm-tint-later" />
+				<svg class="sm-label sm-label-done" viewBox={`${T.drag.x - T.card.x} ${T.drag.y - T.card.y} ${T.drag.w} ${T.drag.h}`}>
+					<g transform={`translate(${T.card.w / 2} ${T.label.icon})`}>
+						<circle r="28" fill="currentColor" />
+						<path d="M-13 1 L-4 10 L13 -9" class="sm-cut" />
+					</g>
+					<text x={T.card.w / 2} y={T.label.title + 12} class="sm-big">做完了 / 不用做</text>
+					<text x={T.card.w / 2} y={T.label.detail + 7} class="sm-small">不再提醒</text>
+				</svg>
+				<svg class="sm-label sm-label-later" viewBox={`${T.drag.x - T.card.x} ${T.drag.y - T.card.y} ${T.drag.w} ${T.drag.h}`}>
+					<g transform={`translate(${T.card.w / 2} ${T.label.icon})`}>
+						<circle r="28" fill="currentColor" />
+						<path d="M0 -15 V0 H11" class="sm-cut" />
+					</g>
+					<text x={T.card.w / 2} y={T.label.title + 12} class="sm-big">要做</text>
+					<text x={T.card.w / 2} y={T.label.detail + 7} class="sm-small">稍后提醒</text>
+				</svg>
+				<span class="sm-touch" style={`--tx:${T.touch.x + T.card.x - T.drag.x};--ty:${T.touch.y + T.card.y - T.drag.y}`} />
+			</div>
+		</div>
+	)
+}
+
+{
+	id === 'care' && (
+		<div class="sm sm-care" data-shot-motion={id} aria-hidden="true">
+			<div class="sm-box sm-floor sm-after" style={box({ x: 0, y: C.below - C.shift, w: 440, h: 956 })} />
+			<div class="sm-box sm-care-card" style={box({ x: 0, y: 0, w: 440, h: 956 })}>
+				<div class="sm-box sm-crop" style={box(C.card)}>
+					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				</div>
+				<span class="sm-box sm-veil" style={box({ x: C.knob.x + C.knob.w, y: C.track.y + 1.67, w: C.track.x + C.track.w - 1.67 - C.knob.x - C.knob.w, h: C.track.h - 3.33 })} />
+				{/* 盖住截图上原来的滑块（多盖 1 点，连边上的半透明像素一起盖掉） */}
+				<span class="sm-box sm-eraser" style={box({ x: C.knob.x - 1, y: C.knob.y - 1, w: C.knob.w + 2, h: C.knob.h + 2 })} />
+				<span class="sm-box sm-slide" style={box(C.knob)} />
+				<svg class="sm-box sm-done" style={box({ x: 0, y: 0, w: 440, h: 956 })} viewBox="0 0 440 956">
+					<text x={(C.knob.x + C.knob.w + 4 + C.track.x + C.track.w - 10) / 2} y={474.5} class="sm-title">{C.reply}</text>
+				</svg>
+				<div class="sm-box sm-knob" style={box(C.knob)}>
+					<div class="sm-crop sm-fill">
+						<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+					</div>
+					<svg class="sm-fill sm-done sm-knob-done" viewBox="0 0 48 48">
+						<path d="M16 24.5 L21.5 30 L32 18.5" />
+					</svg>
+					<span class="sm-touch" style="--tx:24;--ty:24" />
+				</div>
+			</div>
+			<div class="sm-box sm-care-below" style={box({ x: 0, y: 0, w: 440, h: 956 })}>
+				<svg class="sm-box sm-after" style={box({ x: 0, y: 0, w: 440, h: 1196 })} viewBox="0 0 440 1196">
+					{CARE_TILES.map((t) => (
+						<g>
+							<rect x={t.x} y={t.top} width={TILE.w} height={t.bottom - t.top} rx="14" class="sm-tile" />
+							<text x={t.x + TILE.pad} y={t.top + TILE.meta} class="sm-meta">{t.meta}</text>
+							<path d={`M${t.x + TILE.w - TILE.pad - 6} ${t.top + TILE.meta - 9.5} l5 4.5 l-5 4.5`} class="sm-chevron" />
+							{t.lines.map((line, i) => (
+								<text x={t.x + TILE.pad} y={t.top + TILE.body + i * TILE.pitch} class="sm-line">{line}</text>
+							))}
+							<path d={`M${t.x + TILE.pad + 1} ${replyY(t) - 4.5} l5.5 -5 v3 c5 0 8 2 8 7.5 c-1.6 -2.8 -4 -4 -8 -4 v3 z`} class="sm-reply-icon" />
+							<text x={t.x + TILE.pad + 19} y={replyY(t)} class="sm-reply">你回：{t.reply}</text>
+						</g>
+					))}
+				</svg>
+				<div class="sm-box sm-crop" style={box({ x: 0, y: C.below, w: 440, h: C.seam - C.below })}>
+					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				</div>
+			</div>
+			<div class="sm-box sm-crop sm-tabbar" style={box(C.tabBar)}>
+				<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+			</div>
+		</div>
+	)
+}
+
+<script>
+	// 只在看得见时播：电脑上钉住的那部手机轮到这一屏（左边那一节走到屏幕中间）时、手机上这一节的截图在屏幕中间时。
+	// 看不见就停，再进来从头播。系统设了「减弱动态效果」、浏览器不支持（要 @property 和容器单位）就不动，截图原样。
+	const els = [...document.querySelectorAll<HTMLElement>('[data-shot-motion]')];
+	const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+	const able = 'IntersectionObserver' in window && 'registerProperty' in CSS && CSS.supports('width', '1cqw');
+
+	if (els.length && able) {
+		const byTarget = new Map<Element, HTMLElement[]>();
+		for (const el of els) {
+			// 钉住的手机：跟着左边讲同一屏的那一节；每节自带的截图：跟着它自己
+			const target = el.closest('.story-pin')
+				? document.querySelector(`.chapter [data-shot="${el.dataset.shotMotion}"]`)?.closest('.chapter')
+				: el.closest('.shot');
+			if (target) byTarget.set(target, [...(byTarget.get(target) ?? []), el]);
+		}
+
+		const play = async (el: HTMLElement, on: boolean) => {
+			el.classList.remove('is-playing');
+			if (!on || calm.matches) return;
+			// 叠上去的几块用的图都加载好了再播，免得第一轮露出空的
+			await Promise.all([...el.querySelectorAll('img')].map((img) => img.decode().catch(() => undefined)));
+			if (el.dataset.seen !== 'in') return;
+			void el.offsetWidth;
+			el.classList.add('is-playing');
+		};
+
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					for (const el of byTarget.get(entry.target) ?? []) {
+						el.dataset.seen = entry.isIntersecting ? 'in' : 'out';
+						void play(el, entry.isIntersecting);
+					}
+				}
+			},
+			{ rootMargin: '-30% 0px -30% 0px' },
+		);
+		for (const target of byTarget.keys()) io.observe(target);
+
+		calm.addEventListener('change', () => {
+			for (const el of els) void play(el, el.dataset.seen === 'in');
+		});
+	}
+</script>
