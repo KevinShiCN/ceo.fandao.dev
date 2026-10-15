@@ -80,7 +80,7 @@ export const MOMENTS: readonly Moment[] = [
 	{
 		at: '14:32',
 		kind: '来电打断',
-		then: '没录到 6 分钟。手表和手机提醒你，点一下接着录。',
+		then: '打电话这 6 分钟没录，电话一挂自己接着录。',
 	},
 	{
 		at: '15:38',

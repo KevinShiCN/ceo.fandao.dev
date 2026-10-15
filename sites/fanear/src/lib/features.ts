@@ -72,7 +72,10 @@ export const DATA: readonly DataFact[] = [
 /** 手表这一组的三句：首页手表三种样子旁边也用 */
 const WATCH = {
 	chunk: '每 15 分钟一块传到手机。手机确认收到之前，表上那一块不删。',
-	interrupt: '被来电、Siri、闹钟打断时，手表和手机同时提醒你，点一下接着录。',
+	// 自动接着录（本人 10-15「其实支持了自动恢复录制了」）：打断结束时手表上的饭耳在前台就自己续上，不在前台请手机拉起来
+	// （Apps/Watch/RecorderController+AudioSession.swift handleInterruption；「用体能训练拉起来」默认开），
+	// 手机拉不起来就发通知喊人（Apps/iOS/Transfer/AutoLaunchPlan.swift）。不写成保证一直录。
+	interrupt: '被来电、Siri、闹钟打断，打断一结束就自己接着录；没接上时，手表和手机提醒你点一下。',
 	battery: '电量低于 10% 又没在充电，先存好正在录的这一块再停。',
 	stopped: '按了停就不录了，再点「开始录音」接着录。',
 } as const;
