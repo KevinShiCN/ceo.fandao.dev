@@ -53,7 +53,6 @@ export interface Moment {
 }
 
 export const MOMENTS: readonly Moment[] = [
-	// 0.2.0 待合：L10（饭耳说话时叫「小耳」）
 	{
 		at: '9:10',
 		kind: '小耳说了一句',
@@ -69,7 +68,7 @@ export const MOMENTS: readonly Moment[] = [
 	{
 		at: '12:00',
 		kind: '按计划不录',
-		then: '「录音时间」里这 1 小时涂成不录，手表待命，到点接着记。',
+		then: '「录音自动启停」里这 1 小时涂成不录，手表待命，到点接着记。',
 	},
 	{
 		at: '14:00',
