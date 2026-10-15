@@ -1,0 +1,146 @@
+---
+// 首页。首屏两版（10-15 待本人挑）：A「真机」（HeroA.astro，10-13 选定的 C 版换成现在的截图）、
+// B「先认识我」（HeroB.astro，照 App 第一次打开的介绍页）。构建时 FANEAR_HOME=A|B 切换，默认 A（pages/index.astro）。
+// 首屏以下两版相同，只有一处：ADHD 那段和心愿，A 放在「我」这一节开头，B 放在照片旁边（不重复写两遍）。
+// 往下：我 → 这一天 → 手表上 → 手机上（今天、待办、小耳、设置，按 0.2.0 的底部页签）→ 你的数据 → 现在能不能用、最近更新。
+// 文案都取 src/lib/ 里已经核对过的数据（features.ts、why.ts、day.ts、shots.ts、site.ts），不按子串挑句子。
+import { group, homePoints } from '../../lib/features';
+import Shot from '../Shot.astro';
+import Chapter from './Chapter.astro';
+import Data from './Data.astro';
+import Day from './Day.astro';
+import HeroA from './HeroA.astro';
+import HeroB from './HeroB.astro';
+import Intro from './Intro.astro';
+import Latest from './Latest.astro';
+import Now from './Now.astro';
+import Points from './Points.astro';
+import Watch from './Watch.astro';
+import '../../styles/scroll-motion.css';
+
+interface Props {
+	hero: 'A' | 'B';
+}
+
+const { hero } = Astro.props;
+
+// 手机上的四个页签：App 里那一屏叫什么、讲哪一组功能、配哪张截图。
+// 0.2.0 待合：L10（底部页签「今天 - 待办 - 小耳 - 设置」）
+const tabs = [
+	{ id: 'h-tab-today', screen: '今天', group: group('today'), shot: 'today' },
+	{ id: 'h-tab-todo', screen: '待办', group: group('todo'), shot: 'todoDeck' },
+	{ id: 'h-tab-xiaoer', screen: '小耳', group: group('xiaoer'), shot: 'care' },
+	{ id: 'h-tab-settings', screen: '设置', group: group('models'), shot: 'asr' },
+] as const;
+const [first, ...rest] = tabs;
+
+const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
+---
+
+<main id="main" class:list={['home', `home-${hero.toLowerCase()}`]}>
+	{hero === 'A' ? <HeroA /> : <HeroB />}
+
+	<Intro opening={hero === 'A'} />
+
+	<Day />
+
+	<div class="group">
+		<h2>手表上</h2>
+	</div>
+	<Watch />
+
+	<div class="group group-phone">
+		<h2>手机上</h2>
+		<p>底部四个页签：{tabs.map((t) => t.screen).join(' - ')}</p>
+	</div>
+
+	<div class="story">
+		{
+			tabs.map((tab, i) => (
+				<Chapter id={tab.id} screen={tab.screen} title={tab.group.headline ?? tab.group.title} lead={tab.group.lead} flip={i % 2 === 1}>
+					<Points items={homePoints(tab.group)} />
+					<Shot slot="figure" id={tab.shot} caption={false} sizes={phoneSizes} />
+				</Chapter>
+			))
+		}
+
+		{/* 电脑上往下滑时用的那一部手机：钉在右边不动，四屏跟着左边四节一屏一屏换（styles/scroll-motion.css）。
+		    手机、平板、不支持滚动动画的浏览器和设了「减弱动态效果」的不显示它，还是每节自带截图 */}
+		<div class="story-phone">
+			<div class="story-pin">
+				<Shot id={first.shot} stack={rest.map((t) => t.shot)} caption={false} sizes="300px" class="story-shot" />
+			</div>
+		</div>
+	</div>
+	<p class="story-note">这四张是模拟器截图，演示数据；截图里的底部页签还是现在的「今天 - 饭耳 - 待办 - 设置」。</p>
+
+	<Data />
+	<Now />
+	<Latest />
+</main>
+
+<style>
+	.home > :global(section:not(.data)),
+	.story,
+	.story-note {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin-left: auto;
+		margin-right: auto;
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+	}
+
+	.story-phone {
+		display: none;
+	}
+
+	/* 「手表上」「手机上」：一道深墨粗线开头，像说明书换一章 */
+	/* 粗线只画在版心里，不伸进两边留白，所以用外边距收进来 */
+	.group {
+		max-width: var(--page-max);
+		margin-left: max(var(--gutter), calc((100% - var(--page-max)) / 2));
+		margin-right: max(var(--gutter), calc((100% - var(--page-max)) / 2));
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--s-1) var(--s-4);
+		margin-top: var(--s-8);
+		padding-top: var(--s-3);
+		border-top: 3px solid var(--c-ink);
+	}
+
+	.group h2 {
+		font-size: 20px;
+		font-weight: 800;
+	}
+
+	.group-phone {
+		margin-top: var(--s-9);
+	}
+
+	.group p {
+		color: var(--c-ink-2);
+		font-size: 15px;
+	}
+
+	.story-note {
+		margin-top: var(--s-6);
+		color: var(--c-ink-3);
+		font-size: 14px;
+	}
+
+	@media (min-width: 768px) {
+		.group {
+			margin-top: var(--s-9);
+		}
+
+		.group h2 {
+			font-size: 22px;
+		}
+
+		.group-phone {
+			margin-top: calc(var(--s-9) + var(--s-6));
+		}
+	}
+</style>

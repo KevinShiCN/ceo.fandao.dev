@@ -1,0 +1,117 @@
+---
+// 你的数据：没有截图，写成说明书里的一张小表。内容和功能页「数据和隐私」同一份（src/lib/features.ts 的 DATA）。
+import { DATA, DATA_LEAD } from '../../lib/features';
+import { withBase } from '../../lib/url';
+---
+
+<section class="data" aria-labelledby="h-data">
+	<div class="data-inner">
+		<div class="data-head">
+			<h2 id="h-data">你的数据</h2>
+			<p>{DATA_LEAD}</p>
+			<p class="data-more">全文看<a href={withBase('/privacy/')}>隐私说明</a>。</p>
+		</div>
+		<dl class="data-rows">
+			{
+				DATA.map((fact) => (
+					<div>
+						<dt>{fact.title}</dt>
+						<dd>{fact.text}</dd>
+					</div>
+				))
+			}
+		</dl>
+	</div>
+</section>
+
+<style>
+	.data {
+		margin-top: var(--s-8);
+		background: var(--c-wash);
+	}
+
+	.data-inner {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: var(--s-7) var(--gutter);
+	}
+
+	h2 {
+		font-size: 26px;
+		font-weight: 800;
+	}
+
+	.data-head p {
+		margin-top: var(--s-3);
+		font-size: 18px;
+		line-height: 1.65;
+	}
+
+	.data-head .data-more {
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	.data-rows {
+		margin: var(--s-5) 0 0;
+	}
+
+	.data-rows div {
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	dt {
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	dd {
+		margin: var(--s-1) 0 0;
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	@media (min-width: 768px) {
+		.data {
+			margin-top: var(--s-9);
+		}
+
+		.data-inner {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+			gap: var(--s-8);
+			padding-top: var(--s-8);
+			padding-bottom: var(--s-8);
+		}
+
+		h2 {
+			font-size: 34px;
+		}
+
+		.data-head p {
+			font-size: 20px;
+		}
+
+		.data-head .data-more {
+			font-size: 16px;
+		}
+
+		.data-rows {
+			margin-top: 0;
+		}
+
+		.data-rows div {
+			display: grid;
+			grid-template-columns: 9em minmax(0, 1fr);
+			gap: var(--s-4);
+			align-items: baseline;
+			padding: var(--s-4) 0;
+		}
+
+		dd {
+			margin: 0;
+		}
+	}
+</style>

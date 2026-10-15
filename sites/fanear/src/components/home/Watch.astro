@@ -1,38 +1,33 @@
 ---
 // 手表上：录音这件事配手表的三种样子（正在录、被打断、自己停的），每张图旁边一句话。
-// 手机上一张一行（图左字右），电脑上三张并排。
-import { SHOTS, type ShotId } from '../../../lib/shots';
-import Shot from '../../Shot.astro';
-import { feature, point } from './pick';
+// 手机上一张一行（图左字右），电脑上三张并排。句子都在 src/lib/features.ts（WATCH_STATES）。
+import { group, WATCH_FOOT, WATCH_STATES } from '../../lib/features';
+import { SHOTS } from '../../lib/shots';
+import Shot from '../Shot.astro';
 
-const record = feature('record');
-const states: { id: ShotId; text: string }[] = [
-	{ id: 'watchRecording', text: point(record, '15 分钟') },
-	{ id: 'watchInterrupted', text: point(record, '打断') },
-	// 「自己停的」这张图上写着「14:32 你自己停的」，下面是「开始录音」按钮
-	{ id: 'watchStopped', text: '你不按停，它就一直录；按了停，再点「开始录音」接着录。' },
-];
+const watch = group('watch');
 ---
+
 
 <section class="watch" aria-labelledby="h-c-record">
 	<div class="watch-head">
-		<h3 id="h-c-record">{record.title}</h3>
-		<p class="watch-lead">{record.lead}</p>
+		<h3 id="h-c-record">全天录</h3>
+		<p class="watch-lead">{watch.lead}</p>
 	</div>
 	<ul class="states">
 		{
-			states.map((state) => (
+			WATCH_STATES.map((state) => (
 				<li>
-					<Shot id={state.id} caption={false} sizes="(min-width: 768px) 200px, 34vw" />
+					<Shot id={state.shot} caption={false} sizes="(min-width: 768px) 200px, 34vw" />
 					<div class="state-text">
-						<h4>{SHOTS[state.id].caption}</h4>
+						<h4>{SHOTS[state.shot].caption}</h4>
 						<p>{state.text}</p>
 					</div>
 				</li>
 			))
 		}
 	</ul>
-	<p class="watch-foot">{point(record, '电量')}</p>
+	<p class="watch-foot">{WATCH_FOOT}</p>
 </section>
 
 <style>

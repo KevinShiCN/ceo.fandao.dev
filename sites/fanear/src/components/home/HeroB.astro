@@ -1,0 +1,171 @@
+---
+// 首屏 B「先认识我」：照 App 第一次打开的介绍页（饭耳仓库 Apps/iOS/Onboarding/AppIntroPage.swift）：
+// 稻田照片整幅，左上角饭耳 LOGO，左下角作者三行，右下角摄影署名；接着 ADHD 那段和心愿。
+// 字只在那几行底下垫一小块暗色（同 App），不铺满整张照片。照片是 App 里同一张（Assets.xcassets/intro-hero），交给 Astro 出多尺寸。
+// 手机上照片占满一屏宽、下面接着两句；电脑上照片在左、两句在右。
+import { Image } from 'astro:assets';
+import hero from '../../assets/intro-hero.jpg';
+import { SITE } from '../../lib/site';
+import { withBase } from '../../lib/url';
+import { INTRO } from '../../lib/why';
+import Logo from '../Logo.astro';
+import Opening from './Opening.astro';
+---
+
+<section class="hero-b" aria-labelledby="h-b-name">
+	<figure class="photo">
+		<Image
+			src={hero}
+			alt={INTRO.photoAlt}
+			widths={[480, 720, 960, 1290]}
+			sizes="(min-width: 960px) 520px, 100vw"
+			quality={82}
+			loading="eager"
+			fetchpriority="high"
+			class="photo-img"
+		/>
+		<h1 id="h-b-name" class="photo-badge">
+			<Logo size={22} />
+			<span>{SITE.name}</span>
+			<span class="visually-hidden">{SITE.nameEn}</span>
+		</h1>
+		<figcaption class="photo-author">
+			<strong>{INTRO.author}</strong>
+			<span class="photo-title">{INTRO.authorTitle}</span>
+			<span class="photo-line">{INTRO.authorLine}</span>
+		</figcaption>
+		<p class="photo-credit">{INTRO.photoCredit}</p>
+	</figure>
+
+	<div class="hero-b-text">
+		<Opening />
+		<div class="hero-b-actions">
+			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
+			<a class="btn btn-line" href={withBase('/features/')}>看全部功能</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.photo {
+		position: relative;
+		margin: 0 calc(-1 * var(--gutter));
+		overflow: hidden;
+		background: var(--c-wash);
+	}
+
+	/* 跟 App 一样整幅宽；手机上最多一屏高的八成，裁的时候保住脸（人在偏上的位置） */
+	.photo :global(.photo-img) {
+		width: 100%;
+		height: auto;
+		max-height: 80svh;
+		object-fit: cover;
+		object-position: 50% 30%;
+	}
+
+	.photo-badge {
+		position: absolute;
+		top: var(--s-4);
+		left: var(--s-4);
+		display: inline-flex;
+		align-items: center;
+		gap: var(--s-2);
+		padding: var(--s-1) var(--s-3) var(--s-1) var(--s-2);
+		border-radius: var(--r-btn);
+		background: var(--c-paper-veil);
+		font-size: 18px;
+		font-weight: 800;
+		line-height: 1.6;
+		letter-spacing: 0.04em;
+	}
+
+	/* 左下角三行：底下垫一小块从下往上、往右淡掉的暗色，只在这几行字后面 */
+	.photo-author {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		display: grid;
+		gap: 2px;
+		padding: var(--s-7) var(--s-8) var(--s-4) var(--s-5);
+		color: var(--c-paper);
+		text-shadow: 0 1px 3px var(--c-photo-scrim);
+		background: radial-gradient(120% 100% at 0% 100%, var(--c-photo-scrim) 0 45%, transparent 75%);
+	}
+
+	.photo-author strong {
+		font-size: 28px;
+		font-weight: 800;
+		line-height: 1.2;
+	}
+
+	.photo-title {
+		font-size: 17px;
+		font-weight: 700;
+	}
+
+	.photo-line {
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	.photo-credit {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		padding: var(--s-5) var(--s-3) var(--s-2) var(--s-6);
+		color: var(--c-paper);
+		font-size: 12px;
+		font-weight: 600;
+		text-shadow: 0 1px 3px var(--c-photo-scrim);
+		background: radial-gradient(100% 100% at 100% 100%, var(--c-photo-scrim) 0 35%, transparent 75%);
+	}
+
+	.hero-b-text {
+		padding-top: var(--s-6);
+	}
+
+	.hero-b-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-3);
+		margin-top: var(--s-6);
+	}
+
+	@media (min-width: 768px) {
+		.photo-author strong {
+			font-size: 34px;
+		}
+
+		.photo-title {
+			font-size: 19px;
+		}
+
+		.photo-line {
+			font-size: 14px;
+		}
+	}
+
+	/* 电脑：照片在左（保持竖幅，不放大到糊），两句在右 */
+	@media (min-width: 960px) {
+		.hero-b {
+			display: grid;
+			grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+			align-items: center;
+			gap: var(--s-8);
+			padding-top: var(--s-7);
+		}
+
+		.photo {
+			margin: 0;
+			border-radius: var(--r-card);
+		}
+
+		.photo :global(.photo-img) {
+			max-height: min(78vh, 680px);
+		}
+
+		.hero-b-text {
+			padding-top: 0;
+		}
+	}
+</style>
