@@ -184,7 +184,7 @@ export const GROUPS: readonly Group[] = [
 			{ text: '三个用途：「备份全部」「给 AI 或导进笔记」「发纪要」。也可以自定义，自己勾 Markdown、PDF、JSON、TXT、CSV、字幕 SRT 和录音。' },
 			{ text: '「发纪要」是一份 PDF：日期、时段、参与的人、要点、待办和原文。' },
 			{ text: '可以关掉这一页，导出在后台接着做，好了会告诉你。' },
-			{ text: '一句关照、每天的总结、一场对话、一条待办、一句原话，都能「做成图」：17 个版式、10 套配色，3:4、9:16、1:1，默认隐去别人的名字。截屏以后还会弹「帮你排好版了」。' },
+			{ text: '一句关照、每天的总结、一场对话、一条待办、一句原话，都能做成图分享：17 个版式、10 套配色，3:4、9:16、1:1，默认隐去别人的名字。截屏以后还会弹「帮你排好版了」。' },
 		],
 		shots: ['share'],
 	},
@@ -199,7 +199,7 @@ export const GROUPS: readonly Group[] = [
 			{ text: '配好以后只用「正在用」那一家，连不上不会自动换别家。' },
 			// 0.2.0 待合：L6（云端出错先自己重试、再查服务商、再让你「发给开发者」）
 			{ text: '云端出错时先隔一会儿自己重试，再查是不是服务商的问题；服务商没问题，就请你「发给开发者」，只带日志。' },
-			{ text: '大模型按供应商添加：国内有 DeepSeek、通义千问、豆包、Kimi、智谱 GLM，海外有 OpenAI、Anthropic、OpenRouter，也能自定义。接口格式三种：「Responses」「OpenAI 兼容」「Claude 兼容」。', home: true },
+			{ text: '大模型按供应商添加：国内有 DeepSeek、通义千问、豆包、Kimi、智谱 GLM，海外有 OpenAI、Anthropic、Google、Meta、OpenRouter，也能自定义。接口格式四种：「Responses」「OpenAI 兼容」「Claude 兼容」「Gemini 原生」。', home: true },
 			{ text: '也可以选「iPhone 自带模型」：只出标题和要点，不抓承诺、不认人。' },
 		],
 		shots: ['asr'],
