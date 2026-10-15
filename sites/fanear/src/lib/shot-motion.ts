@@ -42,9 +42,11 @@ export const TODO_MOTION = {
 	drag: { x: 15, y: 121, w: 410, h: 719 },
 	radius: 22,
 	/** 飞走以后顶上来的那张：App 演示数据里真正的下一张「小陈说周五前把对账单发来」。
-	 *  像素裁自同一台模拟器、同一份演示数据拍的「滑走一张以后」那屏，裁出来正好是卡的位置和大小 */
+	 *  像素裁自同一台模拟器、同一份演示数据拍的「滑走一张以后」那屏，只裁边框以内（边框由样式画：在后面时浅灰、顶上来变深墨） */
 	next: todoNextCard as ImageMetadata,
-	nextFrom: 'fanear/本地资料/accept-020-20261015/todo-polish-020/after/phone-todo-swipe-out.png，裁 (48,366)-(1272,2517) 像素',
+	nextFrom: 'fanear/本地资料/accept-020-20261015/todo-polish-020/after/phone-todo-swipe-out.png，裁 (53,371)-(1267,2512) 像素',
+	/** 裁图在卡里往里缩多少点（5 像素 = 1.67 点） */
+	nextInset: 5 / 3,
 	/** 手指按在卡上哪儿（相对卡左上角） */
 	touch: { x: 204, y: 590 },
 	/** 染色那块：图标、大字、小字的中心高度（相对卡顶，量自 App 拖到一半的截图） */
