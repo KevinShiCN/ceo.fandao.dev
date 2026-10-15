@@ -81,7 +81,13 @@
 	width: calc(440 * var(--u));
 	height: auto;
 	left: calc(var(--l) * -1 * var(--u));
-	top: calc(var(--t) * -1 * var(--u));
+	top: calc(var(--st, var(--t)) * -1 * var(--u));
+}
+
+/* 竖着拉长的一截：图按 --k 倍竖着放大，--st 那一行对到这一块的上沿 */
+.sm.sm .sm-stretch > img {
+	height: calc(956 * var(--k) * var(--u));
+	top: calc(var(--st) * var(--k) * -1 * var(--u));
 }
 
 /* 手指按着的地方 */
@@ -101,13 +107,12 @@
 
 /* 两轮交替，每轮 4.2 秒，都从静止开始：0.3 秒后手指按上去，拖 105 点（1.1 秒）停 0.6 秒，0.3 秒飞走
    （第一轮往左「要做 · 稍后提醒」，第二轮往右「做完了 / 不用做 · 不再提醒」），两轮露出来的都是同一张下一张，跟 App 一样；
-   下一张已经长回原尺寸、边框变黑顶在最上面，停 0.75 秒。回到起始分两步，卡片区域任何时候只有一张卡的字：
+   下一张已经长回原尺寸顶在最上面，停 0.75 秒。回到起始分两步，卡片区域任何时候只有一张卡的字：
    下一张 0.3 秒淡出成空牌堆（纸白底和底下露出的两道边），第一张再 0.3 秒从牌堆里升上来（缩小 5%、下移 12 点 → 原位）。 */
 .sm-todo.is-playing,
 .sm-todo.is-playing .sm-a,
 .sm-todo.is-playing .sm-b,
-.sm-todo.is-playing .sm-touch,
-.sm-todo.is-playing .sm-b-edge {
+.sm-todo.is-playing .sm-touch {
 	animation-duration: 8.4s;
 	animation-timing-function: linear;
 	animation-iteration-count: infinite;
@@ -162,12 +167,12 @@
 	height: calc(100% - 2 * var(--in) * var(--u));
 }
 
-/* 后面那张的边：在后面时浅灰 1 点；顶上来时变成最上面那张的 1.5 点深墨边（TodoDeckCard 的 isTop） */
+/* 后面那张的边：1.5 点深墨（main 上后面露边的卡跟最上面那张一样，TodoDeckPage 没传 isTop） */
 .sm-b-edge {
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
+	box-shadow: inset 0 0 0 calc(1.5 * var(--u)) var(--c-ink);
 }
 
 /* 整张染色：底色不透明度 0.92 × 进度，字和图标 1.5 × 进度（比底色先出来），过线时字从 0.9 放到 1（TodoSwipeTint） */
@@ -236,9 +241,6 @@
 	animation-name: sm-todo-touch;
 }
 
-.sm-todo.is-playing .sm-b-edge {
-	animation-name: sm-todo-top;
-}
 
 @keyframes sm-todo-x {
 	0%,
@@ -397,37 +399,6 @@
 	}
 }
 
-/* 飞走时后面那张的边从浅灰变成深墨；它藏着的时候换回浅灰 */
-@keyframes sm-todo-top {
-	0%,
-	30.952% {
-		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
-		animation-timing-function: ease-out;
-	}
-
-	32.738%,
-	45.238% {
-		box-shadow: inset 0 0 0 calc(1.5 * var(--u)) var(--c-ink);
-		animation-timing-function: steps(1, start);
-	}
-
-	50%,
-	80.952% {
-		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
-		animation-timing-function: ease-out;
-	}
-
-	82.738%,
-	95.238% {
-		box-shadow: inset 0 0 0 calc(1.5 * var(--u)) var(--c-ink);
-		animation-timing-function: steps(1, start);
-	}
-
-	100% {
-		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
-	}
-}
-
 /* ---------- 小耳：滑条收下这一张 ---------- */
 
 /* 一轮 7 秒：0.6 秒后手指按住滑块，1.2 秒拖到底，滑块变对勾、字变白，停 0.35 秒（SlideToConfirm 收下前等的那一下），
@@ -528,6 +499,17 @@
 /* 「以前的」小卡（CareFeedTile） */
 .sm-tile {
 	fill: var(--c-wash);
+}
+
+/* 第二张下半截：「明天别忘了：……」16 点半粗；借来的滑条上的字是深墨（没滑） */
+.sm-todo-line {
+	fill: var(--c-ink);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.sm-care .sm-title-ink {
+	fill: var(--c-ink);
 }
 
 .sm-meta {

@@ -5,7 +5,7 @@
 // 小耳：手指把第一张卡的滑条拖到底，滑块变成对勾、字变白，这张卡淡出收起，下面的卡和「以前的」一起顶上来。
 // 播完停一下再回到截图原样（待办：下一张先淡出成空牌堆，第一张再升回来；小耳倒回去），从头再播。坐标和数据在 lib/shot-motion.ts，动画在 styles/shot-motion.css。
 import { Image } from 'astro:assets';
-import { CARE_MOTION, CARE_TILES, TODO_MOTION, type Rect } from '../lib/shot-motion';
+import { CARE_LETTER_TAIL, CARE_MOTION, CARE_TILES, TODO_MOTION, type Rect } from '../lib/shot-motion';
 import { SHOTS, type ShotId } from '../lib/shots';
 import '../styles/shot-motion.css';
 
@@ -20,6 +20,11 @@ const shot = SHOTS[id];
 const box = (r: Rect) => `--l:${r.x};--t:${r.y};--w:${r.w};--h:${r.h}`;
 const T = TODO_MOTION;
 const C = CARE_MOTION;
+const L = CARE_LETTER_TAIL;
+// 滑条上的字：基线在滑轨上沿下 35.83 点，左右在滑块右边 4 点到滑轨右边 10 点之间居中（SlideToConfirm）
+const titleX = (C.knob.x + C.knob.w + 4 + C.track.x + C.track.w - 10) / 2;
+const titleDy = 35.83;
+const bottom = 956 + C.shift;
 // 「以前的」小卡里各行的位置（相对卡顶，量自截图）：顶上一行、那句话第一行的基线，行距，「你回」比最后一行低多少
 const TILE = { pad: 12, w: 193, meta: 23.5, body: 50, pitch: 21, reply: 24.3 };
 const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.length - 1) * TILE.pitch + TILE.reply;
@@ -27,7 +32,6 @@ const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.
 
 {
 	id === 'todoDeck' && (
-		// 0.2.0 待合：L4（滑卡左右滑、整张染色还在 todo-polish-020 分支）
 		<div class="sm sm-todo" data-shot-motion={id} aria-hidden="true">
 			<div class="sm-box sm-floor" style={box(T.card)} />
 			<div class="sm-box sm-b" style={`${box(T.card)};--in:${T.nextInset}`}>
@@ -75,7 +79,7 @@ const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.
 				<span class="sm-box sm-eraser" style={box({ x: C.knob.x - 1, y: C.knob.y - 1, w: C.knob.w + 2, h: C.knob.h + 2 })} />
 				<span class="sm-box sm-slide" style={box(C.knob)} />
 				<svg class="sm-box sm-done" style={box({ x: 0, y: 0, w: 440, h: 956 })} viewBox="0 0 440 956">
-					<text x={(C.knob.x + C.knob.w + 4 + C.track.x + C.track.w - 10) / 2} y={474.5} class="sm-title">{C.reply}</text>
+					<text x={titleX} y={C.track.y + titleDy} class="sm-title">{C.reply}</text>
 				</svg>
 				<div class="sm-box sm-knob" style={box(C.knob)}>
 					<div class="sm-crop sm-fill">
@@ -88,7 +92,8 @@ const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.
 				</div>
 			</div>
 			<div class="sm-box sm-care-below" style={box({ x: 0, y: 0, w: 440, h: 956 })}>
-				<svg class="sm-box sm-after" style={box({ x: 0, y: 0, w: 440, h: 1196 })} viewBox="0 0 440 1196">
+				<svg class="sm-box sm-after" style={box({ x: 0, y: 0, w: 440, h: bottom })} viewBox={`0 0 440 ${bottom}`}>
+					<text x={L.pastLabel.x} y={L.pastLabel.baseline} class="sm-meta">以前的</text>
 					{CARE_TILES.map((t) => (
 						<g>
 							<rect x={t.x} y={t.top} width={TILE.w} height={t.bottom - t.top} rx="14" class="sm-tile" />
@@ -105,6 +110,19 @@ const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.
 				<div class="sm-box sm-crop" style={box({ x: 0, y: C.below, w: 440, h: C.seam - C.below })}>
 					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
 				</div>
+				{/* 第二张卡身往下接：把「先按你们的来」那行下面一小截空白（只有左右两道边）竖着拉长，接到借来的滑条上 */}
+				<div class="sm-box sm-crop sm-stretch sm-after" style={`${box({ x: 0, y: L.band.to, w: 440, h: L.borrow.to - L.band.to })};--st:${L.band.from};--k:${(L.borrow.to - L.band.to) / L.band.h}`}>
+					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				</div>
+				{/* 第二张的滑条和卡底：借第一张那一截像素挪下来，滑条上的字换成这一封的回话 */}
+				<div class="sm-box sm-crop sm-after" style={`${box({ x: 0, y: L.borrow.to, w: 440, h: L.borrow.h })};--st:${L.borrow.from}`}>
+					<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
+				</div>
+				<svg class="sm-box sm-after" style={box({ x: 0, y: 0, w: 440, h: bottom })} viewBox={`0 0 440 ${bottom}`}>
+					<rect x={C.knob.x + C.knob.w + 2} y={L.borrow.to + 2 + 4} width={C.track.x + C.track.w - 4 - C.knob.x - C.knob.w - 2} height={C.track.h - 8} class="sm-tile" />
+					<text x={titleX} y={L.borrow.to + 2 + titleDy} class="sm-title sm-title-ink">{L.reply}</text>
+					<text x={L.todo.x} y={L.todo.baseline} class="sm-todo-line">{L.todo.text}</text>
+				</svg>
 			</div>
 			<div class="sm-box sm-crop sm-tabbar" style={box(C.tabBar)}>
 				<Image src={shot.src} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />

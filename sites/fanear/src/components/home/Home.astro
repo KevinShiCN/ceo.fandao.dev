@@ -17,7 +17,6 @@ import Watch from './Watch.astro';
 import '../../styles/scroll-motion.css';
 
 // 手机上的四个页签：App 里那一屏叫什么、讲哪一组功能、配哪张截图。
-// 0.2.0 待合：L10（底部页签「今天 - 待办 - 小耳 - 设置」）
 const tabs = [
 	{ id: 'h-tab-today', screen: '今天', group: group('today'), shot: 'today' },
 	{ id: 'h-tab-todo', screen: '待办', group: group('todo'), shot: 'todoDeck' },
@@ -64,7 +63,7 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 			</div>
 		</div>
 	</div>
-	<p class="story-note">这四张是模拟器截图，演示数据；截图里的底部页签还是现在的「今天 - 饭耳 - 待办 - 设置」。</p>
+	<p class="story-note">这四张是模拟器截图，演示数据。</p>
 
 	<Data />
 	<Now />
