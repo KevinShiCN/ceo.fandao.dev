@@ -1,12 +1,12 @@
 ---
-// 第 C 版首屏：App 图标、名字、一句话、状态、两个按钮；旁边（手机上是下面）一组大的真机：
-// 手机「今天」在前当主角，手表「正在录」压在它左下角。全页只有这一处打开页面时自己播的动画；
-// 电脑上往下滑时的动效都在 styles/scroll-motion.css。
-import { SHOTS_NOTE } from '../../../lib/shots';
-import { SITE, STATUS } from '../../../lib/site';
-import { withBase } from '../../../lib/url';
-import Logo from '../../Logo.astro';
-import Shot from '../../Shot.astro';
+// 首屏 A「真机」（10-13 本人选的 C 版，10-15 换成现在的界面截图）：App 图标、名字、一句话、状态、两个按钮；
+// 旁边（手机上是下面）一组大的真机：手机「今天」在前当主角，手表「正在录」压在它左下角。
+// 全页只有这一处打开页面时自己播的动画；电脑上往下滑时的动效都在 styles/scroll-motion.css。
+// 首屏 B「先认识我」在 HeroB.astro，构建时用 FANEAR_HOME 切（pages/index.astro）。
+import { SITE, STATUS } from '../../lib/site';
+import { withBase } from '../../lib/url';
+import Logo from '../Logo.astro';
+import Shot from '../Shot.astro';
 
 // 一句话在第一个逗号后断开：电脑上分两行，手机上照常折行
 const cut = SITE.tagline.indexOf('，') + 1;
@@ -46,7 +46,7 @@ const tagline = cut > 0 ? [SITE.tagline.slice(0, cut), SITE.tagline.slice(cut)] 
 				sizes="(min-width: 768px) 180px, 34vw"
 			/>
 		</div>
-		<figcaption>左边手表「正在录」，右边手机「今天」。{SHOTS_NOTE}</figcaption>
+		<figcaption>左边手表「正在录」，右边手机「今天」。模拟器截图，演示数据。</figcaption>
 	</figure>
 </section>
 

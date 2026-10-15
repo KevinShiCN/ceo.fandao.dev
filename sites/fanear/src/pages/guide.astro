@@ -1,30 +1,34 @@
 ---
-// 使用说明：从装 App 到改「这句是谁说的」，按先后一步一步写，所以用编号。
-// 按钮名、设置项名照 App 界面上的字写（fanear 仓库 Apps/iOS、Apps/Watch），改了 App 文案这里也要跟着改。
+// 使用说明：按 0.2.0 第一次打开的顺序写（饭耳仓库 RootView.swift、Onboarding、Setup/SetupGuide.swift、
+// Setup/ExperienceChecklist.swift），从装 App 到删除数据，按先后一步一步写，所以用编号。
+// 按钮名、设置项名照 App 界面上的原字（事实底稿第五节），改了 App 文案这里也要跟着改。
+// 0.2.0 清单里还没合进 main 的条目，在那一句旁边标「0.2.0 待合：Lx」，发布前逐条核对。
 import PageIntro from '../components/PageIntro.astro';
 import Shot from '../components/Shot.astro';
 import Toc from '../components/Toc.astro';
 import Base from '../layouts/Base.astro';
 import { SHOTS_NOTE } from '../lib/shots';
-import { STATUS } from '../lib/site';
+import { STATUS, XHS } from '../lib/site';
 import { withBase } from '../lib/url';
 import '../styles/page-motion.css';
 
 const steps = [
 	{ id: 'install', title: '装 App' },
-	{ id: 'accounts', title: '填你自己的转文字和大模型账号' },
-	{ id: 'health', title: '允许读健康数据' },
-	{ id: 'record', title: '打开手表上的饭耳，开始录' },
-	{ id: 'today', title: '看今天' },
-	{ id: 'commitments', title: '确认答应的事' },
-	{ id: 'speaker', title: '改「这句是谁说的」' },
+	{ id: 'first-open', title: '第一次打开' },
+	{ id: 'setup', title: '先录上' },
+	{ id: 'checklist', title: '让饭耳更好用' },
+	{ id: 'asr', title: '选转文字' },
+	{ id: 'llm', title: '设大模型' },
+	{ id: 'daily', title: '每天怎么用' },
+	{ id: 'export', title: '导出和分享' },
+	{ id: 'delete', title: '删除数据' },
 ];
 ---
 
-<Base title="使用说明" description="饭耳怎么用：装 App，填你自己的转文字和大模型账号，手表怎么录，看今天，确认答应的事，改「这句是谁说的」。">
+<Base title="使用说明" description="饭耳怎么用：装 App，第一次打开，先录上，让饭耳更好用，选转文字，设大模型，每天怎么用，导出和分享，删除数据。">
 	<main id="main" class="wrap">
 		<PageIntro title="使用说明">
-			<p>从装好到用顺，一共 7 步。按钮和设置项的名字都照 App 上的字写。</p>
+			<p>按第一次打开饭耳的顺序，一共 9 步。按钮和设置项的名字都照 App 上的字写，写的是 0.2.0（准备送审的版本）里的样子。</p>
 		</PageIntro>
 
 		<div class="guide">
@@ -35,102 +39,209 @@ const steps = [
 					<h2><span class="step-no">1</span>装 App</h2>
 					<div class="note-box" role="note">
 						<p><strong>现在还装不了。</strong>饭耳{STATUS.label}，{STATUS.text}</p>
-						<p>苹果开发者账号开通后先上 TestFlight，到时候这一步会放加入测试的链接。</p>
+						<p>{STATUS.next}想第一时间知道，{XHS.search}。</p>
 					</div>
-					<p>需要一部 iPhone 和配好对的 Apple Watch。手表上的饭耳跟着手机上的一起装；手表上没出现的话，到 iPhone 上的「Watch」App 里找到饭耳，点「安装」。</p>
+					<p>需要一部 iPhone 和配好对的 Apple Watch。手表上的饭耳要单独装到手表上，第 3 步「先录上」会带你装。</p>
 				</li>
 
-				<li id="accounts" class="step">
-					<h2><span class="step-no">2</span>填你自己的转文字和大模型账号</h2>
-					<p>饭耳没有自己的服务器。转文字和整理对话，都由手机直接发到你自己的账号，费用也从你的账号走。打开手机上的饭耳，点底部的「设置」：</p>
-					<h3>转文字：火山转写</h3>
-					<ol class="substeps">
-						<li>在火山引擎控制台开通「豆包录音文件识别模型 2.0」。</li>
-						<li>点「火山转写」那一行，把控制台里的 APP ID 填进「App Key」，Access Token 填进「Access Key」。「资源 ID」和「接口地址」已经填好，一般不用改。</li>
-						<li>点「测试转文字连接」。它只送 1 秒静音过去，不会上传你的录音。</li>
-					</ol>
-					<h3>整理对话的大模型</h3>
-					<ol class="substeps">
-						<li>「地址」填你用的大模型服务的接口地址，要支持 OpenAI 的 Responses 接口（饭耳会在地址后面接 /responses）。比如 OpenAI 官方是 https://api.openai.com/v1。</li>
-						<li>「模型」填模型名。点「密钥」那一行，在「新密钥」里填这个服务给你的 Key。</li>
-						<li>点「测试大模型连接」。它只发一句「请只回复两个字：收到」。</li>
-					</ol>
-					<p class="hint">密钥存在手机的钥匙串里。每块录音多长（默认 15 分钟）、原始录音留几天（默认 7 天）、要不要自动调响度（默认开），也都在「设置」里改，改了马上生效。</p>
-				</li>
-
-				<li id="health" class="step">
-					<h2><span class="step-no">3</span>允许读健康数据</h2>
-					<p>在「设置」里点「允许读取健康数据」，系统会列出心率、睡眠、步数、环境音量等全部类型，建议全部打开。</p>
-					<p>打开以后，每段对话上面会画出同一段时间你的心率；整理对话时，同一段时间的健康数据也会一起交给大模型。不开也能用，只是没有这部分。</p>
-				</li>
-
-				<li id="record" class="step has-shots">
+				<li id="first-open" class="step has-shots">
 					<div class="step-text">
-						<h2><span class="step-no">4</span>打开手表上的饭耳，开始录</h2>
-						<p class="consent"><strong>录别人说话之前，先告诉对方、征得同意。</strong></p>
-						<ul>
-							<li>打开手表上的饭耳就开始录，屏幕上写「正在录」和今天已录多久。只要不是你自己停的、电量也够，每次打开都会接着录。</li>
-							<li>想停就按「停止录音」。自己停的不会自动接着录，再录要点「开始录音」。</li>
-							<li>被来电、Siri、闹钟打断时，手表震一下、发一条通知，整块屏变蓝，写「录音停了，点一下继续」。点一下就接着录。</li>
-							<li>电量低于 10% 时，饭耳先存好正在录的这一块再停，充上电再点继续。</li>
-							<li>录音每 15 分钟一块传到手机，「待传 2 块」就是还有 2 块没传到。手机收到了，表上那一块才删。</li>
-						</ul>
-					</div>
-					<div class="step-shots watch-pair">
-						<Shot id="watchRecording" />
-						<Shot id="watchInterrupted" />
-					</div>
-				</li>
-
-				<li id="today" class="step has-shots">
-					<div class="step-text">
-						<h2><span class="step-no">5</span>看今天</h2>
-						<p>手机上的「今天」从上往下是：</p>
-						<ul>
-							<li>一句话：今天录了多久、断了几次、几块转写完、几块失败。</li>
-							<li>一天的时间条：彩色是对话，黑块是没录到，斜纹是没转成文字。没转成文字的，点「重试」再转一次。</li>
-							<li>「件事等你确认」：点「去确认」。</li>
-							<li>今天的对话，新的在上面。点进一段，看逐句原话、谁说的、几点说的，上面是同一段时间的心率。</li>
-						</ul>
-						<p class="hint">整理没完成的对话会写「还没整理」或「整理失败」，失败的点「重试」。</p>
-					</div>
-					<div class="step-shots">
-						<Shot id="today" />
-					</div>
-				</li>
-
-				<li id="commitments" class="step has-shots">
-					<div class="step-text">
-						<h2><span class="step-no">6</span>确认答应的事</h2>
-						<p>「待确认」里分两类：「我答应别人的」「别人答应我的」。每件事写着到期日和原话，下面三个键：</p>
-						<dl class="keys">
-							<dt>不是</dt>
-							<dd>这件事不算。点错了，5 秒内点「撤销」。</dd>
-							<dt>补充</dt>
-							<dd>补点什么，比如数量、找谁、改到哪天。存下后这件事算进待办，带着你补的话。</dd>
-							<dt>进待办</dt>
-							<dd>算数，进待办。</dd>
-						</dl>
-						<p>24 小时没回的，自动进待办。</p>
-					</div>
-					<div class="step-shots">
-						<Shot id="commitments" />
-					</div>
-				</li>
-
-				<li id="speaker" class="step has-shots">
-					<div class="step-text">
-						<h2><span class="step-no">7</span>改「这句是谁说的」</h2>
-						<p>认不准的人先显示「说话人 1」「说话人 2」，那几句下面有「这句是谁说的」；别的句子长按也能改。</p>
+						<h2><span class="step-no">2</span>第一次打开</h2>
 						<ol class="substeps">
-							<li>点「这句是谁说的」，选一个人；不在里面的，在「别人（写名字）」里写上名字，比如「王经理」，点「就是他」。</li>
-							<li>上面的开关打开是「这段里这个人说的每一句都改」，关上是「只改这一句」。</li>
+							<li>第一页是我写的几句话：为什么做饭耳、它做什么。看完点「下一步」。</li>
+							<li>
+								「使用前须知」：饭耳会全天录下你身边的对话，开始前请逐条勾选。「4 条都要勾」：
+								<ul>
+									<li>转文字、整理对话，用的都是你自己的账号</li>
+									<li>饭耳收不到，也不存任何用户数据</li>
+									<li>免费、按现状提供，不保证录全、转准、分析对</li>
+									<li>录别人之前，先取得对方同意</li>
+								</ul>
+							</li>
+							<li>「可选，不勾也能正常用」：（可选）整理对话、找一句关照、写每天的总结时，把健康数据发给我的大模型。不勾，健康数据就只在饭耳里看，以后在设置里随时改。</li>
+							<li>「最后一步」：勾上「我已年满 18 周岁，已阅读并同意《使用条款与免责声明》和《隐私说明》」，点「同意并开始使用」。没勾全时点一下，会带你到没勾的那条。</li>
+							<li>最后一页向右滑到底，开始用饭耳。</li>
 						</ol>
-						<p>改完马上生效，以后重新整理也不会改回去。</p>
+						<p class="consent"><strong>录别人说话之前，先告诉对方、征得同意。</strong></p>
 					</div>
 					<div class="step-shots">
+						<Shot id="consent" />
+					</div>
+				</li>
+
+				<li id="setup" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">3</span>先录上</h2>
+						<p>进到「今天」以后会打开「先录上」：这 3 步做完，手表就开始录，别的设置等录上了再说。</p>
+						<ol class="substeps">
+							<li><strong>配对 Apple Watch</strong>：在 iPhone 的「Watch」App 里配对手表。</li>
+							<li>
+								<strong>手表上装好饭耳</strong>：
+								<ol class="inner">
+									<li>打开 iPhone 上的「Watch」App，点底部的「我的手表」。</li>
+									<li>往下滑到最底，点「App」。</li>
+									<li>在「可用 App」里找到饭耳，点右边的「安装」。</li>
+									<li>饭耳右边开始转圈就是在装，等它装完。</li>
+									<li>装好后，饭耳会出现在「已安装到 Apple Watch」里。</li>
+								</ol>
+								装好了手表上却找不到饭耳：在「Watch」App 里点饭耳，打开「在 Apple Watch 上显示 App」。
+							</li>
+							<li><strong>在手表上打开饭耳</strong>：打开就开始录。第一次会问能不能用麦克风，点「允许」。</li>
+						</ol>
+						<p class="hint">点「稍后再说」也没关系，今天页顶上能接着做。手表配好对却没装饭耳时，App 会整屏提醒「手表上还没装饭耳，现在录不了」，下面就是这几步。</p>
+						{/* 0.2.0 待合：L5（今天页点开始录音，录上后卡片飞到右上角变绿） */}
+						<p class="hint">也可以在今天页点开始录音：录上以后，那张卡片飞到右上角、变成绿色。</p>
+					</div>
+					<div class="step-shots">
+						<Shot id="setup" />
+					</div>
+				</li>
+
+				<li id="checklist" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">4</span>让饭耳更好用</h2>
+						<p>手机第一次看到手表在录，会弹「让饭耳更好用」：为了最好的体验，建议都设好；随时能关，下次在今天页或设置里接着设。每项旁边一个按钮，不想设的点「不需要」。</p>
+						<dl class="keys">
+							<dt>录得稳</dt>
+							<dd>
+								「停了自动接上」：手表被打断后，手机把它叫起来接着录。代价：会结束手表上正在进行的运动。手机得开着「后台 App 刷新」，低电量模式开着时叫不起手表；手表锁着（充电没戴）时也叫不起。叫不起时会发通知喊你点一下，所以别把它当成一定接得上。
+								<br />「加到常用表盘」：停了接得更快，抬腕就知道在不在录。
+								<br />「接不上时喊你」：手机叫不起手表时，马上发通知喊你点一下。
+							</dd>
+							<dt>录得安心</dt>
+							<dd>
+								「来消息照样震」：录音时手表收到消息照样震，不漏消息。震动声可能被录进去。
+								<br />「别人看不到你在录」：抬腕停在表盘，不跳出饭耳。
+							</dd>
+							<dt>整理得好</dt>
+							<dd>
+								「转文字更准、分出谁在说」：配好付费转写，字更准，还能分出说话人（第 5 步）。
+								<br />「自动整理成一段段对话」：配好大模型，录音自动整理成对话、抓出待办（第 6 步）。
+							</dd>
+						</dl>
+					</div>
+					<div class="step-shots">
+						<Shot id="checklist" />
+					</div>
+				</li>
+
+				<li id="asr" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">5</span>选转文字</h2>
+						<p>设置里点「转文字」。四种里选一种「设为正在用」：</p>
+						<dl class="keys">
+							<dt>火山引擎</dt>
+							<dd>云端，标「收费、效果最佳」，豆包录音文件识别模型 2.0 标准版，0.8 元/小时。分得清谁在说话。填一个「API Key」（新版控制台「API Key 管理」里的 Key）。</dd>
+							<dt>腾讯云</dt>
+							<dd>云端，录音文件识别 大模型 2.0。分得清谁在说话。填「SecretId」和「SecretKey」。单块录音超过 5MB 时手机先压小再送。</dd>
+							<dt>苹果自带转写</dt>
+							<dd>手机上转，不联网，免费，效果一般，不分说话人。iOS 26 以上才有，第一次用要下载苹果的中文模型，点「下载并设为正在用」。</dd>
+							<dt>SenseVoice</dt>
+							<dd>下载到手机（约 163MB），不联网，免费，效果一般，不分说话人。点「下载并设为正在用」，看得到进度，失败会写原因，能重试。</dd>
+						</dl>
+						<p>怎么选：想分清谁在说话、字准一点，用云端；先试试、不想花钱，用本机。没配好云端时，饭耳先用本机转；配好以后只用「正在用」那一家，连不上不会自动换别家。</p>
+						<ul>
+							<li>填好以后点「测试连接」：只送 1 秒静音过去，不上传你的录音。</li>
+							<li>不会开通，点「不会开通？」：把提示词复制给你自己的 AI，再点「粘贴 AI 给的结果」，一键填好。</li>
+							<li>火山引擎新开通的账号通常送 20 小时；开成「试用」的，到期会被收回、转写会停，开通正式版以后点「重试」补上。</li>
+						</ul>
+					</div>
+					<div class="step-shots">
+						<Shot id="asr" />
+					</div>
+				</li>
+
+				<li id="llm" class="step">
+					<h2><span class="step-no">6</span>设大模型</h2>
+					<p>大模型负责给每段对话起标题、写要点、认人、抓待办，还有小耳的一句话和每天的总结。设置里点「AI大模型」：</p>
+					<ol class="substeps">
+						<li>点「添加供应商」，在「国内」「海外」里选一家，或者选「自定义」。国内预设有 DeepSeek、通义千问、豆包、Kimi、智谱 GLM，海外有 OpenAI、Anthropic、OpenRouter；有中国站、国际站的在「站点」里选。</li>
+						<li>填「名字」「地址」「密钥」。地址写成 http 的会自动改成 https，没写协议的会补上。</li>
+						<li>点「添加模型」，写模型名。每个模型选一种「接口格式」：「Responses」「OpenAI 兼容」「Claude 兼容」。名字里带 claude 的默认选 Claude 兼容，gpt、o1、o3、o4 开头的默认选 Responses，其余默认 OpenAI 兼容，选错了可以改。</li>
+						<li>点「测试连接」，通了点「保存」，再「设为正在用」。测不通不会换过去。</li>
+					</ol>
+					<p class="hint">也可以选「iPhone 自带模型」：只出标题和要点，不抓承诺、不认人，要机型和 Apple 智能都满足。想要待办和认人，还是建议用第三方大模型。</p>
+				</li>
+
+				<li id="daily" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">7</span>每天怎么用</h2>
+						{/* 0.2.0 待合：L10（底部页签「今天 - 待办 - 小耳 - 设置」） */}
+						<p>底部四个页签：「今天」「待办」「小耳」「设置」。</p>
+						<h3>今天</h3>
+						<ul>
+							<li>时间条：彩色是对话，黑块是没录到，斜纹是没转成文字，白格是按计划不录。</li>
+							<li>右上角的手表按钮直接写状态，绿点「录音正常」；红的就是要你处理。被打断的记录在「中断 N」里。</li>
+							<li>顶上「N 件今天要做」，点「去处理」到待办。没转成文字、整理失败的，点「全部重试」。</li>
+							<li>搜索：搜人名、事情，或者「上周三」这样的日子，点一下跳到那一句。</li>
+						</ul>
+						<h3>待办</h3>
+						<ul>
+							{/* 0.2.0 待合：L4（右滑「做完了 / 不用做」、左滑「要做 · 稍后提醒」、第一次进待办的介绍） */}
+							<li>第一次进来先看一遍怎么滑。右滑是「做完了 / 不用做」，左滑是「要做 · 稍后提醒」，滑错了点撤销。</li>
+							<li>点卡片听这一句。想补一句，点「补充」，补完点「存下」，这张就算还要做。</li>
+							<li>右上角「清单」看全部：「我要做的」「等别人的」，圆圈点一下就是做完了。</li>
+						</ul>
+						<h3>小耳</h3>
+						<ul>
+							{/* 0.2.0 待合：L10（饭耳说话时叫「小耳」） */}
+							<li>小耳偶尔跟你说一句你没留意的事，睡前写好当天的总结。滑条上是替你写好的回话，滑到底就收下。</li>
+							<li>「这个声音是谁」「可能听错的字」这类小问题收在这一页顶上，答一下，下次认得更准。</li>
+						</ul>
+						<h3>改「这句是谁说的」</h3>
+						<ul>
+							{/* 0.2.0 待合：L3（标记面板边打边搜、默认整场一起标） */}
+							<li>点开一段对话，顶上「说话人」每人一行：「听」「跳到」「标记」。认错成你的，点「不是我」。</li>
+							<li>点「标记」，边打字边搜名字，默认把这一场里这个声音说的都标上。改完那一段自动重新整理，你改过的一直算数。</li>
+						</ul>
+						<h3>点原话就听</h3>
+						<ul>
+							{/* 0.2.0 待合：L8（所有引用说话的地方都能点了听） */}
+							<li>对话里点一句，只放这一句；点「播放这一场」从头放。引用了原话的地方，点一下就能听。</li>
+							<li>录音按设置删掉以后，写「录音已删，只剩文字」。</li>
+						</ul>
+					</div>
+					<div class="step-shots step-shots-two">
+						<Shot id="todoDeck" />
 						<Shot id="conversation" />
 					</div>
+				</li>
+
+				<li id="export" class="step has-shots">
+					<div class="step-text">
+						<h2><span class="step-no">8</span>导出和分享</h2>
+						<ul>
+							<li>设置首页、对话页右上角都有「导出」；长按一句也能「导出这一场…」。</li>
+							<li>选用途：「备份全部」「给 AI 或导进笔记」「发纪要」；或者在「自定义导出」里自己勾范围、内容、格式和录音。</li>
+							<li>文件只在手机上生成。可以关掉这一页，导出在后台接着做，好了会告诉你。点「分享…」或「存到「文件」」。</li>
+							<li>想发图：一句关照、每天的总结、一场对话、一条待办、一句原话都能「做成图」，挑版式、比例、配色，默认隐去别人的名字；「存到相册」只要「仅添加照片」的权限。</li>
+						</ul>
+						<p class="hint">导出的文件和分享图里有别人的声音和话，发出去前先征得对方同意。</p>
+					</div>
+					<div class="step-shots">
+						<Shot id="share" />
+					</div>
+				</li>
+
+				<li id="delete" class="step">
+					<h2><span class="step-no">9</span>删除数据</h2>
+					<dl class="keys">
+						<dt>录音自动删</dt>
+						<dd>设置里「原始录音」：7、30、90 天，最多 5、10、20、50 GB（满了先删最早的），或一直留着，默认 30 天。只删已经转成文字的录音，在下次打开饭耳时清理；文字、整理、待办、声纹都留着。</dd>
+						<dt>删一段的录音</dt>
+						<dd>对话页最下面「删除部分或整段」→「删除这一段的录音」，只删声音。</dd>
+						<dt>彻底删除</dt>
+						<dd>同一处「彻底删除这一段」：录音、转写、整理、待办卡、声纹样本、搜索索引一起删，删了找不回，要确认三次。别人要求你删掉他的话时用它。</dd>
+						<dt>删认出的声音</dt>
+						<dd>设置里「认出的声音」，点进去删除。</dd>
+						{/* 0.2.0 待合：L1（设置页分块后「高级」挪到哪，核对路径） */}
+						{/* 0.2.0 待合：L7（「回到第一次打开」把模型配置和密钥也清干净） */}
+						<dt>清空数据</dt>
+						<dd>设置 → 高级 → 清空数据，要确认两次，建议先在「导出」里「备份全部」。「清空录音和历史」「清空录音和历史，声音留着」，或者「回到第一次打开」：连设置、密钥和须知同意一起删，像刚装好一样。服务商已经收到的、iCloud 整机备份里的旧内容，这里清不掉。</dd>
+						<dt>删 App</dt>
+						<dd>手表和手机上存的一起删。密钥存在钥匙串里，删 App 以后可能还留着；想一起删，先「回到第一次打开」再删 App。</dd>
+					</dl>
+					<p class="hint">饭耳没有服务器，开发者拿不到你的数据。只有你自己在设置里「给开发者」导出、发过来的那一份才收得到，要删发邮件到 ceo@cnfandao.com。</p>
 				</li>
 			</ol>
 		</div>
@@ -192,8 +303,18 @@ const steps = [
 	}
 
 	.step ul,
-	.substeps {
+	.substeps,
+	.inner {
 		padding-left: 1.3em;
+	}
+
+	.inner {
+		margin: var(--s-2) 0;
+		list-style: decimal;
+	}
+
+	.step ul ul {
+		margin-top: var(--s-2);
 	}
 
 	/* 步骤本身是 <ol>，里面的 <ul> 默认会变成空心圈，这里写回实心点 */
@@ -232,10 +353,17 @@ const steps = [
 		color: var(--c-paper);
 	}
 
+	/* 名字和说明：手机上上下排，宽一点的屏幕左右排 */
 	.keys {
 		display: grid;
-		grid-template-columns: auto minmax(0, 1fr);
-		gap: var(--s-2) var(--s-4);
+		gap: var(--s-1) var(--s-4);
+	}
+
+	@media (min-width: 600px) {
+		.keys {
+			grid-template-columns: auto minmax(0, 1fr);
+			row-gap: var(--s-2);
+		}
 	}
 
 	.keys dt {
@@ -248,19 +376,30 @@ const steps = [
 		color: var(--c-ink-2);
 	}
 
+	.keys dd + dt {
+		margin-top: var(--s-3);
+	}
+
+	@media (min-width: 600px) {
+		.keys dd + dt {
+			margin-top: 0;
+		}
+	}
+
+	.step-shots-two {
+		display: flex;
+		gap: var(--s-4);
+		width: min(560px, 100%);
+	}
+
+	.step-shots-two > :global(*) {
+		flex: 1;
+		min-width: 0;
+	}
+
 	.step-shots {
 		width: min(300px, 76%);
 		margin: var(--s-6) auto 0;
-	}
-
-	.watch-pair {
-		display: flex;
-		gap: var(--s-4);
-		width: min(420px, 100%);
-	}
-
-	.watch-pair > :global(*) {
-		flex: 1;
 	}
 
 	.shots-note {
@@ -297,10 +436,9 @@ const steps = [
 			align-items: start;
 		}
 
-		.step.has-shots .watch-pair {
+		.step.has-shots .step-shots-two {
 			flex-direction: column;
-			width: 200px;
-			justify-self: center;
+			gap: var(--s-6);
 		}
 
 		.step-shots {

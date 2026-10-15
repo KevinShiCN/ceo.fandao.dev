@@ -1,9 +1,9 @@
 ---
-// 手机上的一屏讲一件事：上面写这是 App 里哪一屏，标题、一句话、细节；旁边是这一屏的真机截图。
+// 手机上的一个页签讲一件事：上面写这是 App 底部哪个页签，标题、一句话、细节；旁边是这一屏的真机截图。
 // flip 让截图换到左边，几节交替着排。手机上一律字在上、图在下。
 interface Props {
 	id: string;
-	/** App 里这一屏叫什么，跟截图下面那行字一样 */
+	/** 这一节讲的是 App 底部哪个页签 */
 	screen: string;
 	title: string;
 	lead: string;
@@ -15,7 +15,7 @@ const { id, screen, title, lead, flip = false } = Astro.props;
 
 <section class:list={['chapter', flip && 'chapter-flip']} aria-labelledby={id}>
 	<div class="chapter-text">
-		<p class="chapter-screen">App 里的「{screen}」</p>
+		<p class="chapter-screen">底部页签「{screen}」</p>
 		<h3 id={id}>{title}</h3>
 		<p class="chapter-lead">{lead}</p>
 		<slot />

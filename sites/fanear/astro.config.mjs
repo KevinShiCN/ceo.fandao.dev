@@ -10,6 +10,7 @@ import { defineConfig } from 'astro/config';
 //   SITE_URL=https://example.com SITE_BASE=/some/path/ npm run fanear:build -- --outDir <目录>
 // 几个构建同时跑（比如几版首页一起出预览）时，FANEAR_CACHE_DIR 给每个构建单独的缓存目录，免得互相覆盖
 // （相对 sites/fanear，如 FANEAR_CACHE_DIR=.cache-b）。
+// 首页首屏两版（10-15 待本人挑）：FANEAR_HOME=A（默认，「真机」）或 B（「先认识我」），见 src/pages/index.astro。
 const SITE_URL = process.env.SITE_URL ?? 'https://fanear.fandao.dev';
 const SITE_BASE = process.env.SITE_BASE ?? '/';
 if (!SITE_BASE.startsWith('/') || !SITE_BASE.endsWith('/')) {

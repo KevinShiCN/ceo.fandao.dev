@@ -1,0 +1,349 @@
+---
+// 「这一天」：用 App 自带的演示数据，照今天页时间条的画法，画一条大号的一天（数据和出处在 src/lib/day.ts）。
+// 时间条是 HTML 方块按钟点算出来的位置和宽度，不是图片。下面列这一天里的几处时刻：一场对话找出一条承诺、小耳的一句话……
+// 电脑上（≥1024、支持滚动驱动动画、没设减弱动态效果）这一节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，
+// 画到哪个时刻，哪个时刻就亮起来（styles/scroll-motion.css 第 5 处）；别的情况一次全画好、全亮着。
+import { AXIS, LEGEND, MOMENTS, position, SEGMENTS, TICKS, type Fill } from '../../lib/day';
+
+const pct = (n: number) => `${Math.round(n * 10000) / 100}%`;
+const segments = SEGMENTS.map((s) => {
+	const start = position(s.from);
+	return { ...s, left: pct(start), width: pct(position(s.to) - start) };
+});
+const moments = MOMENTS.map((m, i) => ({ ...m, p: position(m.at), row: i % 2 }));
+const summary = `演示数据里的一天，${AXIS.from} 点到 ${AXIS.to} 点：${moments.map((m) => `${m.at} ${m.kind}`).join('；')}。`;
+const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
+---
+
+<section class="day" aria-labelledby="h-day">
+	<div class="day-track">
+		<div class="day-stage">
+			<div class="day-head">
+				<h2 id="h-day">这一天</h2>
+				<p class="day-lead">手表录了一整天，手机上就是这样一条。往下看它在这一天里找出了什么。</p>
+			</div>
+
+			<figure class="ribbon-figure">
+				<div class="ribbon-wrap" role="img" aria-label={summary}>
+					<div class="ribbon-marks" aria-hidden="true">
+						{
+							moments.map((m) => (
+								<span class:list={['mark', `mark-row-${m.row}`]} style={`--x:${pct(m.p)};--p:${m.p}`}>
+									<span class="mark-time">{m.at}</span>
+								</span>
+							))
+						}
+					</div>
+					<div class="ribbon">
+						<div class="ribbon-fill">
+							{segments.map((s) => <span class:list={['seg', `seg-${s.fill}`]} style={`left:${s.left};width:${s.width}`} />)}
+						</div>
+						<span class="ribbon-cursor" aria-hidden="true" />
+					</div>
+					<div class="ribbon-ticks" aria-hidden="true">
+						{TICKS.map((h) => <span style={`--x:${pct((h - AXIS.from) / (AXIS.to - AXIS.from))}`}>{h}点</span>)}
+					</div>
+				</div>
+				<figcaption>
+					<ul class="ribbon-key">
+						{
+							LEGEND.map((item) => (
+								<li>
+									<span class={swatch(item.fill)} aria-hidden="true" />
+									{item.label}
+								</li>
+							))
+						}
+					</ul>
+					<p class="ribbon-note">演示数据：人名、对话都是 App 里自带的演示，不是真的录音。</p>
+				</figcaption>
+			</figure>
+
+			<ol class="moments">
+				{
+					moments.map((m) => (
+						<li style={`--p:${m.p}`}>
+							<p class="moment-head">
+								<time>{m.at}</time>
+								<span>{m.kind}</span>
+							</p>
+							{m.quote && <p class="moment-quote">「{m.quote}」</p>}
+							<p class="moment-then">{m.then}</p>
+						</li>
+					))
+				}
+			</ol>
+		</div>
+	</div>
+</section>
+
+<style>
+	.day {
+		padding-top: var(--s-8);
+	}
+
+	h2 {
+		font-size: 26px;
+		font-weight: 800;
+	}
+
+	.day-lead {
+		max-width: 32em;
+		margin-top: var(--s-3);
+		font-size: 18px;
+		line-height: 1.65;
+	}
+
+	.ribbon-figure {
+		margin: var(--s-6) 0 0;
+	}
+
+	/* 时间条：整条的底是线色，上面按钟点摆方块（同 App DayRibbonView：圆角 4、对话按人上色） */
+	.ribbon-wrap {
+		position: relative;
+		container-type: inline-size;
+	}
+
+	.ribbon {
+		position: relative;
+		height: 28px;
+		border-radius: var(--r-tag);
+		background: var(--c-line);
+		overflow: hidden;
+	}
+
+	.ribbon-fill {
+		position: absolute;
+		inset: 0;
+	}
+
+	.seg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		min-width: 3px;
+	}
+
+	.seg-me,
+	.swatch-me {
+		background: var(--c-me);
+	}
+
+	.seg-p1 {
+		background: var(--c-p1);
+	}
+
+	.seg-p2 {
+		background: var(--c-p2);
+	}
+
+	.seg-p3 {
+		background: var(--c-p3);
+	}
+
+	.seg-gap,
+	.swatch-gap {
+		background: var(--c-ink);
+	}
+
+	.seg-fail,
+	.swatch-fail {
+		background: var(--hatch);
+	}
+
+	.seg-planned,
+	.swatch-planned {
+		background: var(--c-paper);
+		box-shadow: inset 0 0 0 1px var(--c-ink-3);
+	}
+
+	.seg-deleted,
+	.swatch-deleted {
+		background: var(--hatch-deleted);
+	}
+
+	/* 「对话」的图例：一半我蓝、一半一号橙（同 App RibbonKey） */
+	.swatch-talk {
+		background: linear-gradient(90deg, var(--c-me) 0 50%, var(--c-p1) 50% 100%);
+	}
+
+	/* 往下滑时画到哪儿的那条竖线：平时不显示 */
+	.ribbon-cursor {
+		display: none;
+	}
+
+	.ribbon-ticks {
+		position: relative;
+		height: 22px;
+		margin-top: var(--s-1);
+	}
+
+	.ribbon-ticks span {
+		position: absolute;
+		left: var(--x);
+		translate: -50% 0;
+		color: var(--c-ink-3);
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.ribbon-ticks span:first-child {
+		translate: 0 0;
+	}
+
+	.ribbon-ticks span:last-child {
+		translate: -100% 0;
+	}
+
+	/* 时刻：时间条上方一根细线；手机上只有线，时间在下面的列表里 */
+	.ribbon-marks {
+		position: relative;
+		height: 12px;
+	}
+
+	.mark {
+		position: absolute;
+		bottom: 0;
+		left: var(--x);
+		width: 2px;
+		height: 12px;
+		background: var(--c-ink);
+		translate: -1px 0;
+	}
+
+	.mark-time {
+		display: none;
+	}
+
+	figcaption {
+		margin-top: var(--s-3);
+	}
+
+	.ribbon-key {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-1) var(--s-4);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		color: var(--c-ink-2);
+		font-size: 14px;
+	}
+
+	.ribbon-key li {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.swatch {
+		display: inline-block;
+		width: 16px;
+		height: 11px;
+		border-radius: 2px;
+	}
+
+	.ribbon-note {
+		margin-top: var(--s-2);
+		color: var(--c-ink-3);
+		font-size: 14px;
+	}
+
+	/* 这一天的几处时刻：按钟点排，所以用有序列表；手机上一条一行 */
+	.moments {
+		display: grid;
+		gap: 0;
+		margin: var(--s-6) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.moments li {
+		padding: var(--s-4) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.moment-head {
+		display: flex;
+		align-items: baseline;
+		gap: var(--s-3);
+		font-size: 17px;
+		font-weight: 700;
+	}
+
+	.moment-head time {
+		min-width: 3em;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.moment-quote {
+		margin-top: var(--s-1);
+		color: var(--c-ink);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	.moment-then {
+		margin-top: var(--s-1);
+		color: var(--c-ink-2);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	@media (min-width: 768px) {
+		.day {
+			padding-top: var(--s-9);
+		}
+
+		h2 {
+			font-size: 34px;
+		}
+
+		.day-lead {
+			font-size: 20px;
+		}
+
+		.ribbon {
+			height: 44px;
+		}
+
+		/* 电脑、平板：时刻的钟点写在线上头，挨得近的两个错开一行 */
+		.ribbon-marks {
+			height: 56px;
+		}
+
+		.mark {
+			height: 16px;
+		}
+
+		.mark-row-1 {
+			height: 36px;
+		}
+
+		.mark-time {
+			display: block;
+			position: absolute;
+			bottom: 100%;
+			left: 0;
+			translate: -50% -2px;
+			font-size: 13px;
+			font-weight: 700;
+			font-variant-numeric: tabular-nums;
+			white-space: nowrap;
+		}
+
+		.moments {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			column-gap: var(--s-6);
+		}
+
+		.moment-quote {
+			font-size: 15px;
+		}
+
+		.moment-then {
+			font-size: 14px;
+		}
+	}
+</style>

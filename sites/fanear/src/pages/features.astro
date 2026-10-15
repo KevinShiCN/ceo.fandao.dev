@@ -1,55 +1,65 @@
 ---
-// 功能：一条一节，左边文字、右边截图；同一张截图只放第一次，后面几节不重复。
+// 功能：按 0.2.0 的页签和用途分九组（手表、今天、待办、小耳、对话和认人、搜索、导出和分享、转文字和大模型、数据和隐私），
+// 一组一节，左边文字、右边这一组的截图。内容跟首页同一份（src/lib/features.ts）。
 import PageIntro from '../components/PageIntro.astro';
 import Shot from '../components/Shot.astro';
 import Base from '../layouts/Base.astro';
-import { FEATURES } from '../lib/features';
-import { SHOTS_NOTE, type ShotId } from '../lib/shots';
+import { DATA, GROUPS } from '../lib/features';
+import { SHOTS, SHOTS_NOTE } from '../lib/shots';
 import { STATUS } from '../lib/site';
 import { withBase } from '../lib/url';
 import '../styles/page-motion.css';
-
-const shown = new Set<ShotId>();
-const rows = FEATURES.map((feature) => {
-	const shot = feature.shot && !shown.has(feature.shot) ? feature.shot : undefined;
-	if (shot) shown.add(shot);
-	return { ...feature, shot };
-});
 ---
 
-<Base title="功能" description="饭耳能做什么：手表全天录，转成文字分清谁在说，整理对话，挑出答应的事等你确认，心率和对话对上。">
+<Base title="功能" description="饭耳能做什么：手表全天录，今天页一眼看完，待办滑卡，小耳的一句话和每天的总结，认人、搜索、导出分享，转文字和大模型用你自己选的，数据留在你手机上。">
 	<main id="main" class="wrap">
 		<PageIntro title="功能">
-			<p>下面写的是 0.1.0 已经做进去的功能。这一版还在{STATUS.label}，{STATUS.text}</p>
+			<p>按 App 的页签和用途分组，写的是 0.2.0（准备送审的版本）里的样子。饭耳{STATUS.label}，{STATUS.text}</p>
 			<p>{SHOTS_NOTE}想知道怎么一步步用起来，看<a href={withBase('/guide/')}>使用说明</a>。</p>
 		</PageIntro>
 
+		<nav class="jump" aria-label="功能分组">
+			<ul>
+				{GROUPS.map((g) => <li><a href={`#${g.id}`}>{g.title}</a></li>)}
+			</ul>
+		</nav>
+
 		{
-			rows.map((feature) => (
-				<section id={feature.id} class:list={['feature', feature.shot && 'has-shot', feature.shot === 'watchRecording' && 'has-watch']} aria-labelledby={`h-${feature.id}`}>
-					<div class="feature-text">
-						<h2 id={`h-${feature.id}`}>{feature.title}</h2>
-						<p class="feature-lead">{feature.lead}</p>
-						<ul>
-							{feature.points.map((point) => (
-								<li>{point}</li>
-							))}
-						</ul>
-					</div>
-					{feature.shot === 'watchRecording' ? (
-						<div class="feature-shots watch-pair">
-							<Shot id="watchRecording" />
-							<Shot id="watchInterrupted" />
+			GROUPS.map((g) => {
+				const watch = g.shots.length > 0 && SHOTS[g.shots[0]].device === 'watch';
+				return (
+					<section id={g.id} class:list={['feature', g.shots.length > 0 && 'has-shot', watch && 'has-watch', g.shots.length > 1 && !watch && 'has-two']} aria-labelledby={`h-${g.id}`}>
+						<div class="feature-text">
+							<h2 id={`h-${g.id}`}>{g.title}</h2>
+							<p class="feature-lead">{g.lead}</p>
+							{g.id === 'data' ? (
+								<dl class="facts">
+									{DATA.map((fact) => (
+										<div>
+											<dt>{fact.title}</dt>
+											<dd>{fact.text}</dd>
+										</div>
+									))}
+								</dl>
+							) : (
+								<ul>
+									{g.points.map((point) => (
+										<li>{point.text}</li>
+									))}
+								</ul>
+							)}
+							{g.id === 'data' && <p class="feature-more">全文看<a href={withBase('/privacy/')}>隐私说明</a>。</p>}
 						</div>
-					) : (
-						feature.shot && (
-							<div class="feature-shots">
-								<Shot id={feature.shot} />
+						{g.shots.length > 0 && (
+							<div class:list={['feature-shots', watch && 'watch-row']}>
+								{g.shots.map((id) => (
+									<Shot id={id} sizes={watch ? '(min-width: 900px) 150px, 30vw' : '(min-width: 900px) 260px, 70vw'} />
+								))}
 							</div>
-						)
-					)}
-				</section>
-			))
+						)}
+					</section>
+				);
+			})
 		}
 	</main>
 </Base>
@@ -61,9 +71,40 @@ const rows = FEATURES.map((feature) => {
 		padding: 0 var(--gutter);
 	}
 
+	/* 九组的目录：一行一行折，点了跳到那一组 */
+	.jump ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-2);
+		margin: 0 0 var(--s-6);
+		padding: 0;
+		list-style: none;
+	}
+
+	.jump a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 40px;
+		padding: 0 var(--s-3);
+		border: 1px solid var(--c-line);
+		border-radius: var(--r-tag);
+		color: var(--c-ink);
+		font-size: 15px;
+		text-decoration: none;
+	}
+
+	.jump a:hover {
+		border-color: var(--c-ink);
+	}
+
+	.jump a:active {
+		background: var(--c-wash);
+	}
+
 	.feature {
 		padding: var(--s-7) 0;
 		border-top: 1px solid var(--c-line);
+		scroll-margin-top: var(--s-4);
 	}
 
 	.feature-text {
@@ -86,7 +127,7 @@ const rows = FEATURES.map((feature) => {
 		color: var(--c-ink-2);
 	}
 
-	li + li {
+	.feature-text li + li {
 		margin-top: var(--s-2);
 	}
 
@@ -94,34 +135,71 @@ const rows = FEATURES.map((feature) => {
 		color: var(--c-ink-3);
 	}
 
+	.facts {
+		margin: var(--s-4) 0 0;
+	}
+
+	.facts div {
+		padding: var(--s-3) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.facts dt {
+		font-weight: 700;
+	}
+
+	.facts dd {
+		margin: var(--s-1) 0 0;
+		color: var(--c-ink-2);
+		font-size: 16px;
+		line-height: 1.6;
+	}
+
+	.feature-more {
+		margin-top: var(--s-4);
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
 	.feature-shots {
+		display: flex;
+		justify-content: center;
+		gap: var(--s-4);
 		width: min(300px, 76%);
 		margin: var(--s-6) auto 0;
 	}
 
-	.watch-pair {
-		display: flex;
-		gap: var(--s-4);
-		width: min(440px, 100%);
+	.feature.has-two .feature-shots {
+		width: min(540px, 100%);
 	}
 
-	.watch-pair > :global(*) {
+	.feature-shots > :global(*) {
 		flex: 1;
+		min-width: 0;
+	}
+
+	.watch-row {
+		width: min(480px, 100%);
 	}
 
 	@media (min-width: 900px) {
 		.feature.has-shot {
 			display: grid;
-			grid-template-columns: minmax(0, 1fr) 320px;
+			grid-template-columns: minmax(0, 1fr) 280px;
 			column-gap: var(--s-8);
 			align-items: start;
 		}
 
-		.feature.has-watch {
-			grid-template-columns: minmax(0, 1fr) 440px;
+		.feature.has-two {
+			grid-template-columns: minmax(0, 1fr) 500px;
 		}
 
-		.feature-shots {
+		.feature.has-watch {
+			grid-template-columns: minmax(0, 1fr) 480px;
+		}
+
+		.feature-shots,
+		.feature.has-two .feature-shots {
 			width: 100%;
 			margin: 0;
 		}

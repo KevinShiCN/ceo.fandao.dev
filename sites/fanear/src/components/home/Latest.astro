@@ -1,8 +1,8 @@
 ---
 // 最近更新：最新一个版本的前三条，再链到更新记录页。取数跟第 A 版一样。
-import raw from '../../../data/CHANGELOG.md?raw';
-import { parseChangelog } from '../../../lib/changelog.mjs';
-import { withBase } from '../../../lib/url';
+import raw from '../../data/CHANGELOG.md?raw';
+import { parseChangelog } from '../../lib/changelog.mjs';
+import { withBase } from '../../lib/url';
 
 const log = parseChangelog(raw);
 const latest = log.unreleased[0] ?? log.released[0];

@@ -18,6 +18,8 @@
 	--c-watch-case: #1b1f27; /* 手表外壳 */
 	--c-shadow: rgba(18, 24, 38, 0.18); /* 截图的投影，深墨 18% */
 	--c-scrim: rgba(18, 24, 38, 0.06); /* 卡片悬停时的一层薄底 */
+	--c-photo-scrim: rgba(18, 24, 38, 0.6); /* 照片上压字时，只垫在那几行字底下的暗色（同 App 介绍页，深墨 60%） */
+	--c-paper-veil: rgba(255, 255, 255, 0.85); /* 照片左上角 LOGO 底下垫的半透明纸色（同 App 介绍页） */
 
 	/* 字：用系统字，iPhone 上就是 App 里那套苹方 / SF */
 	--font: -apple-system, 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
@@ -45,6 +47,8 @@
 
 	/* 时间条上「没转成文字」的斜纹，跟 App 里的画法一样 */
 	--hatch: repeating-linear-gradient(135deg, var(--c-ink) 0 2px, var(--c-paper) 2px 4px);
+	/* 「删掉了」：浅灰底上灰色细斜纹，方向和「没转成文字」相反（App 里的 DeletedSwatch） */
+	--hatch-deleted: repeating-linear-gradient(45deg, var(--c-ink-3) 0 1px, var(--c-wash) 1px 4px);
 }
 
 @media (min-width: 768px) {

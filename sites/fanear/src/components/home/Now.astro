@@ -1,0 +1,70 @@
+---
+// 现在能不能用：照实写内测中、还没对外发布、没有下载链接；去哪等消息。下面接最近更新（Latest.astro，数据由 CHANGELOG 生成）。
+import { STATUS } from '../../lib/site';
+import { withBase } from '../../lib/url';
+---
+
+<section class="now" aria-labelledby="h-now">
+	<h2 id="h-now">现在能不能用</h2>
+	<div class="now-body">
+		<p class="now-status"><strong>{STATUS.label}</strong>{STATUS.text}</p>
+		<p>{STATUS.next}</p>
+		<p>{STATUS.follow}</p>
+		<p>装好以后怎么一步步用起来，看<a href={withBase('/guide/')}>使用说明</a>。</p>
+	</div>
+</section>
+
+<style>
+	.now {
+		padding-top: var(--s-8);
+	}
+
+	h2 {
+		font-size: 26px;
+		font-weight: 800;
+	}
+
+	.now-body {
+		max-width: var(--measure);
+		margin-top: var(--s-4);
+	}
+
+	.now-body p {
+		color: var(--c-ink-2);
+		font-size: 17px;
+		line-height: 1.7;
+	}
+
+	.now-body p + p {
+		margin-top: var(--s-2);
+	}
+
+	.now-body .now-status {
+		color: var(--c-ink);
+		font-size: 20px;
+	}
+
+	.now-status strong {
+		display: inline-block;
+		margin-right: var(--s-3);
+		color: var(--c-ink);
+		font-weight: 800;
+	}
+
+	@media (min-width: 768px) {
+		.now {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+			gap: var(--s-8);
+			padding-top: var(--s-9);
+		}
+
+		h2 {
+			font-size: 34px;
+		}
+
+		.now-body {
+			margin-top: 0;
+		}
+	}
+</style>

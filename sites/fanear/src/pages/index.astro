@@ -1,9 +1,13 @@
 ---
-// 首页。10-13 本人从三版里选了 C 版「真机」（A「一天」、B「一句话」两版留在提交 fad0682）。
-import HomeC from '../components/home/HomeC.astro';
+// 首页。首屏两版待本人挑（10-15）：构建时环境变量 FANEAR_HOME=A（默认，「真机」）或 B（「先认识我」），首屏以下相同。
+// 本人选定以后，把没选的那版和这个开关一起删掉。
+import Home from '../components/home/Home.astro';
 import Base from '../layouts/Base.astro';
+
+const hero = process.env.FANEAR_HOME ?? 'A';
+if (hero !== 'A' && hero !== 'B') throw new Error(`FANEAR_HOME 只能是 A 或 B，现在是「${hero}」`);
 ---
 
 <Base>
-	<HomeC />
+	<Home hero={hero} />
 </Base>

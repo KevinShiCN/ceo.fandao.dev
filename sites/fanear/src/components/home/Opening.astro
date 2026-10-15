@@ -1,0 +1,65 @@
+---
+// 「我」开头的两句：ADHD 那段（前半句加粗）和心愿。心愿是全页最显眼的一句。
+// 首屏 A 放在「我」这一节的开头（Intro.astro）；首屏 B 放在照片旁边/下面（HeroB.astro），「我」这一节就从四行开始。
+// App 里心愿左边有一道主色竖条；官网不用「竖条 + 圆角」的框，改成句首一个「我」的蓝色小方块（App 里每句话前面标说话人的那种）。
+import { INTRO } from '../../lib/why';
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['opening', className]}>
+	<p class="opening-origin"><strong>{INTRO.origin.lead}</strong>{INTRO.origin.body}</p>
+	<p class="opening-wish"><span class="who who-me" aria-hidden="true"></span>{INTRO.wish}</p>
+</div>
+
+<style>
+	.opening-origin {
+		max-width: 30em;
+		font-size: 18px;
+		line-height: 1.75;
+	}
+
+	.opening-origin strong {
+		font-weight: 700;
+	}
+
+	.opening-wish {
+		max-width: 14em;
+		margin-top: var(--s-6);
+		font-size: 28px;
+		font-weight: 800;
+		line-height: 1.4;
+		letter-spacing: 0.01em;
+		text-wrap: pretty;
+	}
+
+	/* 「我」的小方块：跟字一样高的一格，挨着第一个字 */
+	.opening-wish .who {
+		width: 0.62em;
+		height: 0.62em;
+		margin-right: 0.3em;
+		vertical-align: 0.06em;
+	}
+
+	@media (min-width: 768px) {
+		.opening-origin {
+			font-size: 20px;
+		}
+
+		.opening-wish {
+			margin-top: var(--s-7);
+			font-size: 44px;
+			line-height: 1.32;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		.opening-wish {
+			font-size: 52px;
+		}
+	}
+</style>
