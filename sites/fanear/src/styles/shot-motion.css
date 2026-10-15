@@ -5,7 +5,7 @@
    系统设了「减弱动态效果」完全不出来。
    位置都按截图上的点写：--u 是一点在页面上多宽（这部手机的屏幕宽 = 440 点），跟着手机宽度缩放。
    动画一律分开写（animation-name、animation-duration……），不用 animation 简写（同 scroll-motion.css 里写的原因）。
-   拖动距离、滑条进度、往上挪多少各用一个登记过的变量（@property）做动画，颜色、倾斜、透明度都由它算出来，
+   拖动距离、滑条进度、往上挪多少、第一张升回来多少各用一个登记过的变量（@property）做动画，颜色、倾斜、透明度都由它算出来，
    和 App 里按拖动距离算的公式一样。 */
 
 @property --sm-x {
@@ -15,6 +15,12 @@
 }
 
 @property --sm-p {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 0;
+}
+
+@property --sm-r {
 	syntax: '<number>';
 	inherits: true;
 	initial-value: 0;
@@ -93,15 +99,31 @@
 
 /* ---------- 待办：滑卡 ---------- */
 
-/* 一轮 7.6 秒：0.4 秒后手指按上去，往左拖 105 点（1.1 秒）停 0.6 秒，再往右拖过去（1.4 秒）停 0.6 秒，
-   0.3 秒飞走，下一张已经长回原尺寸、边框变黑顶上来；停 1.85 秒，0.4 秒淡回截图原样，再停 0.6 秒。
-   淡回去这一下不是「飞走的又回来了」：是一轮放完、从头再放 */
-.sm-todo.is-playing {
-	animation-name: sm-todo-x, sm-end-todo;
-	animation-duration: 7.6s;
+/* 两轮交替，每轮 4.2 秒，都从静止开始：0.3 秒后手指按上去，拖 105 点（1.1 秒）停 0.6 秒，0.3 秒飞走
+   （第一轮往左「要做 · 稍后提醒」，第二轮往右「做完了 / 不用做 · 不再提醒」），两轮露出来的都是同一张下一张，跟 App 一样；
+   下一张已经长回原尺寸、边框变黑顶在最上面，停 0.75 秒。回到起始分两步，卡片区域任何时候只有一张卡的字：
+   下一张 0.3 秒淡出成空牌堆（纸白底和底下露出的两道边），第一张再 0.3 秒从牌堆里升上来（缩小 5%、下移 12 点 → 原位）。 */
+.sm-todo.is-playing,
+.sm-todo.is-playing .sm-a,
+.sm-todo.is-playing .sm-b,
+.sm-todo.is-playing .sm-touch,
+.sm-todo.is-playing .sm-b-edge {
+	animation-duration: 8.4s;
 	animation-timing-function: linear;
 	animation-iteration-count: infinite;
 	animation-fill-mode: both;
+}
+
+.sm-todo.is-playing {
+	animation-name: sm-todo-x, sm-todo-rise;
+}
+
+.sm-todo.is-playing .sm-a {
+	animation-name: sm-todo-a;
+}
+
+.sm-todo.is-playing .sm-b {
+	animation-name: sm-todo-b;
 }
 
 /* 拖到哪（0…1）：横着拖 96 点算过线（TodoBoard horizontalCommit） */
@@ -116,9 +138,11 @@
 	transform-origin: 50% 100%;
 }
 
-/* 最上面那张跟着手走，倾斜 = 横移 / 20 度，最多 12 度，以卡底为轴（TodoDeck.tilt） */
+/* 最上面那张跟着手走，倾斜 = 横移 / 20 度，最多 12 度，以卡底为轴（TodoDeck.tilt）；
+   回到起始时从牌堆里升上来：--sm-r 从 1 到 0，跟后面那张的缩小、下移一样 */
 .sm-todo .sm-a {
-	transform: translateX(calc(var(--sm-x) * var(--u))) rotate(calc(clamp(-12, var(--sm-x) / 20, 12) * 1deg));
+	transform: translateX(calc(var(--sm-x) * var(--u))) rotate(calc(clamp(-12, var(--sm-x) / 20, 12) * 1deg))
+		translateY(calc(12 * var(--sm-r) * var(--u))) scale(calc(1 - 0.05 * var(--sm-r)));
 }
 
 /* 后面那张：平时缩小 5%、下移 12 点（只露底边）；上面那张拖得越远越接近原尺寸（TodoDeckPage.stack） */
@@ -126,21 +150,24 @@
 	transform: translateY(calc(12 * (1 - var(--p)) * var(--u))) scale(calc(1 - 0.05 * (1 - var(--p))));
 }
 
-.sm.sm-todo .sm-b > img {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
+/* 后面那张：纸白底，裁图只是边框以内那块，边框由 .sm-b-edge 画 */
+.sm-todo .sm-b {
+	background: var(--c-paper);
 }
 
-/* 后面那张的边：浅灰 1 点；顶上来以后变成最上面那张的深墨边 */
+.sm.sm-todo .sm-b > img {
+	position: absolute;
+	inset: calc(var(--in) * var(--u));
+	width: calc(100% - 2 * var(--in) * var(--u));
+	height: calc(100% - 2 * var(--in) * var(--u));
+}
+
+/* 后面那张的边：在后面时浅灰 1 点；顶上来时变成最上面那张的 1.5 点深墨边（TodoDeckCard 的 isTop） */
 .sm-b-edge {
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	box-shadow:
-		inset 0 0 0 calc(1 * var(--u)) var(--c-line),
-		inset 0 0 0 calc(1.5 * var(--u)) var(--c-paper);
+	box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
 }
 
 /* 整张染色：底色不透明度 0.92 × 进度，字和图标 1.5 × 进度（比底色先出来），过线时字从 0.9 放到 1（TodoSwipeTint） */
@@ -205,14 +232,6 @@
 	font-weight: 600;
 }
 
-.sm-todo.is-playing .sm-touch,
-.sm-todo.is-playing .sm-b-edge {
-	animation-duration: 7.6s;
-	animation-timing-function: linear;
-	animation-iteration-count: infinite;
-	animation-fill-mode: both;
-}
-
 .sm-todo.is-playing .sm-touch {
 	animation-name: sm-todo-touch;
 }
@@ -223,69 +242,189 @@
 
 @keyframes sm-todo-x {
 	0%,
-	9.868% {
+	7.143% {
 		--sm-x: 0;
 		animation-timing-function: ease-in-out;
 	}
 
-	24.342%,
-	32.237% {
+	20.238%,
+	27.381% {
 		--sm-x: -105;
+		animation-timing-function: cubic-bezier(0.42, 0, 1, 1);
+	}
+
+	30.952%,
+	45.238% {
+		--sm-x: -620;
+		animation-timing-function: steps(1, start);
+	}
+
+	50%,
+	57.143% {
+		--sm-x: 0;
 		animation-timing-function: ease-in-out;
 	}
 
-	50.658%,
-	58.553% {
+	70.238%,
+	77.381% {
 		--sm-x: 105;
 		animation-timing-function: cubic-bezier(0.42, 0, 1, 1);
 	}
 
-	62.5%,
-	100% {
+	80.952%,
+	95.238% {
 		--sm-x: 620;
+		animation-timing-function: steps(1, start);
+	}
+
+	100% {
+		--sm-x: 0;
 	}
 }
 
-@keyframes sm-end-todo {
+/* 第一张升回来：飞走的卡在下一张淡出完的那一刻回到原位，先藏着、缩小下移，再升上来 */
+@keyframes sm-todo-rise {
 	0%,
-	86.842% {
+	45.237% {
+		--sm-r: 0;
+	}
+
+	45.238% {
+		--sm-r: 1;
+		animation-timing-function: ease-out;
+	}
+
+	48.81%,
+	95.237% {
+		--sm-r: 0;
+	}
+
+	95.238% {
+		--sm-r: 1;
+		animation-timing-function: ease-out;
+	}
+
+	98.81%,
+	100% {
+		--sm-r: 0;
+	}
+}
+
+@keyframes sm-todo-a {
+	0%,
+	45.237% {
 		opacity: 1;
 	}
 
-	92.105%,
-	100% {
+	45.238% {
 		opacity: 0;
+		animation-timing-function: ease-out;
+	}
+
+	48.81%,
+	95.237% {
+		opacity: 1;
+	}
+
+	95.238% {
+		opacity: 0;
+		animation-timing-function: ease-out;
+	}
+
+	98.81%,
+	100% {
+		opacity: 1;
+	}
+}
+
+/* 下一张淡出成空牌堆；第一张升回来以后它已经缩回后面，再露出来（只露底边，跟截图一样） */
+@keyframes sm-todo-b {
+	0%,
+	41.667% {
+		opacity: 1;
+		animation-timing-function: ease-in-out;
+	}
+
+	45.238%,
+	48.81% {
+		opacity: 0;
+		animation-timing-function: steps(1, start);
+	}
+
+	50%,
+	91.667% {
+		opacity: 1;
+		animation-timing-function: ease-in-out;
+	}
+
+	95.238%,
+	98.81% {
+		opacity: 0;
+		animation-timing-function: steps(1, start);
+	}
+
+	100% {
+		opacity: 1;
 	}
 }
 
 @keyframes sm-todo-touch {
 	0%,
-	5.263% {
+	3.571% {
 		opacity: 0;
 		animation-timing-function: ease-out;
 	}
 
-	8.553%,
-	58.553% {
+	6.548%,
+	27.381% {
 		opacity: 1;
 	}
 
-	60.526%,
+	29.167%,
+	53.571% {
+		opacity: 0;
+		animation-timing-function: ease-out;
+	}
+
+	56.548%,
+	77.381% {
+		opacity: 1;
+	}
+
+	79.167%,
 	100% {
 		opacity: 0;
 	}
 }
 
+/* 飞走时后面那张的边从浅灰变成深墨；它藏着的时候换回浅灰 */
 @keyframes sm-todo-top {
 	0%,
-	62.5% {
-		opacity: 1;
+	30.952% {
+		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
 		animation-timing-function: ease-out;
 	}
 
-	64.474%,
+	32.738%,
+	45.238% {
+		box-shadow: inset 0 0 0 calc(1.5 * var(--u)) var(--c-ink);
+		animation-timing-function: steps(1, start);
+	}
+
+	50%,
+	80.952% {
+		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
+		animation-timing-function: ease-out;
+	}
+
+	82.738%,
+	95.238% {
+		box-shadow: inset 0 0 0 calc(1.5 * var(--u)) var(--c-ink);
+		animation-timing-function: steps(1, start);
+	}
+
 	100% {
-		opacity: 0;
+		box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--c-line);
 	}
 }
 

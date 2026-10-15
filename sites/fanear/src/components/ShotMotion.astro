@@ -1,9 +1,9 @@
 ---
 // 首页「手机上」待办、小耳两张截图上的滑动动效：叠在截图上的几块，静止时跟截图一模一样，看得见时才动。
-// 待办：手指按住最上面那张卡，先往左拖（整张变琥珀「要做 · 稍后提醒」）再往右拖（变绿「做完了 / 不用做 · 不再提醒」），
-//       过线松手，卡飞走，后面那张（App 演示数据里真正的下一张）长回原尺寸顶上来。
+// 待办：两轮交替。手指按住最上面那张卡往左拖（整张变琥珀「要做 · 稍后提醒」）过线飞走；下一轮往右拖（变绿
+//       「做完了 / 不用做 · 不再提醒」）过线飞走。后面那张（App 演示数据里真正的下一张）跟着长回原尺寸顶上来。
 // 小耳：手指把第一张卡的滑条拖到底，滑块变成对勾、字变白，这张卡淡出收起，下面的卡和「以前的」一起顶上来。
-// 两段都是播一轮、停一下再回到截图原样（待办淡回去，小耳倒回去），从头再播。坐标和数据在 lib/shot-motion.ts，动画在 styles/shot-motion.css。
+// 播完停一下再回到截图原样（待办：下一张先淡出成空牌堆，第一张再升回来；小耳倒回去），从头再播。坐标和数据在 lib/shot-motion.ts，动画在 styles/shot-motion.css。
 import { Image } from 'astro:assets';
 import { CARE_MOTION, CARE_TILES, TODO_MOTION, type Rect } from '../lib/shot-motion';
 import { SHOTS, type ShotId } from '../lib/shots';
@@ -30,7 +30,7 @@ const replyY = (t: (typeof CARE_TILES)[number]) => t.top + TILE.body + (t.lines.
 		// 0.2.0 待合：L4（滑卡左右滑、整张染色还在 todo-polish-020 分支）
 		<div class="sm sm-todo" data-shot-motion={id} aria-hidden="true">
 			<div class="sm-box sm-floor" style={box(T.card)} />
-			<div class="sm-box sm-b" style={box(T.card)}>
+			<div class="sm-box sm-b" style={`${box(T.card)};--in:${T.nextInset}`}>
 				<Image src={T.next} alt="" widths={widths} sizes={sizes} quality={88} loading="lazy" />
 				<span class="sm-b-edge" />
 			</div>
