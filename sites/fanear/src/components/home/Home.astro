@@ -1,7 +1,6 @@
 ---
-// 首页。首屏两版（10-15 待本人挑）：A「真机」（HeroA.astro，10-13 选定的 C 版换成现在的截图）、
-// B「先认识我」（HeroB.astro，照 App 第一次打开的介绍页）。构建时 FANEAR_HOME=A|B 切换，默认 A（pages/index.astro）。
-// 首屏以下两版相同，只有一处：ADHD 那段和心愿，A 放在「我」这一节开头，B 放在照片旁边（不重复写两遍）。
+// 首页。首屏「先认识我」（HeroB.astro，10-15 本人 GW1 B）：App 介绍页的稻田照片，ADHD 那段和心愿就在照片旁边，只出现这一次。
+// 原来的「真机」首屏（HeroA）留在 git 提交 2b38ca2。
 // 往下：我 → 这一天 → 手表上 → 手机上（今天、待办、小耳、设置，按 0.2.0 的底部页签）→ 你的数据 → 现在能不能用、最近更新。
 // 文案都取 src/lib/ 里已经核对过的数据（features.ts、why.ts、day.ts、shots.ts、site.ts），不按子串挑句子。
 import { group, homePoints } from '../../lib/features';
@@ -9,7 +8,6 @@ import Shot from '../Shot.astro';
 import Chapter from './Chapter.astro';
 import Data from './Data.astro';
 import Day from './Day.astro';
-import HeroA from './HeroA.astro';
 import HeroB from './HeroB.astro';
 import Intro from './Intro.astro';
 import Latest from './Latest.astro';
@@ -17,12 +15,6 @@ import Now from './Now.astro';
 import Points from './Points.astro';
 import Watch from './Watch.astro';
 import '../../styles/scroll-motion.css';
-
-interface Props {
-	hero: 'A' | 'B';
-}
-
-const { hero } = Astro.props;
 
 // 手机上的四个页签：App 里那一屏叫什么、讲哪一组功能、配哪张截图。
 // 0.2.0 待合：L10（底部页签「今天 - 待办 - 小耳 - 设置」）
@@ -37,10 +29,10 @@ const [first, ...rest] = tabs;
 const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 ---
 
-<main id="main" class:list={['home', `home-${hero.toLowerCase()}`]}>
-	{hero === 'A' ? <HeroA /> : <HeroB />}
+<main id="main" class="home">
+	<HeroB />
 
-	<Intro opening={hero === 'A'} />
+	<Intro />
 
 	<Day />
 
