@@ -161,8 +161,8 @@ export const SHOTS = {
 		device: 'watch',
 		caption: '正在录',
 		alt: '手表正在录：今天已录 6 小时 12 分，电量 63%，已传到手机 5 小时 30 分，待传 2 块、等连上手机，下面是「停止录音」按钮。',
-		// 表上的时钟是拍摄时的 04:19（watchOS 模拟器改不了时钟），北京时间下午再重拍这一张
-		from: `${STORE}/watch-recording.png`,
+		// 表上的时钟是拍摄时的北京时间（watchOS 模拟器改不了时钟）：10-16 14:53 重拍，对得上这一天下午的演示
+		from: 'fanear/本地资料/website-020-20261015/shots-watch-1016-1450/watch-recording.png',
 		redo: [],
 	},
 	watchInterrupted: {
