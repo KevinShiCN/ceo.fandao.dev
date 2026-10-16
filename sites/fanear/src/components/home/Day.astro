@@ -2,7 +2,8 @@
 // 「这一天」：用 App 自带的演示数据，照今天页时间条的画法，画一条大号的一天（数据和出处在 src/lib/day.ts）。
 // 时间条是 HTML 方块按钟点算出来的位置和宽度，不是图片。下面列这一天里的几处时刻：一场对话找出一条承诺、小耳的一句话……
 // 电脑上（≥1024、支持滚动驱动动画、没设减弱动态效果）这一节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，
-// 画到哪个时刻，哪个时刻就亮起来（styles/scroll-motion.css 第 4 处）；别的情况一次全画好、全亮着。
+// 画到哪个时刻，哪个时刻就亮起来（styles/scroll-motion.css 第 4 处）；手机上（<768）时间条钉在屏幕顶上，
+// 往下读到哪一条时刻，时间条就画到哪个钟点（同一处的手机版）；别的情况一次全画好、全亮着。
 import { AXIS, LEGEND, MOMENTS, position, SEGMENTS, TICKS, type Fill } from '../../lib/day';
 
 const pct = (n: number) => `${Math.round(n * 10000) / 100}%`;
@@ -13,11 +14,24 @@ const segments = SEGMENTS.map((s) => {
 const moments = MOMENTS.map((m, i) => ({ ...m, p: position(m.at), row: i % 2 }));
 const summary = `演示数据里的一天，${AXIS.from} 点到 ${AXIS.to} 点：${moments.map((m) => `${m.at} ${m.kind}`).join('；')}。`;
 const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
+
+// 手机上（<768）往下滑：时间条钉在屏幕顶上，读到哪一条时刻，时间条就画到哪个钟点（styles/scroll-motion.css 第 4 处手机版）。
+// 每个时刻有自己的滚动时间线 --fe-m{i}；图例那一段是 --fe-day-in（8 点走到第一个时刻）。
+// 竖线一层套一层，每层管一段：这一段的时刻经过读的那条线时，往右挪 d（占整条的比例），几层叠起来正好停在下一个时刻。
+const steps = [
+	{ t: '--fe-day-in', d: moments[0].p },
+	...moments.map((m, i) => ({ t: `--fe-m${i}`, d: (moments[i + 1]?.p ?? 1) - m.p })),
+];
+const playScope = steps.map((s) => s.t).join(', ');
+const playHtml = steps.reduceRight(
+	(inner, s) => `<span class="play-step" style="--t:${s.t};--d:${s.d.toFixed(4)}">${inner}</span>`,
+	'<span class="play-head"></span>',
+);
 ---
 
 <section class="day" aria-labelledby="h-day">
 	<div class="day-track">
-		<div class="day-stage">
+		<div class="day-stage" style={`--fe-day-scope:${playScope}`}>
 			<div class="day-head">
 				<h2 id="h-day">这一天</h2>
 				<p class="day-lead">手表录了一整天，手机上就是这样一条。往下看它在这一天里找出了什么。</p>
@@ -27,8 +41,8 @@ const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
 				<div class="ribbon-wrap" role="img" aria-label={summary}>
 					<div class="ribbon-marks" aria-hidden="true">
 						{
-							moments.map((m) => (
-								<span class:list={['mark', `mark-row-${m.row}`]} style={`--x:${pct(m.p)};--p:${m.p}`}>
+							moments.map((m, i) => (
+								<span class:list={['mark', `mark-row-${m.row}`]} style={`--x:${pct(m.p)};--p:${m.p};--t:--fe-m${i}`}>
 									<span class="mark-time">{m.at}</span>
 								</span>
 							))
@@ -39,6 +53,7 @@ const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
 							{segments.map((s) => <span class:list={['seg', `seg-${s.fill}`]} style={`left:${s.left};width:${s.width}`} />)}
 						</div>
 						<span class="ribbon-cursor" aria-hidden="true" />
+						<span class="ribbon-play" aria-hidden="true" set:html={playHtml} />
 					</div>
 					<div class="ribbon-ticks" aria-hidden="true">
 						{TICKS.map((h) => <span style={`--x:${pct((h - AXIS.from) / (AXIS.to - AXIS.from))}`}>{h}点</span>)}
@@ -61,8 +76,8 @@ const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
 
 			<ol class="moments">
 				{
-					moments.map((m) => (
-						<li style={`--p:${m.p}`}>
+					moments.map((m, i) => (
+						<li style={`--p:${m.p};--t:--fe-m${i}`}>
 							<p class="moment-head">
 								<time>{m.at}</time>
 								<span>{m.kind}</span>
@@ -169,6 +184,11 @@ const swatch = (fill: Fill | 'talk') => `swatch swatch-${fill}`;
 
 	/* 往下滑时画到哪儿的那条竖线：平时不显示 */
 	.ribbon-cursor {
+		display: none;
+	}
+
+	/* 手机上往下滑时一段一段往前走的竖线（盖住还没到的钟点）：平时不显示 */
+	.ribbon-play {
 		display: none;
 	}
 

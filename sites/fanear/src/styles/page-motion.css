@@ -1,11 +1,12 @@
-/* 功能、使用说明两页在电脑上的滚动动效（10-13 本人 Q33：「A、B 都做我看看效果」，首页之外内页也加）。
+/* 功能、使用说明两页的滚动动效（10-13 本人 Q33：「A、B 都做我看看效果」，首页之外内页也加；
+   10-16 本人：「移动端为什么没有动效？scroll的动效是要有的」，手机、平板也打开，挪的距离小一些）。
    跟首页（scroll-motion.css）同一套做法：CSS 滚动驱动动画，往下滑才动、往回滑倒回去，不用 JavaScript；
-   窗口 ≥1024、浏览器支持、没设「减弱动态效果」才打开，否则页面跟原来一样。
+   浏览器支持、没设「减弱动态效果」才打开，否则页面跟原来一样。
    每一节三处：上沿那条细线从左往右画出来；字往上浮到位；截图比字走得远、到得晚，往上升到位（有远近感）。
    只动位置和大小、不动透明度：刚打开页面就在屏幕里的那一节不会显得半透明。
    动画一律分开写，不用 animation 简写（原因见 scroll-motion.css 开头）。 */
 
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
 		/* 每一节：功能页的 .feature，使用说明的 .step。原来的上边线改透明，同一位置画一条长出来的线 */
 		.wrap > section.feature,
@@ -63,15 +64,23 @@
 
 		@keyframes fe-page-rise {
 			from {
-				translate: 0 28px;
+				translate: 0 var(--fe-page-rise, 28px);
 			}
 		}
 
 		@keyframes fe-page-shot {
 			from {
-				translate: 0 96px;
+				translate: 0 var(--fe-page-shot-rise, 96px);
 				scale: 0.96;
 			}
 		}
+	}
+}
+
+/* 手机屏幕矮，字和截图挪得少一点 */
+@media (max-width: 767px) {
+	.wrap {
+		--fe-page-rise: 20px;
+		--fe-page-shot-rise: 64px;
 	}
 }
