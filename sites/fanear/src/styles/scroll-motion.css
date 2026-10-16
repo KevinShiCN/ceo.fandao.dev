@@ -1,21 +1,24 @@
-/* 首页电脑上的滚动动效（10-13 本人：「电脑端我希望增加更多动效，主要是跟 scroll 相关的动效，滑动带来动效，才有质感」）。
+/* 首页的滚动动效：电脑一套（10-13 本人：「电脑端我希望增加更多动效，主要是跟 scroll 相关的动效，滑动带来动效，才有质感」），
+   手机一套（10-16 本人：「移动端为什么没有动效？scroll的动效是要有的」）。
    动画都挂在滚动位置上（CSS 滚动驱动动画）：往下滑就往前走，往回滑就倒回去，不滑就不动；不用 JavaScript。
-   同时满足三条才打开，否则页面跟原来的 C 版一模一样：
-   - 窗口至少 1024 宽（手机、平板不动）
-   - 浏览器支持滚动驱动动画（Chrome、Edge 115 起，Safari 26 起）
-   - 系统没设「减弱动态效果」
+   浏览器支持滚动驱动动画（Chrome、Edge 115 起，Safari 26 起）、系统没设「减弱动态效果」才打开，否则页面跟原来一样。
    一共四处，每处都在讲产品本身（首屏是照片，不动）：
-   1. 「手表上」「手机上」两道粗线：滑到时从左往右画出来，像说明书翻到新的一章
-   2. 手表三种样子：一开始叠成一块表，往下滑就往两边发开，变成三种样子，字跟着出来
-   3. 手机四个页签：右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏，像点了底下的页签（淡入）；
-      没轮到的那一节，字变淡
-   4. 这一天：整节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，一根竖线跟着走；
-      画到哪个时刻，时间条上那根线和下面那一条就亮起来——往下滑就是这一天往前过
+   1. 「手表上」「手机上」两道粗线：滑到时从左往右画出来，像说明书翻到新的一章（所有宽度）
+   2. 手表三种样子：一开始叠成一块表，往下滑就发开成三种样子，字跟着出来
+      （≥768 三张并排，往两边发；手机上一张一行，往下发）
+   3. 手机四个页签：电脑上（≥1024）右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏（淡入），没轮到的那一节字变淡；
+      手机、平板上每节自带截图，截图从更低的地方、稍小一点升上来，比字晚到位
+   4. 这一天：电脑上（≥1024）整节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，一根竖线跟着走，
+      画到哪个时刻，时间条上那根线和下面那一条就亮起来；
+      手机上（<768）时间条钉在屏幕顶上，往下读到哪一条时刻，竖线就走到哪个钟点、前面的颜色露出来，那一条亮起来
+      ——往下滑就是这一天往前过
    选择器里多写一两层类名，是为了压过各组件自己的样式（Astro 给组件样式加了一层属性，权重更高）。
    动画一律分开写（animation-name、animation-timeline……），不用 animation 简写：构建时的压缩会把简写和
    animation-timeline 并成一句简写，浏览器不认，整句作废（10-13 实测：并完以后字、表、首屏全都不动）。 */
 
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+/* ========== 所有宽度 ========== */
+
+@media (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
 		/* ---------- 1. 「手表上」「手机上」的粗线 ---------- */
 
@@ -48,7 +51,27 @@
 			}
 		}
 
-		/* ---------- 2. 手表三种样子：一块表发成三块 ---------- */
+		/* 手表发牌：从叠着的位置（--fe-deal-x/y、--fe-deal-scale，各档自己给）回到自己那一格 */
+		@keyframes fe-deal {
+			from {
+				translate: var(--fe-deal-x, 0px) var(--fe-deal-y, 0px);
+				scale: var(--fe-deal-scale, 1);
+			}
+		}
+
+		@keyframes fe-fade-in {
+			from {
+				opacity: 0;
+			}
+		}
+	}
+}
+
+/* ========== ≥768：手表三张并排 ========== */
+
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+	@supports (animation-timeline: view()) {
+		/* ---------- 2. 手表三种样子：一块表往两边发成三块 ---------- */
 
 		/* 三张表的列宽从这个盒子量（cqw），一开始都挪到中间那张的位置 */
 		.home .watch .states {
@@ -93,19 +116,13 @@
 			animation-range: contain 35% contain 60%;
 		}
 
-		@keyframes fe-deal {
-			from {
-				translate: var(--fe-deal-x, 0px) var(--fe-deal-y, 0px);
-				scale: var(--fe-deal-scale, 1);
-			}
-		}
+	}
+}
 
-		@keyframes fe-fade-in {
-			from {
-				opacity: 0;
-			}
-		}
+/* ========== ≥1024：电脑 ========== */
 
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+	@supports (animation-timeline: view()) {
 		/* ---------- 3. 手机四个页签：一部手机，四屏跟着滑 ---------- */
 
 		/* 左栏四节，每节一屏高、字竖着居中；右栏是钉住的手机。每节自带的截图收起来 */
@@ -286,6 +303,172 @@
 		@keyframes fe-day-moment {
 			from {
 				opacity: 0.25;
+			}
+		}
+	}
+}
+
+/* ========== <1024：手机、平板的四个页签 ========== */
+
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+	@supports (animation-timeline: view()) {
+		/* ---------- 3. 每节自带的截图从更低的地方、稍小一点升上来，比字晚到位（跟功能页、使用说明的截图同一个动法） ---------- */
+		.home .story .chapter-figure {
+			animation-name: fe-shot-rise;
+			animation-duration: auto;
+			animation-timing-function: linear;
+			animation-fill-mode: both;
+			animation-timeline: view();
+			animation-range: entry 0% cover 45%;
+		}
+
+		@keyframes fe-shot-rise {
+			from {
+				translate: 0 72px;
+				scale: 0.94;
+			}
+		}
+	}
+}
+
+/* ========== <768：手机 ========== */
+
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+	@supports (animation-timeline: view()) {
+		/* ---------- 2. 手表三种样子：一张一行，一开始叠在第一张那一格，往下滑往下发开 ---------- */
+		.home .watch .states {
+			view-timeline: --fe-watch block;
+		}
+
+		.home .watch .states .shot {
+			position: relative;
+			animation-name: fe-deal;
+			animation-timing-function: cubic-bezier(0.25, 0.6, 0.2, 1);
+			animation-fill-mode: both;
+			animation-timeline: --fe-watch;
+			animation-range: entry 60% contain 45%;
+		}
+
+		/* 叠着的时候「正在录」在最上面，后两张往上错开一点，看得出是一叠。往上挪的距离是一行的高（图高 + 行距） */
+		.home .watch .states li:nth-child(1) .shot {
+			z-index: 3;
+		}
+
+		.home .watch .states li:nth-child(2) .shot {
+			z-index: 2;
+			--fe-deal-y: calc(-100% - var(--s-5) - 18px);
+			--fe-deal-scale: 0.94;
+		}
+
+		.home .watch .states li:nth-child(3) .shot {
+			z-index: 1;
+			--fe-deal-y: calc(-200% - 2 * var(--s-5) - 36px);
+			--fe-deal-scale: 0.88;
+		}
+
+		/* 第二、三张落到自己那一行时，旁边的字才出来 */
+		.home .watch .states li:nth-child(n + 2) .state-text {
+			animation-name: fe-fade-in;
+			animation-timing-function: linear;
+			animation-fill-mode: both;
+			animation-timeline: --fe-watch;
+		}
+
+		.home .watch .states li:nth-child(2) .state-text {
+			animation-range: contain 0% contain 25%;
+		}
+
+		.home .watch .states li:nth-child(3) .state-text {
+			animation-range: contain 20% contain 45%;
+		}
+	}
+
+	/* ---------- 4. 这一天：时间条钉在屏幕顶上，读到哪一条，竖线就走到哪个钟点 ---------- */
+	/* 时间条上的线和竖线要跟着下面列表里的每一条走，靠 timeline-scope 把各条的时间线借给时间条；不支持就不动 */
+	@supports (animation-timeline: view()) and (timeline-scope: --fe-x) {
+		.home .day .day-stage {
+			timeline-scope: var(--fe-day-scope);
+		}
+
+		/* 图例和说明不跟着钉：拆开 figure，让时间条直接钉在这一节里，列表从它底下滑过去 */
+		.home .day .ribbon-figure {
+			display: contents;
+		}
+
+		.home .day .ribbon-wrap {
+			position: sticky;
+			top: 0;
+			z-index: 2;
+			margin: var(--s-6) calc(-1 * var(--gutter)) 0;
+			padding: var(--s-3) var(--gutter) var(--s-2);
+			background: var(--c-paper);
+			border-bottom: 1px solid var(--c-line);
+		}
+
+		/* 「读的那条线」在屏幕 40% 高处：一条从它的上沿碰到这条线，到下沿离开这条线，是这一条的时间线 */
+		.home .day figcaption,
+		.home .day .moments li {
+			view-timeline-axis: block;
+			view-timeline-inset: 40% 59%;
+		}
+
+		.home .day figcaption {
+			view-timeline-name: --fe-day-in;
+		}
+
+		.home .day .moments li {
+			view-timeline-name: var(--t);
+		}
+
+		/* 还没读到的时刻和时间条上它那根线是淡的，读到就亮，读过的一直亮着 */
+		.home .day .moments li,
+		.home .day .mark {
+			animation-name: fe-day-lit;
+			animation-duration: auto;
+			animation-timing-function: linear;
+			animation-fill-mode: both;
+			animation-timeline: var(--t);
+			animation-range: cover 0% cover 30%;
+		}
+
+		/* 竖线一层套一层（Day.astro 的 playHtml）：每层在自己那一条经过时往右挪一段，叠起来就是走到哪个钟点。
+		   竖线右边是一块跟底色一样的灰，盖住还没到的钟点；挪过去，前面的颜色就露出来 */
+		.home .day .ribbon-play,
+		.home .day .play-step {
+			display: block;
+			position: absolute;
+			inset: 0;
+		}
+
+		.home .day .play-step {
+			animation-name: fe-day-step;
+			animation-duration: auto;
+			animation-timing-function: linear;
+			animation-fill-mode: both;
+			animation-timeline: var(--t);
+			animation-range: cover 0% cover 100%;
+		}
+
+		.home .day .play-head {
+			position: absolute;
+			inset: 0;
+			background: var(--c-line);
+			border-left: 2px solid var(--c-ink);
+		}
+
+		@keyframes fe-day-step {
+			from {
+				translate: 0 0;
+			}
+
+			to {
+				translate: calc(var(--d) * (100cqw - 2px)) 0;
+			}
+		}
+
+		@keyframes fe-day-lit {
+			from {
+				opacity: 0.3;
 			}
 		}
 	}
