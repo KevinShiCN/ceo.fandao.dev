@@ -1,0 +1,53 @@
+---
+// 版本目录里的列表：分组标题（未发布 / 已发布）下面一版一行，写版本号、短说明和日期。
+// 手机上点开的那份和电脑左边那份各渲染一次，同一时间只显示其中一份（样式在 styles/toc.css、styles/version-toc.css）。
+interface Props {
+	groups: readonly {
+		/** 更新记录页里这一组的锚点 */
+		id: string;
+		title: string;
+		versions: readonly {
+			anchor: string;
+			version: string;
+			/** 短说明，比如「自用内测」；没有就是空的 */
+			label: string;
+			/** 2026-10-16 这样的写法；没有日期是 null */
+			date: string | null;
+			/** 10月16日 */
+			dateText: string | null;
+		}[];
+	}[];
+}
+
+const { groups } = Astro.props;
+---
+
+<div class="toc-list vtoc-list">
+	{
+		groups.map((group) => (
+			<div class="vtoc-group">
+				<a class="vtoc-group-title" href={`#${group.id}`}>
+					<span>{group.title}</span>
+					<span class="vtoc-group-count">{group.versions.length > 0 ? `${group.versions.length} 个` : '还没有'}</span>
+				</a>
+				{group.versions.length > 0 && (
+					<ol>
+						{group.versions.map((v) => (
+							<li>
+								<a href={`#${v.anchor}`} data-toc-link={v.anchor} data-toc-title={v.label ? `${v.version} ${v.label}` : v.version}>
+									<span class="vtoc-version">{v.version}</span>
+									{v.label && <span class="vtoc-label">{v.label}</span>}
+									{v.date && (
+										<time class="vtoc-date" datetime={v.date}>
+											{v.dateText}
+										</time>
+									)}
+								</a>
+							</li>
+						))}
+					</ol>
+				)}
+			</div>
+		))
+	}
+</div>

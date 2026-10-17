@@ -1,0 +1,95 @@
+---
+// 更新记录的版本目录（本人 10-17：「changelog要支持toc」「不然只能硬滑」「左边应该有目录」）。
+// 版本有几十个，按「未发布」「已发布」两组列出来，点哪一版跳到哪一版。
+// 手机、平板：钉在屏幕顶上的一条，写着读到哪一版，下面一条细进度条是整页读了多少；点「目录」展开全部版本，正在读的那版在列表中间。
+// 电脑（≥1024 宽）：左边一列跟着滚；版本多、一屏放不下时这一列自己滚，读到的那一版点亮，并一直留在看得见的地方。
+// 读到哪一版跟使用说明的步骤目录同一个算法（lib/toc-spy.ts）。没有 JavaScript 时照样能点开、能跳，只是不点亮。
+// 骨架（顶上那一条、展开的列表、左边一列）用 styles/toc.css，版本目录自己的样式在 styles/version-toc.css。
+import type { ComponentProps } from 'astro/types';
+import '../styles/toc.css';
+import '../styles/version-toc.css';
+import VersionTocList from './VersionTocList.astro';
+
+type Props = ComponentProps<typeof VersionTocList>;
+
+const { groups } = Astro.props;
+const total = `共 ${groups.reduce((n, group) => n + group.versions.length, 0)} 个版本`;
+---
+
+<nav class="toc vtoc" aria-label="版本目录" data-vtoc style="--toc-n:1">
+	<details class="toc-bar">
+		<summary class="toc-summary">
+			<span class="toc-now">
+				<span class="toc-name" data-vtoc-name data-total={total}>{total}</span>
+			</span>
+			<span class="toc-open">目录</span>
+			<span class="toc-progress" aria-hidden="true"><span class="toc-seg"></span></span>
+		</summary>
+		<VersionTocList groups={groups} />
+	</details>
+
+	<div class="toc-rail">
+		<p class="toc-rail-head">{total}</p>
+		<span class="toc-progress" aria-hidden="true"><span class="toc-seg"></span></span>
+		<VersionTocList groups={groups} />
+	</div>
+</nav>
+
+<script>
+	import { closeOnPick, readingPosition, trackScroll } from '../lib/toc-spy';
+
+	/** 让列表里正在读的那一行露在列表看得见的地方；center 为真时放到列表中间。列表没显示出来（另一种屏幕宽度）时什么都不做 */
+	const reveal = (list: HTMLElement | null, link: HTMLElement | undefined, center = false) => {
+		if (!list || !link || list.clientHeight === 0) return;
+		const top = link.offsetTop;
+		const bottom = top + link.offsetHeight;
+		if (center) {
+			list.scrollTop = Math.max(0, top - (list.clientHeight - link.offsetHeight) / 2);
+			return;
+		}
+		const room = 2 * link.offsetHeight;
+		if (top - room < list.scrollTop) list.scrollTop = Math.max(0, top - room);
+		else if (bottom + room > list.scrollTop + list.clientHeight) list.scrollTop = bottom + room - list.clientHeight;
+	};
+
+	for (const toc of document.querySelectorAll<HTMLElement>('[data-vtoc]')) {
+		const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]')];
+		const ids = [...new Set(links.map((a) => a.dataset.tocLink ?? ''))];
+		const found = ids.map((id) => document.getElementById(id));
+		// 锚点对不上就不接管，目录照样能跳
+		if (found.length === 0 || found.some((el) => el === null)) continue;
+		const versions = found as HTMLElement[];
+		const titles = ids.map((id) => links.find((a) => a.dataset.tocLink === id)?.dataset.tocTitle ?? '');
+		const segs = [...toc.querySelectorAll<HTMLElement>('.toc-seg')];
+		const name = toc.querySelector<HTMLElement>('[data-vtoc-name]');
+		const bar = toc.querySelector('details');
+		const barList = bar?.querySelector<HTMLElement>('.vtoc-list') ?? null;
+		const railList = toc.querySelector<HTMLElement>('.toc-rail .vtoc-list');
+		const linkIn = (list: HTMLElement | null, at: number) =>
+			at < 0 ? undefined : links.find((a) => a.dataset.tocLink === ids[at] && list?.contains(a));
+		let shown = -2;
+
+		const update = () => {
+			const { at, part } = readingPosition(versions);
+			const read = at < 0 ? 0 : (at + part) / versions.length;
+			for (const seg of segs) seg.style.setProperty('--fill', String(Math.round(read * 1000) / 1000));
+			if (at === shown) return;
+			shown = at;
+			for (const a of links) {
+				if (at >= 0 && a.dataset.tocLink === ids[at]) a.setAttribute('aria-current', 'location');
+				else a.removeAttribute('aria-current');
+			}
+			if (name) name.textContent = at < 0 ? (name.dataset.total ?? '') : titles[at];
+			reveal(railList, linkIn(railList, at));
+		};
+
+		trackScroll(update);
+		toc.dataset.live = '';
+		if (bar) {
+			closeOnPick(bar);
+			bar.addEventListener('toggle', () => {
+				if (bar.open) reveal(barList, linkIn(barList, shown), true);
+			});
+		}
+	}
+</script>

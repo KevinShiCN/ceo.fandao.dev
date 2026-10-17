@@ -108,6 +108,41 @@ export function parseChangelog(markdown) {
 	return log;
 }
 
+/**
+ * 版本旁边的短说明：标题括号里第一个逗号、分号前那一截（「自用内测，2026-10-15」→「自用内测」）；只写了日期时是空的
+ * @param {string} note
+ */
+export function noteLabel(note) {
+	const head = note.split(/[，,；;]/)[0].trim();
+	return /^\d{4}-\d{2}-\d{2}$/.test(head) ? '' : head;
+}
+
+/**
+ * 这一版的日期：标题括号里写了日期就用它，没写就用条目里最晚的一天；都没有是 null
+ * @param {ChangelogVersion} version
+ * @returns {string | null} 2026-10-16 这样的写法
+ */
+export function versionDate(version) {
+	const inNote = /\d{4}-\d{2}-\d{2}/.exec(version.note);
+	if (inNote) return inNote[0];
+	const dates = version.items.flatMap((item) => (item.date ? [item.date] : [])).sort();
+	return dates.at(-1) ?? null;
+}
+
+/** 「2026-10-16」→「10月16日」 */
+export function dateText(/** @type {string} */ iso) {
+	return `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
+}
+
+/**
+ * 只有开发者自己那一版才有的条目：开头写着「自用内测版」「饭耳 Beta：」「饭耳 Beta 实验」「开发版」「（只在开发者自测的版本里）」。
+ * 只认开头：一条里中间才提到内测版的，前面那半句是大家都有的，不算。
+ * @param {ChangelogItem} item
+ */
+export function isDeveloperOnly(item) {
+	return /^(（只在开发者自测的版本里）|自用内测版|饭耳 Beta[：:\s]|开发版)/.test(item.text);
+}
+
 /** 「（说明）」去掉外面一层括号；没有括号就原样 */
 function stripParens(/** @type {string} */ text) {
 	const match = /^[（(](.*)[）)]$/.exec(text.trim());

@@ -2,7 +2,7 @@
 // 解析器在 sites/fanear/src/lib/changelog.mjs，官网的「更新记录」页和同步脚本都用它。
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseChangelog } from '../sites/fanear/src/lib/changelog.mjs';
+import { dateText, isDeveloperOnly, noteLabel, parseChangelog, versionDate } from '../sites/fanear/src/lib/changelog.mjs';
 
 const NOW = `# 饭耳 FanEar 更新记录
 
@@ -94,4 +94,33 @@ test('同一个版本号出现两次报错', () => {
 
 test('分组里已经有版本还写「还没有」报错', () => {
 	assert.throws(() => parseChangelog(NOW.replace('## 已发布\n', '## 已发布\n\n### 0.0.1（试装）\n- 试装。\n')), /还没有/);
+});
+
+test('目录里的短说明：括号里第一个逗号、分号前那一截；只写了日期就不要', () => {
+	assert.equal(noteLabel('自用内测，2026-10-15'), '自用内测');
+	assert.equal(noteLabel('饭耳 Beta，2026-10-16'), '饭耳 Beta');
+	assert.equal(noteLabel('内测中，还没对外发布；TestFlight 内测只装在开发者自己的手机上'), '内测中');
+	assert.equal(noteLabel('自用内测'), '自用内测');
+	assert.equal(noteLabel('2026-10-17'), '');
+	assert.equal(noteLabel(''), '');
+});
+
+test('版本的日期：标题里写了就用标题的，没写用条目里最晚的一天', () => {
+	const item = (/** @type {string | null} */ date) => ({ date, text: '一条' });
+	const v = (/** @type {string} */ note, /** @type {(string | null)[]} */ dates) => ({ version: '0.1.0', note, anchor: 'v0-1-0', items: dates.map(item) });
+	assert.equal(versionDate(v('对外版，2026-10-17', ['2026-10-16'])), '2026-10-17');
+	assert.equal(versionDate(v('自用内测', ['2026-10-13', '2026-10-14', null])), '2026-10-14');
+	assert.equal(versionDate(v('', [null])), null);
+	assert.equal(dateText('2026-10-07'), '10月7日');
+});
+
+test('只有开发者那一版才有的条目：只认开头的几种写法', () => {
+	const only = (/** @type {string} */ text) => isDeveloperOnly({ date: null, text });
+	assert.ok(only('自用内测版「环境和语气」改标「实验」'));
+	assert.ok(only('饭耳 Beta：设置 › 转文字里多了「自建服务」'));
+	assert.ok(only('饭耳 Beta 实验：送云端转写前先剪掉静音'));
+	assert.ok(only('开发版改成单独的 App「饭耳 Beta」'));
+	assert.ok(only('（只在开发者自测的版本里）「给开发者」导出多一份'));
+	assert.ok(!only('转文字加第三家：阿里云百炼'));
+	assert.ok(!only('点「让手表接着记」时直接告诉你；（只在开发者自测的版本里）会从手机把饭耳叫起来'), '中间才提到的不算');
 });
