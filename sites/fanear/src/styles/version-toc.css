@@ -1,0 +1,119 @@
+/* 更新记录的版本目录（components/VersionToc.astro）：在 styles/toc.css 的骨架上，改成一版一行的样子。
+   一行：版本号（等宽数字）、短说明（放不下就省略）、日期（靠右）。分组标题在列表滚动时贴在列表顶上。
+   颜色、间距都取 tokens.css；只在更新记录页加载。 */
+
+.vtoc-list ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vtoc-list li a {
+	gap: var(--s-2);
+}
+
+.vtoc-version {
+	flex: none;
+	min-width: 3.6em;
+	color: var(--c-ink);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.vtoc-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.vtoc-date {
+	flex: none;
+	margin-left: auto;
+	color: var(--c-ink-3);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* 分组标题：未发布 / 已发布，右边写几个版本 */
+.vtoc-list a.vtoc-group-title {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	justify-content: space-between;
+	background: var(--c-paper);
+	color: var(--c-ink-3);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.vtoc-group-count {
+	font-weight: 500;
+	letter-spacing: 0;
+}
+
+/* 读到的那一版：浅底，版本号是我蓝 */
+.vtoc[data-live] .vtoc-list a[aria-current] {
+	background: var(--c-wash);
+	color: var(--c-ink);
+}
+
+.vtoc[data-live] .vtoc-list a[aria-current] .vtoc-version {
+	color: var(--c-me);
+}
+
+/* 手机、平板上点开的列表：上边不留空，分组标题贴顶时上面不会露出半行 */
+.toc-bar .vtoc-list {
+	padding-top: 0;
+}
+
+.toc-bar .vtoc-list a.vtoc-group-title {
+	min-height: 40px;
+}
+
+.toc-bar .vtoc-group + .vtoc-group {
+	margin-top: var(--s-2);
+	border-top: 1px solid var(--c-line);
+}
+
+/* 电脑：左边一列不超过一屏，列表自己滚 */
+@media (min-width: 1024px) {
+	.toc.vtoc {
+		padding-top: var(--s-6);
+	}
+
+	.vtoc .toc-rail {
+		display: flex;
+		flex-direction: column;
+		max-height: calc(100vh - 2 * var(--s-5) - var(--s-6));
+	}
+
+	.vtoc .toc-rail .vtoc-list {
+		position: relative;
+		flex: 1 1 auto;
+		min-height: 0;
+		margin-right: calc(-1 * var(--s-2));
+		padding-right: var(--s-2);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		scrollbar-color: var(--c-line) transparent;
+		scrollbar-width: thin;
+	}
+
+	.vtoc .toc-rail .vtoc-list a {
+		min-height: 32px;
+		padding: 0 var(--s-2);
+		border-radius: var(--r-tag);
+		font-size: 14px;
+	}
+
+	.vtoc .toc-rail .vtoc-list li a:hover {
+		background: var(--c-scrim);
+	}
+
+	.vtoc .toc-rail .vtoc-group + .vtoc-group {
+		margin-top: var(--s-3);
+	}
+}

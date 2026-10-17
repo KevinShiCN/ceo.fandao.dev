@@ -1,5 +1,5 @@
 ---
-// 功能：按 0.2.0 的页签和用途分九组（手表、今天、待办、小耳、对话和认人、搜索、导出和分享、转文字和大模型、数据和隐私），
+// 功能：按 0.3.0 的页签和用途分九组（手表、今天、待办、小耳、对话和认人、搜索、导出和分享、转文字和大模型、数据和隐私），
 // 一组一节，左边文字、右边这一组的截图。内容跟首页同一份（src/lib/features.ts）。
 import PageIntro from '../components/PageIntro.astro';
 import Shot from '../components/Shot.astro';
@@ -14,7 +14,7 @@ import '../styles/page-motion.css';
 <Base title="功能" description="饭耳能做什么：手表全天录，今天页一眼看完，待办滑卡，小耳的一句话和每天的总结，认人、搜索、导出分享，转文字和大模型用你自己选的，数据留在你手机上。">
 	<main id="main" class="wrap">
 		<PageIntro title="功能">
-			<p>按 App 的页签和用途分组，写的是 0.2.0（准备送审的版本）里的样子。饭耳{STATUS.label}，{STATUS.text}</p>
+			<p>按 App 的页签和用途分组，写的是 0.3.0 里的样子。饭耳{STATUS.label}，{STATUS.text}</p>
 			<p>{SHOTS_NOTE}想知道怎么一步步用起来，看<a href={withBase('/guide/')}>使用说明</a>。</p>
 		</PageIntro>
 

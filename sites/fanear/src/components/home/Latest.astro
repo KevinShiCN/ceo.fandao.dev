@@ -1,13 +1,14 @@
 ---
-// 最近更新：最新一个版本的前三条，再链到更新记录页。取数跟第 A 版一样。
+// 最近更新：最新的已发布版本（还没有已发布的，就用最新的未发布版本）的前三条，再链到更新记录页。
+// 只有开发者自己那一版才有的条目（「自用内测版…」「饭耳 Beta：…」）不放首页，更新记录页照样全列（本人 10-17 Q7：首页放的是只给开发者用的东西）。
 import raw from '../../data/CHANGELOG.md?raw';
-import { parseChangelog } from '../../lib/changelog.mjs';
+import { dateText, isDeveloperOnly, parseChangelog } from '../../lib/changelog.mjs';
 import { withBase } from '../../lib/url';
 
 const log = parseChangelog(raw);
-const latest = log.unreleased[0] ?? log.released[0];
+const latest = log.released[0] ?? log.unreleased[0];
+const shown = latest ? latest.items.filter((item) => !isDeveloperOnly(item)).slice(0, 3) : [];
 const itemCount = [...log.unreleased, ...log.released].reduce((n, v) => n + v.items.length, 0);
-const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
 ---
 
 {
@@ -24,7 +25,7 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 				</a>
 			</div>
 			<ul>
-				{latest.items.slice(0, 3).map((item) => (
+				{shown.map((item) => (
 					<li>
 						{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
 						<span>{item.text}</span>

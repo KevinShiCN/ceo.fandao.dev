@@ -1,17 +1,26 @@
 ---
 // 更新记录：内容全部来自 src/data/CHANGELOG.md（fanear 仓库 CHANGELOG.md 的原样副本，由同步命令复制过来），
 // 这里只负责排版。未发布和已发布分开放，未发布在上面。格式不对时构建直接失败（见 src/lib/changelog.mjs）。
+// 左边（手机上是顶上一条）是版本目录（components/VersionToc.astro），点哪一版跳到哪一版。
 import PageIntro from '../components/PageIntro.astro';
+import VersionToc from '../components/VersionToc.astro';
 import raw from '../data/CHANGELOG.md?raw';
 import Base from '../layouts/Base.astro';
-import { parseChangelog } from '../lib/changelog.mjs';
+import { dateText, noteLabel, parseChangelog, versionDate } from '../lib/changelog.mjs';
 
 const log = parseChangelog(raw);
 const groups = [
 	{ id: 'unreleased', title: '未发布', hint: '在做的和做完还没发出去的都写在这里。', versions: log.unreleased },
 	{ id: 'released', title: '已发布', hint: '上了 TestFlight 或 App Store 的版本。', versions: log.released },
 ];
-const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.slice(8, 10))}日`;
+const tocGroups = groups.map((group) => ({
+	id: group.id,
+	title: group.title,
+	versions: group.versions.map((v) => {
+		const date = versionDate(v);
+		return { anchor: v.anchor, version: v.version, label: noteLabel(v.note), date, dateText: date && dateText(date) };
+	}),
+}));
 ---
 
 <Base title="更新记录" description="饭耳每个版本改了什么，已发布和还没发布的都记。">
@@ -20,40 +29,45 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 			<p>每发一个版本，先写在这里。已发布和还没发布的都记，新的在上面。</p>
 		</PageIntro>
 
-		{
-			groups.map((group) => (
-				<section class="group" aria-labelledby={`h-${group.id}`}>
-					<div class="group-head">
-						<h2 id={`h-${group.id}`}>{group.title}</h2>
-						<p>{group.hint}</p>
-					</div>
-					{group.versions.length === 0 ? (
-						<p class="empty">
-							还没有。
-						</p>
-					) : (
-						group.versions.map((v) => (
-							<article id={v.anchor} class="version">
-								<header class="version-head">
-									<h3>
-										<a href={`#${v.anchor}`}>{v.version}</a>
-									</h3>
-									{v.note && <p class="version-note">{v.note}</p>}
-								</header>
-								<ul class="items">
-									{v.items.map((item) => (
-										<li>
-											{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
-											<span>{item.text}</span>
-										</li>
-									))}
-								</ul>
-							</article>
-						))
-					)}
-				</section>
-			))
-		}
+		<div class="log">
+			<VersionToc groups={tocGroups} />
+			<div class="log-body">
+				{
+					groups.map((group) => (
+						<section id={group.id} class="group" aria-labelledby={`h-${group.id}`}>
+							<div class="group-head">
+								<h2 id={`h-${group.id}`}>{group.title}</h2>
+								<p>{group.hint}</p>
+							</div>
+							{group.versions.length === 0 ? (
+								<p class="empty">
+									还没有。
+								</p>
+							) : (
+								group.versions.map((v) => (
+									<article id={v.anchor} class="version">
+										<header class="version-head">
+											<h3>
+												<a href={`#${v.anchor}`}>{v.version}</a>
+											</h3>
+											{v.note && <p class="version-note">{v.note}</p>}
+										</header>
+										<ul class="items">
+											{v.items.map((item) => (
+												<li>
+													{item.date && <time datetime={item.date}>{dateText(item.date)}</time>}
+													<span>{item.text}</span>
+												</li>
+											))}
+										</ul>
+									</article>
+								))
+							)}
+						</section>
+					))
+				}
+			</div>
+		</div>
 	</main>
 </Base>
 
@@ -67,6 +81,37 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 	.group {
 		padding: var(--s-6) 0 var(--s-5);
 		border-top: 1px solid var(--c-line);
+		/* 点目录跳过来时，标题停在手机顶上那一条目录下面，不被盖住 */
+		scroll-margin-top: var(--toc-bar-h);
+	}
+
+	/* 手机、平板上目录那一条自带下边线，第一组就不再画上边线 */
+	@media (max-width: 1023px) {
+		.group:first-child {
+			border-top: 0;
+		}
+	}
+
+	/* 电脑：左边一列是版本目录（跟着滚），右边正文，正文一栏还是原来的宽度 */
+	@media (min-width: 1024px) {
+		.wrap {
+			max-width: calc(var(--page-max) + 2 * var(--gutter));
+		}
+
+		.log {
+			display: grid;
+			grid-template-columns: 220px minmax(0, 1fr);
+			column-gap: var(--s-7);
+			align-items: start;
+		}
+
+		.log-body {
+			max-width: calc(var(--measure) + 160px);
+		}
+
+		.group {
+			scroll-margin-top: 0;
+		}
 	}
 
 	.group-head h2 {
@@ -86,7 +131,13 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 
 	.version {
 		margin-top: var(--s-5);
-		scroll-margin-top: var(--s-4);
+		scroll-margin-top: calc(var(--toc-bar-h) + var(--s-4));
+	}
+
+	@media (min-width: 1024px) {
+		.version {
+			scroll-margin-top: var(--s-4);
+		}
 	}
 
 	.version-head {

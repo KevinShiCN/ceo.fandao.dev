@@ -39,7 +39,7 @@ const total = `共 ${items.length} 步`;
 </nav>
 
 <script>
-	const LINE = 0.3;
+	import { closeOnPick, readingPosition, trackScroll } from '../lib/toc-spy';
 
 	for (const toc of document.querySelectorAll<HTMLElement>('[data-toc]')) {
 		const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]')];
@@ -56,20 +56,7 @@ const total = `共 ${items.length} 步`;
 		let shown = -2;
 
 		const update = () => {
-			const line = window.innerHeight * LINE;
-			let at = -1;
-			let part = 0;
-			steps.forEach((step, i) => {
-				const box = (step as HTMLElement).getBoundingClientRect();
-				if (box.top <= line) {
-					at = i;
-					part = Math.min(1, (line - box.top) / box.height);
-				}
-			});
-			if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
-				at = steps.length - 1;
-				part = 1;
-			}
+			const { at, part } = readingPosition(steps as HTMLElement[]);
 			for (const row of rows) {
 				row.forEach((seg, i) => seg.style.setProperty('--fill', String(i < at ? 1 : i === at ? Math.round(part * 1000) / 1000 : 0)));
 			}
@@ -86,34 +73,8 @@ const total = `共 ${items.length} 步`;
 			if (head) head.textContent = at < 0 ? (head.dataset.total ?? '') : `第 ${at + 1} 步，共 ${steps.length} 步`;
 		};
 
-		let queued = false;
-		const schedule = () => {
-			if (queued) return;
-			queued = true;
-			requestAnimationFrame(() => {
-				queued = false;
-				update();
-			});
-		};
-		window.addEventListener('scroll', schedule, { passive: true });
-		window.addEventListener('resize', schedule);
-		window.addEventListener('load', schedule);
-		update();
+		trackScroll(update);
 		toc.dataset.live = '';
-
-		// 手机上点开的目录：点了哪步就收起来；按 Esc、点目录外面也收起来
-		if (bar) {
-			bar.addEventListener('click', (event) => {
-				if ((event.target as Element).closest('a')) bar.open = false;
-			});
-			bar.addEventListener('keydown', (event) => {
-				if (event.key !== 'Escape' || !bar.open) return;
-				bar.open = false;
-				bar.querySelector('summary')?.focus();
-			});
-			document.addEventListener('click', (event) => {
-				if (bar.open && !bar.contains(event.target as Node)) bar.open = false;
-			});
-		}
+		if (bar) closeOnPick(bar);
 	}
 </script>
