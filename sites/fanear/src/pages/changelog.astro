@@ -5,7 +5,6 @@ import PageIntro from '../components/PageIntro.astro';
 import raw from '../data/CHANGELOG.md?raw';
 import Base from '../layouts/Base.astro';
 import { parseChangelog } from '../lib/changelog.mjs';
-import { STATUS } from '../lib/site';
 
 const log = parseChangelog(raw);
 const groups = [
@@ -30,7 +29,7 @@ const dateText = (iso: string) => `${Number(iso.slice(5, 7))}月${Number(iso.sli
 					</div>
 					{group.versions.length === 0 ? (
 						<p class="empty">
-							还没有。{STATUS.next}
+							还没有。
 						</p>
 					) : (
 						group.versions.map((v) => (

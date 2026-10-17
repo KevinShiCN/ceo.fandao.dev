@@ -8,7 +8,7 @@ import Shot from '../components/Shot.astro';
 import Toc from '../components/Toc.astro';
 import Base from '../layouts/Base.astro';
 import { SHOTS_NOTE } from '../lib/shots';
-import { STATUS, XHS } from '../lib/site';
+import { STATUS } from '../lib/site';
 import { withBase } from '../lib/url';
 import '../styles/page-motion.css';
 
@@ -38,8 +38,8 @@ const steps = [
 				<li id="install" class="step">
 					<h2><span class="step-no">1</span>装 App</h2>
 					<div class="note-box" role="note">
-						<p><strong>现在还装不了。</strong>饭耳{STATUS.label}，{STATUS.text}</p>
-						<p>{STATUS.next}想第一时间知道，{XHS.search}。</p>
+						<p>饭耳{STATUS.label}，{STATUS.text}</p>
+						<p><strong>{STATUS.follow}</strong></p>
 					</div>
 					<p>需要一部 iOS 17 以上的 iPhone 和配好对的 Apple Watch（watchOS 10 以上）。手表上的饭耳要单独装到手表上，第 3 步「先录上」会带你装。</p>
 				</li>

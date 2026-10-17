@@ -1,5 +1,5 @@
 ---
-// 现在能不能用：照实写内测中、还没对外发布、没有下载链接；去哪等消息。下面接最近更新（Latest.astro，数据由 CHANGELOG 生成）。
+// 现在能不能用：照实写公开测试中、还没上架 App Store；TestFlight 去小红书群里拿（官网不放链接）。下面接最近更新（Latest.astro，数据由 CHANGELOG 生成）。
 import { STATUS } from '../../lib/site';
 import { withBase } from '../../lib/url';
 ---
@@ -8,7 +8,6 @@ import { withBase } from '../../lib/url';
 	<h2 id="h-now">现在能不能用</h2>
 	<div class="now-body">
 		<p class="now-status"><strong>{STATUS.label}</strong>{STATUS.text}</p>
-		<p>{STATUS.next}</p>
 		<p>{STATUS.follow}</p>
 		<p>装好以后怎么一步步用起来，看<a href={withBase('/guide/')}>使用说明</a>。</p>
 	</div>
