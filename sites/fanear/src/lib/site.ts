@@ -41,6 +41,7 @@ export interface NavItem {
 export const NAV: readonly NavItem[] = [
 	{ path: '/features/', label: '功能' },
 	{ path: '/guide/', label: '使用说明' },
+	{ path: '/faq/', label: '常见问题' },
 	{ path: '/changelog/', label: '更新记录' },
 ];
 

@@ -1,4 +1,4 @@
-/* 功能、使用说明两页的滚动动效（10-13 本人 Q33：「A、B 都做我看看效果」，首页之外内页也加；
+/* 功能、使用说明、常见问题三页的滚动动效（10-13 本人 Q33：「A、B 都做我看看效果」，首页之外内页也加；
    10-16 本人：「移动端为什么没有动效？scroll的动效是要有的」，手机、平板也打开，挪的距离小一些）。
    跟首页（scroll-motion.css）同一套做法：CSS 滚动驱动动画，往下滑才动、往回滑倒回去，不用 JavaScript；
    浏览器支持、没设「减弱动态效果」才打开，否则页面跟原来一样。
@@ -8,16 +8,18 @@
 
 @media (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
-		/* 每一节：功能页的 .feature，使用说明的 .step。原来的上边线改透明，同一位置画一条长出来的线 */
+		/* 每一节：功能页的 .feature，使用说明的 .step，常见问题的 .faq-group。原来的上边线改透明，同一位置画一条长出来的线 */
 		.wrap > section.feature,
-		.wrap .steps > li.step {
+		.wrap .steps > li.step,
+		.wrap .faq-groups > section.faq-group {
 			position: relative;
 			border-top-color: transparent;
 			view-timeline: --fe-sec block;
 		}
 
 		.wrap > section.feature::before,
-		.wrap .steps > li.step::before {
+		.wrap .steps > li.step::before,
+		.wrap .faq-groups > section.faq-group::before {
 			content: '';
 			position: absolute;
 			top: -1px;
@@ -36,7 +38,8 @@
 
 		/* 字：每一块各自往上浮到位，没有截图的那几步一段一段接着上来 */
 		.wrap > section.feature .feature-text,
-		.wrap .steps > li.step > :not(.step-shots) {
+		.wrap .steps > li.step > :not(.step-shots),
+		.wrap .faq-groups > section.faq-group > * {
 			animation-name: fe-page-rise;
 			animation-duration: auto;
 			animation-timing-function: cubic-bezier(0.25, 0.6, 0.2, 1);

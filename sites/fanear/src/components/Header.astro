@@ -1,6 +1,6 @@
 ---
-// 页头：左边 LOGO、名字和现在的状态（点了回首页），右边三个栏目。
-// 手机上分两行：第一行 LOGO 和状态，第二行三个栏目；宽屏并成一行。
+// 页头：左边 LOGO、名字和现在的状态（点了回首页），右边四个栏目。
+// 手机上分两行：第一行 LOGO 和状态，第二行四个栏目；宽屏并成一行。
 import { NAV, SITE, STATUS } from '../lib/site';
 import { stripBase, withBase } from '../lib/url';
 import Logo from './Logo.astro';
@@ -124,6 +124,17 @@ const path = stripBase(Astro.url.pathname);
 		border-bottom-color: var(--c-me);
 		color: var(--c-ink);
 		font-weight: 600;
+	}
+
+	/* 窄手机（360 宽）四个栏目一行放不下，每个栏目左右少留一点 */
+	@media (max-width: 399px) {
+		.site-nav {
+			margin-left: calc(-1 * var(--s-2));
+		}
+
+		.site-nav a {
+			padding: 0 var(--s-2);
+		}
 	}
 
 	@media (min-width: 720px) {

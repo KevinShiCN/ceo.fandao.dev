@@ -1,0 +1,399 @@
+---
+// 常见问题（本人 10-18：「做FAQ页面 汇总一些常用的疑问」）。先放本人点名的两件：选手表（建议买 Ultra）、
+// 健康权限（以前手滑点错了，饭耳没法再提醒，要用户自己去改）；再收饭耳仓库 docs/user-insights/ 里用户问过、答案已经定了的。
+// 规矩同使用说明：只写真事；按钮名、设置项名照 App 界面上的原字，改了 App 文案这里也要跟着改。
+// 按饭耳主线 1b747c1b（0.2.6 的 202610180137 构建）核对过（10-18），每一条的出处写在那一条上面。
+import PageIntro from '../components/PageIntro.astro';
+import Base from '../layouts/Base.astro';
+import { STATUS, XHS } from '../lib/site';
+import { withBase } from '../lib/url';
+import '../styles/page-motion.css';
+
+/** 问题原文。键就是页内锚点（比如 /faq/#health-permission），目录和标题都从这里取。 */
+const Q = {
+	ultra: '买哪款 Apple Watch？要不要买 Ultra？',
+	'old-watch': '我现在的手表能用吗？',
+	'health-use': '饭耳读健康数据做什么？会发给谁？',
+	'health-permission': '当时手滑点了「不允许」，健康数据怎么重新打开？',
+	wrist: '录音时，一抬腕就跳出饭耳？',
+	'background-refresh': '「后台 App 刷新」明明开着，饭耳还说没开？',
+	price: '饭耳要钱吗？',
+	dialect: '说粤语、方言或外语，转得出来吗？',
+	download: '去哪下载饭耳？',
+	privacy: '我的录音会传给开发者吗？',
+} as const;
+type QId = keyof typeof Q;
+
+/** 分组：目录和正文同一个顺序。 */
+const GROUPS: Record<string, { title: string; items: readonly QId[] }> = {
+	watch: { title: '选手表', items: ['ultra', 'old-watch'] },
+	health: { title: '健康数据', items: ['health-use', 'health-permission'] },
+	settings: { title: '设置', items: ['wrist', 'background-refresh'] },
+	cost: { title: '花费和转文字', items: ['price', 'dialect'] },
+	privacy: { title: '下载和隐私', items: ['download', 'privacy'] },
+};
+
+/** 苹果官网「比较 Apple Watch 机型」（apple.com.cn/watch/compare/，10-18 取）的电池续航原文「最长可达 N 小时」。 */
+const WATCHES = [
+	{ name: 'Apple Watch Ultra 4', hours: 50, pick: true },
+	{ name: 'Apple Watch Series 12', hours: 24, pick: false },
+	{ name: 'Apple Watch SE 3', hours: 18, pick: false },
+];
+const MAX_HOURS = Math.max(...WATCHES.map((w) => w.hours));
+---
+
+<Base
+	title="常见问题"
+	description="饭耳常见问题：买哪款 Apple Watch、要不要买 Ultra，健康数据读来做什么、点错了怎么改，要不要钱，录音会不会传给开发者。"
+>
+	<main id="main" class="wrap">
+		<PageIntro title="常见问题">
+			<p>问得最多的 {Object.keys(Q).length} 个问题。按钮和设置项的名字照 App 上的字写。</p>
+		</PageIntro>
+
+		<div class="faq">
+			<nav class="faq-index" aria-label="全部问题">
+				{
+					Object.values(GROUPS).map((group) => (
+						<div class="faq-index-group">
+							<p class="faq-index-title">{group.title}</p>
+							<ul>
+								{group.items.map((id) => (
+									<li>
+										<a href={`#${id}`}>{Q[id]}</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))
+				}
+			</nav>
+
+			<div class="faq-groups">
+				<section class="faq-group" aria-labelledby="g-watch">
+					<h2 id="g-watch">{GROUPS.watch.title}</h2>
+
+					{/* 续航、麦克风：苹果官网机型比较页原文（10-18 取）。「最要紧的是续航」：饭耳仓库 10-13 换表调研，确定的差别是续航；
+					    三个麦克风饭耳的录音用不用得上，没同场对录验证过，所以只照抄苹果的原话，不写「录得更清楚」。 */}
+					<div class="qa" id="ultra">
+						<h3>{Q.ultra}</h3>
+						<p><strong>建议买 Ultra。</strong>饭耳全天录音，手表的麦克风一直开着，最要紧的是续航。苹果官网写的电池续航：</p>
+						<ul class="battery">
+							{
+								WATCHES.map((w) => (
+									<li class:list={['battery-row', { pick: w.pick }]}>
+										<span class="battery-name">
+											{w.name}
+											{w.pick && <span class="pick-tag">推荐</span>}
+										</span>
+										<span class="battery-value">最长 {w.hours} 小时</span>
+										<span class="battery-track" aria-hidden="true">
+											<span class="battery-bar" style={`width: ${(w.hours / MAX_HOURS) * 100}%`} />
+										</span>
+									</li>
+								))
+							}
+						</ul>
+						<p>麦克风：Ultra 4 是「三麦克风阵列，支持波束成形和风噪降低功能」，Series 12 和 SE 3 是「麦克风，支持语音突显功能」。</p>
+						<p class="hint">数字和引号里的话出自苹果官网的机型比较页（2026 年 10 月），是苹果自己测的，不是开着饭耳录音时测的。</p>
+					</div>
+
+					{/* 系统要求：饭耳仓库 project.yml（iOS 17.0、watchOS 10.0），跟使用说明第 1 步一致。 */}
+					<div class="qa" id="old-watch">
+						<h3>{Q['old-watch']}</h3>
+						<p>watchOS 10 以上的 Apple Watch 都能装，iPhone 要 iOS 17 以上。电池用旧了、续航短的表，可能撑不满一整天。</p>
+					</div>
+				</section>
+
+				<section class="faq-group" aria-labelledby="g-health">
+					<h2 id="g-health">{GROUPS.health.title}</h2>
+
+					{/* 饭耳仓库 HealthPermissionSection.swift：开关「允许大模型调用健康数据」，关着只在饭耳里展示（比如对话页的心率）；
+					    LegalTexts.swift：不发给开发者；写入「体能训练」只用来拉起手表；不是医疗器械。 */}
+					<div class="qa" id="health-use">
+						<h3>{Q['health-use']}</h3>
+						<p>回看对话时，对上你当时的身体状态，比如说某句话时的心率。要读哪几项，iPhone 会逐项列出来，你自己选；一项不开也能录音。</p>
+						<p>默认只在饭耳里显示。在「设置」里打开「允许大模型调用健康数据」，才会发给你自己配的大模型，帮着整理对话、找关照、写总结。不会自动发给开发者。</p>
+						<p>另外会申请写入「体能训练」，只用来把手表上停了的饭耳拉起来接着录。</p>
+						<p class="hint">饭耳不是医疗器械，不做诊断。</p>
+					</div>
+
+					{/* 只问一次：苹果 HKHealthStore requestAuthorization 文档（问过的类型不再弹窗）；App 看不到读取权限：HealthKit 的隐私设计。
+					    四步照抄饭耳仓库 HealthAccessGuide.swift（出自苹果《iPhone 使用手册》「共享你的健康数据」），App 改了这里跟着改。 */}
+					<div class="qa" id="health-permission">
+						<h3>{Q['health-permission']}</h3>
+						<p><strong>饭耳没法再问你，也没法提醒你。</strong>苹果规定，健康数据每一项只问一次，问过以后 App 不能再弹出来问；App 也看不到你关了哪几项。只能你自己去打开：</p>
+						<ol class="list">
+							<li>打开「健康」App，点底部「摘要」</li>
+							<li>点右上角你的头像（或姓名首字母）</li>
+							<li>在「隐私」下面点「App」</li>
+							<li>点「饭耳」，把允许读取的项目打开</li>
+						</ol>
+						<p>饭耳「设置」里「读取心率、睡眠等」那一行有「去健康 App 改」，点一下直接打开「健康」App。</p>
+					</div>
+				</section>
+
+				<section class="faq-group" aria-labelledby="g-settings">
+					<h2 id="g-settings">{GROUPS.settings.title}</h2>
+
+					{/* 路径照抄饭耳仓库 PrivacyGuide.swift；「设好了」见 ExperienceChecklist.swift（饭耳读不到手表上的设置，本人 10-17 TW1 A）。 */}
+					<div class="qa" id="wrist">
+						<h3>{Q.wrist}</h3>
+						<p>苹果默认这样：手表上正在录音的 App，抬腕时会回到它。想抬腕停在表盘，在 iPhone 上设：</p>
+						<ol class="list">
+							<li>打开「Watch」App，点「我的手表」›「通用」›「返回表盘」</li>
+							<li>点「饭耳」，选「自定义」「始终」，关掉「返回 App」</li>
+						</ol>
+						<p>只改屏幕显示，不影响录音。饭耳读不到手表上的这个设置，设好后在「让饭耳更好用」的「抬腕不弹出饭耳」那一行点「设好了」。</p>
+					</div>
+
+					{/* 灰色的开：饭耳仓库 ExperienceChecklist.swift 的提示原话（10-17 两位 0.2.6 用户截图）；低电量模式会关掉后台 App 刷新：苹果支持文章 101604。 */}
+					<div class="qa" id="background-refresh">
+						<h3>{Q['background-refresh']}</h3>
+						<p>多半是 iPhone 的总开关关了：这时「设置」里饭耳那一页的开关看着是开的，其实是灰的、点不动。到 iPhone「设置 › 通用 › 后台 App 刷新」，最上面那行别选「关闭」。</p>
+						<p>低电量模式开着时，后台 App 刷新也会被关掉。</p>
+					</div>
+				</section>
+
+				<section class="faq-group" aria-labelledby="g-cost">
+					<h2 id="g-cost">{GROUPS.cost.title}</h2>
+
+					{/* 价钱照饭耳 App「语音转文字」列表里写的（ASRSettingsText.swift）。 */}
+					<div class="qa" id="price">
+						<h3>{Q.price}</h3>
+						<p>饭耳免费。要花钱的只有你自己选的云端服务，钱直接付给服务商：</p>
+						<ul class="list">
+							<li>转文字：用手机本机转免费；云端的阿里云百炼约 0.1 元/小时，腾讯云、火山引擎 0.8 元/小时。</li>
+							<li>大模型：按你选的那一家的价钱。</li>
+						</ul>
+						<p>怎么选，看<a href={withBase('/guide/#asr')}>使用说明第 5 步</a>。</p>
+					</div>
+
+					{/* 提醒原话：饭耳仓库 LocalTranscriptionText.swift（粤语用户反馈苹果自带转写认不出，本人 10-17）；SenseVoice 约 163MB 同上。 */}
+					<div class="qa" id="dialect">
+						<h3>{Q.dialect}</h3>
+						<p>苹果自带转写对粤语等方言和外语转得不好。免费的可以换 SenseVoice（下载到手机，约 163MB），还不行就用云端转写。在「设置 › 语音转文字」里换。</p>
+					</div>
+				</section>
+
+				<section class="faq-group" aria-labelledby="g-privacy">
+					<h2 id="g-privacy">{GROUPS.privacy.title}</h2>
+
+					<div class="qa" id="download">
+						<h3>{Q.download}</h3>
+						<p>{STATUS.text}{STATUS.follow}装好以后照<a href={withBase('/guide/')}>使用说明</a>一步步来。</p>
+					</div>
+
+					{/* 照饭耳仓库 LegalTexts.swift：不会自动发给开发者，转写与大模型请求不经过开发者的服务器，iCloud 录音保存默认打开。 */}
+					<div class="qa" id="privacy">
+						<h3>{Q.privacy}</h3>
+						<p>录音、转写文字和健康数据都不会自动传给开发者。转文字和大模型的请求从你的手机直接发给你选的服务商，不经过开发者的服务器。</p>
+						<p>录音存在你的手机上，默认还在你自己的 iCloud 里存一份。详见<a href={withBase('/privacy/')}>隐私说明</a>。</p>
+					</div>
+				</section>
+
+				<p class="faq-more">没找到你的问题？{XHS.search}，问我。</p>
+			</div>
+		</div>
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--page-max) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter);
+	}
+
+	/* 目录：手机上放在最前面，一组一组列出全部问题；电脑上是左边一列，跟着滚 */
+	.faq-index {
+		padding: var(--s-5) 0;
+		border-top: 1px solid var(--c-line);
+	}
+
+	.faq-index-group + .faq-index-group {
+		margin-top: var(--s-4);
+	}
+
+	.faq-index-title {
+		color: var(--c-ink-3);
+		font-size: 14px;
+		font-weight: 700;
+	}
+
+	.faq-index ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.faq-index a {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		padding: var(--s-1) 0;
+		/* 用链接的我蓝，一眼看出能点 */
+		color: var(--c-me);
+		font-size: 16px;
+		line-height: 1.5;
+		text-decoration: none;
+		touch-action: manipulation;
+	}
+
+	.faq-index a:hover {
+		color: var(--c-me-press);
+		text-decoration: underline;
+	}
+
+	.faq-index a:active {
+		background: var(--c-wash);
+	}
+
+	.faq-group {
+		padding-top: var(--s-6);
+		border-top: 1px solid var(--c-line);
+	}
+
+	.faq-group + .faq-group {
+		margin-top: var(--s-7);
+	}
+
+	.faq-group h2 {
+		font-size: 26px;
+	}
+
+	.qa {
+		max-width: var(--measure);
+		margin-top: var(--s-5);
+		/* 点目录跳过来时，问题不贴着屏幕顶 */
+		scroll-margin-top: var(--s-4);
+	}
+
+	.qa + .qa {
+		margin-top: var(--s-6);
+	}
+
+	.qa h3 {
+		font-size: 19px;
+	}
+
+	.qa p,
+	.qa .list,
+	.qa .battery {
+		margin-top: var(--s-3);
+	}
+
+	.list {
+		padding-left: 1.3em;
+	}
+
+	ul.list {
+		list-style: disc;
+	}
+
+	.list li + li {
+		margin-top: var(--s-2);
+	}
+
+	.list li::marker {
+		color: var(--c-ink-3);
+	}
+
+	.hint {
+		color: var(--c-ink-2);
+		font-size: 16px;
+	}
+
+	/* 续航对比：一款表一行，上面是名字和小时数，下面一根条，长短按小时数；推荐的那款条是我蓝，名字旁边写「推荐」 */
+	.battery {
+		display: grid;
+		gap: var(--s-4);
+		margin-bottom: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.battery-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: baseline;
+		column-gap: var(--s-3);
+		row-gap: var(--s-2);
+	}
+
+	.battery-name {
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.pick-tag {
+		display: inline-flex;
+		align-items: center;
+		min-height: 22px;
+		margin-left: var(--s-2);
+		padding: 0 var(--s-2);
+		border: 1px solid var(--c-me);
+		border-radius: var(--r-tag);
+		color: var(--c-me);
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1;
+		vertical-align: 1px;
+	}
+
+	.battery-value {
+		color: var(--c-ink);
+		font-size: 16px;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.battery-track {
+		grid-column: 1 / -1;
+		height: 10px;
+		overflow: hidden;
+		border-radius: var(--r-tag);
+		background: var(--c-wash);
+	}
+
+	.battery-bar {
+		display: block;
+		height: 100%;
+		border-radius: 0 var(--r-tag) var(--r-tag) 0;
+		background: var(--c-ink-3);
+	}
+
+	.pick .battery-bar {
+		background: var(--c-me);
+	}
+
+	.faq-more {
+		margin-top: var(--s-7);
+		padding: var(--s-5) 0 var(--s-6);
+		border-top: 1px solid var(--c-line);
+		color: var(--c-ink-2);
+	}
+
+	/* 电脑：左边一列目录，右边正文 */
+	@media (min-width: 1024px) {
+		.faq {
+			display: grid;
+			grid-template-columns: 260px minmax(0, 1fr);
+			column-gap: var(--s-7);
+			align-items: start;
+		}
+
+		.faq-index {
+			position: sticky;
+			top: var(--s-4);
+			max-height: calc(100vh - 2 * var(--s-4));
+			overflow-y: auto;
+			padding: var(--s-6) 0 var(--s-5);
+		}
+
+		.faq-index a {
+			min-height: 40px;
+			font-size: 15px;
+		}
+	}
+</style>
