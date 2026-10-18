@@ -1,0 +1,107 @@
+---
+// 自建服务转写的接口说明：全文来自 src/data/self-hosted-asr-api.md（fanear 仓库 docs/self-hosted-asr-api.md 的原样副本，
+// 由同步命令复制过来），这里只负责排版，不写一个字。标题取文档的第一个一级标题。
+// 想让这页更新，改 fanear 仓库那份文档再跑 scripts/sync-website.sh，不要改这里的副本。
+import { Content, getHeadings } from '../data/self-hosted-asr-api.md';
+import Base from '../layouts/Base.astro';
+import '../styles/page-motion.css';
+
+const title = getHeadings().find((h) => h.depth === 1)?.text;
+if (!title) throw new Error('self-hosted-asr-api.md 里没有一级标题');
+---
+
+<Base title={title} description="饭耳「自建服务」转写要对接的接口：饭耳发什么、要什么返回、出错时怎么回，以及已核对过的服务。">
+	<main id="main" class="wrap">
+		<article class="doc">
+			<Content />
+		</article>
+	</main>
+</Base>
+
+<style>
+	.wrap {
+		max-width: calc(var(--measure) + 2 * var(--gutter));
+		margin: 0 auto;
+		padding: 0 var(--gutter) var(--s-8);
+	}
+
+	.doc :global(h1) {
+		padding: var(--s-7) 0 var(--s-4);
+		font-size: 34px;
+		line-height: 1.25;
+		letter-spacing: 0.02em;
+	}
+
+	.doc :global(h2) {
+		margin-top: var(--s-7);
+		padding-top: var(--s-5);
+		border-top: 1px solid var(--c-line);
+		font-size: 22px;
+		scroll-margin-top: var(--s-5);
+	}
+
+	.doc :global(p),
+	.doc :global(ul),
+	.doc :global(table) {
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+	}
+
+	.doc :global(h1 + p) {
+		max-width: var(--measure);
+		font-size: 18px;
+		line-height: 1.7;
+	}
+
+	.doc :global(ul) {
+		padding-left: 1.4em;
+	}
+
+	.doc :global(li + li) {
+		margin-top: var(--s-2);
+	}
+
+	.doc :global(code) {
+		padding: 1px 6px;
+		background: var(--c-wash);
+		border-radius: 4px;
+		color: var(--c-ink);
+		font-size: 0.9em;
+		overflow-wrap: anywhere;
+	}
+
+	/* 表格：窄屏里横着滑，不撑破页面 */
+	.doc :global(table) {
+		display: block;
+		overflow-x: auto;
+		max-width: 100%;
+		border-collapse: collapse;
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.doc :global(th),
+	.doc :global(td) {
+		min-width: 6em;
+		padding: var(--s-2) var(--s-3);
+		border: 1px solid var(--c-line);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	.doc :global(th) {
+		background: var(--c-wash);
+		color: var(--c-ink);
+		white-space: nowrap;
+	}
+
+	@media (min-width: 768px) {
+		.doc :global(h1) {
+			padding: var(--s-8) 0 var(--s-5);
+		}
+
+		.doc :global(h2) {
+			font-size: 24px;
+		}
+	}
+</style>
