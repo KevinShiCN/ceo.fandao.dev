@@ -119,17 +119,18 @@ const MAX_HOURS = Math.max(...WATCHES.map((w) => w.hours));
 					</div>
 
 					{/* 只问一次：苹果 HKHealthStore requestAuthorization 文档（问过的类型不再弹窗）；App 看不到读取权限：HealthKit 的隐私设计。
-					    四步照抄饭耳仓库 HealthAccessGuide.swift（出自苹果《iPhone 使用手册》「共享你的健康数据」），App 改了这里跟着改。 */}
+					    改权限：本人 10-18 定从 iPhone「设置」里改（原话路径「设置 → 隐私与安全性 → 健康 → 饭耳」）；苹果开发者文档
+					    「Authorizing access to health data」：权限随时可以在「设置」或「健康」App 里改。「健康」App 那条照抄饭耳仓库
+					    HealthAccessGuide.swift（出自苹果《iPhone 使用手册》「共享你的健康数据」，App 里「去健康 App 改」打开的就是它），App 改了这里跟着改。 */}
 					<div class="qa" id="health-permission">
 						<h3>{Q['health-permission']}</h3>
-						<p><strong>饭耳没法再问你，也没法提醒你。</strong>苹果规定，健康数据每一项只问一次，问过以后 App 不能再弹出来问；App 也看不到你关了哪几项。只能你自己去打开：</p>
+						<p><strong>饭耳没法再问你，也没法提醒你。</strong>苹果规定，健康数据每一项只问一次，问过以后 App 不能再弹出来问；App 也看不到你关了哪几项。只能你自己去设置里打开：</p>
 						<ol class="list">
-							<li>打开「健康」App，点底部「摘要」</li>
-							<li>点右上角你的头像（或姓名首字母）</li>
-							<li>在「隐私」下面点「App」</li>
-							<li>点「饭耳」，把允许读取的项目打开</li>
+							<li>打开 iPhone「设置」，点「隐私与安全性」</li>
+							<li>点「健康」，再点「饭耳」</li>
+							<li>把要读的项目打开</li>
 						</ol>
-						<p>饭耳「设置」里「读取心率、睡眠等」那一行有「去健康 App 改」，点一下直接打开「健康」App。</p>
+						<p>也可以在「健康」App 里改：点底部「摘要」，点右上角你的头像（或姓名首字母），在「隐私」下面点「App」，再点「饭耳」。饭耳「设置」里「读取心率、睡眠等」那一行的「去健康 App 改」，打开的就是「健康」App。</p>
 					</div>
 				</section>
 
