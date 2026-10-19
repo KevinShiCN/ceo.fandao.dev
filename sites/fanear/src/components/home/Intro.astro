@@ -178,9 +178,10 @@ import { INTRO, splitPoint, WHY } from '../../lib/why';
 		margin: var(--s-3) 0 0;
 	}
 
+	/* 左栏放得下最长的名字「某录音卡产品」（6 个字），不折行 */
 	.why-others div {
 		display: grid;
-		grid-template-columns: 4.5em minmax(0, 1fr);
+		grid-template-columns: 6em minmax(0, 1fr);
 		gap: var(--s-3);
 		align-items: baseline;
 		padding: var(--s-3) 0;
@@ -189,6 +190,7 @@ import { INTRO, splitPoint, WHY } from '../../lib/why';
 
 	.why-others dt {
 		font-weight: 700;
+		white-space: nowrap;
 	}
 
 	.why-others dd {
