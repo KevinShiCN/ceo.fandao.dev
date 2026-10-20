@@ -191,7 +191,7 @@ export const GROUPS: readonly Group[] = [
 			{ text: '没填好密钥的云端不能设为正在用。配好以后只用「正在用」那一家，连不上不会自动换别家。' },
 			{ text: '设置里的「常用词」帮转写认对人名和说法，能「批量导入」（一行一个）和「导出」。' },
 			{ text: '云端出错时先隔一会儿自己重试，再查是不是服务商的问题；服务商没问题，就请你「发给开发者」，只带日志。' },
-			{ text: '大模型按供应商添加：国内有 DeepSeek、通义千问、豆包、Kimi、智谱 GLM、MiniMax，海外有 OpenAI、Anthropic、Google、Meta、OpenRouter，也能自定义。接口格式四种：「Responses」「OpenAI 兼容」「Claude 兼容」「Gemini 原生」。', home: true },
+			{ text: '大模型按供应商添加：国内有 DeepSeek、通义千问、豆包、Kimi、智谱 GLM、MiniMax，海外有 O家、A家、G家、M家、OR家，也能自定义。接口格式四种：「Responses」「O家兼容」「A家兼容」「G家原生」。', home: true },
 			{ text: '也可以选「iPhone 自带模型」：只出标题和要点，不抓承诺、不认人。' },
 		],
 		shots: ['asr'],
