@@ -15,9 +15,10 @@
 | `model` | 设置里填的模型名 |
 | `response_format` | 「分说话人」关：`verbose_json`；开：`diarized_json`；只回文字的服务切小段送时用测试连接测出的那种（一般是 `json`） |
 | `temperature` | `0` |
+| `language` | 转写语言（设置 › 语音转文字 › 转写语言，2026-10-22 起），ISO-639-1：`zh`（繁体）、`en`、`ja`、`ko`、`es`、`fr`、`de`、`it`、`pt`；转写语言是简体中文时不发，服务自己认（中英夹杂、粤语不被强制成普通话） |
 | `chunking_strategy` | 只在整块送 `diarized_json` 时发，值 `auto`（OpenAI 的分人模型超过 30 秒必须带）；切小段送不发 |
 
-不发 `language`、`prompt`、`timestamp_granularities`、`stream`。服务不认识的字段请忽略，不要报错（OpenAI 也是忽略的，2026-10-18 实测）。
+不发 `prompt`、`timestamp_granularities`、`stream`。服务不认识的字段请忽略，不要报错（OpenAI 也是忽略的，2026-10-18 实测）。
 
 ## 饭耳要什么返回
 
