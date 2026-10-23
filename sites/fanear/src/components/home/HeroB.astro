@@ -38,6 +38,10 @@ import Opening from './Opening.astro';
 	</figure>
 
 	<div class="hero-b-text">
+		<div class="hero-slogan-block">
+			<p class="hero-slogan">{SITE.slogan}</p>
+			<p class="hero-oneline">{SITE.tagline}</p>
+		</div>
 		<Opening />
 		<div class="hero-b-actions">
 			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
@@ -124,6 +128,26 @@ import Opening from './Opening.astro';
 		padding-top: var(--s-6);
 	}
 
+	/* 10-23 本人 AS1 C、AS7 A：slogan 是首屏最大的一句，下面一句说它是什么，再接 ADHD 那段 */
+	.hero-slogan-block {
+		margin-bottom: var(--s-6);
+	}
+
+	.hero-slogan {
+		color: var(--c-ink);
+		font-size: clamp(28px, 8.2vw, 34px);
+		font-weight: 800;
+		line-height: 1.25;
+		text-wrap: balance;
+	}
+
+	.hero-oneline {
+		margin-top: var(--s-3);
+		color: var(--c-ink-2);
+		font-size: 17px;
+		line-height: 1.6;
+	}
+
 	.hero-b-actions {
 		display: flex;
 		flex-wrap: wrap;
@@ -134,6 +158,14 @@ import Opening from './Opening.astro';
 	@media (min-width: 768px) {
 		.photo-author strong {
 			font-size: 34px;
+		}
+
+		.hero-slogan {
+			font-size: 50px;
+		}
+
+		.hero-oneline {
+			font-size: 19px;
 		}
 
 		.photo-title {
@@ -166,6 +198,11 @@ import Opening from './Opening.astro';
 
 		.hero-b-text {
 			padding-top: 0;
+		}
+
+		.hero-slogan {
+			font-size: 62px;
+			line-height: 1.2;
 		}
 	}
 </style>

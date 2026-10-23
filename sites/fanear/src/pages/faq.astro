@@ -182,7 +182,7 @@ const MAX_HOURS = Math.max(...WATCHES.map((w) => w.hours));
 
 					<div class="qa" id="download">
 						<h3>{Q.download}</h3>
-						<p>{STATUS.text}{STATUS.follow}装好以后照<a href={withBase('/guide/')}>使用说明</a>一步步来。</p>
+						<p>{STATUS.label}，{STATUS.text}{STATUS.follow}装好以后照<a href={withBase('/guide/')}>使用说明</a>一步步来。</p>
 					</div>
 
 					{/* 照饭耳仓库 LegalTexts.swift：不会自动发给开发者，转写与大模型请求不经过开发者的服务器，iCloud 录音保存默认打开。 */}
