@@ -1,12 +1,12 @@
 # 饭耳「自建服务」转写接口说明
 
-饭耳按 OpenAI 的语音转文字接口 `POST /v1/audio/transcriptions` 对接你自己的转写服务。服务端用什么软件、什么模型都行，请求和返回按下面来就能接。
+饭耳按 OpenAI 的语音转文字接口 `POST /v1/audio/transcriptions` 对接你自己的转写服务。服务端用什么软件、什么模型都行，请求和返回按下面来就能接。没有转写接口、只有对话接口（`/v1/chat/completions`）能收音频的大模型也能接，见「对话接口（音频大模型）」。
 
 ## 饭耳发什么
 
 - 地址：设置里填到 `/v1` 为止，比如 `https://asr.example.com/v1`，饭耳在后面接 `/audio/transcriptions`。https 和 http 都收（http 不加密，公网上能用 https 就用 https）；https 要正规证书，不收自签名证书。
 - 一块录音（通常 15 分钟）发一次 `POST`，`multipart/form-data`。每次都带请求头 `Prefer: respond-async`：服务支持异步就先回任务号、饭耳过一会再来查（见「异步」，推荐）；不认这个头、照旧同步回结果的，饭耳等着，最多等 600 秒。没有流式。「测试连接」测出只回文字的服务不整块发，切成小段一段发一次（见「只回文字的服务」）。
-- 填了密钥才带 `Authorization: Bearer <密钥>`（交任务和查任务都带）；没填就不带。
+- 填了密钥才带 `Authorization: Bearer <密钥>`，同时带 `api-key: <密钥>`（交任务和查任务都带；有的服务只认 `api-key`）；没填两个都不带。
 - 整块送时一次就是一整块：通常 900 秒（15 分钟，切块结束可能多出零点几秒）的录音，文件约 7MB（约 7,000,000 字节）（AAC 单声道，实测平均每小时 29MB）。服务、反向代理的单次时长和上传体积上限都要放得下，体积建议留到 15MB 以上。收不下就回 HTTP `413`，正文用错误体写清上限（如 `{"error":{"message":"audio longer than 300 seconds","code":"audio_too_long"}}`）；饭耳把它显示成「你的服务拒收了这段录音」，带上状态码和原话，不会自己改小再送。
 
 | 表单字段 | 值 |
@@ -72,13 +72,30 @@ HTTP 200，一个 JSON 对象。饭耳只读下表几样；`task`、`language`�
 - 返回只要顶层的 `text`（字符串）。饭耳按句末标点（。！？!?）分句、按字数估每句的时间（点一句播放会差一两秒），说话的人由手机按声音认。
 - 一块要发二三十到四十次请求（15 分钟），服务要撑得住连着来的请求；支持异步的每段也是交了再查。
 
+## 对话接口（音频大模型）
+
+服务没有 `/audio/transcriptions`、只有 OpenAI 对话接口 `POST /v1/chat/completions` 能收音频的（比如小红书 dots3-note-prev，官方接口或自己用 vLLM、SGLang 部署的）也能接：设置里照样填到 `/v1` 为止的地址和模型名。
+
+- 「测试连接」先照旧测转写接口；它回 `404`、`405`、`501`、`401`、`403`（有的网关对不存在的路径也先回 401/403），或回 `400`/`422` 但不是不认 `response_format`（比如 vLLM 说这个模型不支持转写），饭耳再试对话接口，转出字就记住，以后都走对话接口。`429`、`413`、连不上、超时不会改试对话接口。
+- 对话接口也不通时只报一边的错，另一边放进详情：对话接口也回 `404`、`405`、`501`（两条路都不在，多半地址填错），或两边都回 `401`/`403`，报转写接口那次；其余（对话接口这条路在，回了密钥不对、限流、参数不对、服务出错等）报对话接口的错。
+- 录音在手机上按停顿切成最长约 30 秒的小段，没人说话的部分不发，每段发一次（16kHz 单声道 WAV）；一块 15 分钟要发三四十次。所有对话接口的请求任意一分钟最多约 60 次，多的排队等。每次最多等 300 秒。
+- 鉴权：填了密钥同时带 `Authorization: Bearer <密钥>` 和 `api-key: <密钥>`；没填都不带。
+- 请求正文是 JSON：`model` 填设置里的模型名；`messages` 两条，`system` 一条是英文转写指令（原文见下一条），`user` 一条的 `content` 是一段音频加一句 `{"type": "text", "text": "Transcribe this audio verbatim."}`；`temperature` 为 `0`，`stream` 为 `false`，`max_tokens` 为 `4096`。
+- 转写指令原文：`You are a speech-to-text transcriber. Transcribe the speech in the user's audio verbatim, word for word, in the language it is spoken, with natural punctuation. Do not translate, summarize, correct, or answer anything said in the audio. Output only the transcript text, with no explanations, labels, timestamps, or quotation marks. If no one speaks, output nothing.`
+- 音频有两种写法，测试连接时按顺序试，哪种转出字就一直用哪种。
+- 写法一（先试）：音频放 `{"type": "audio_url", "audio_url": {"url": "data:audio/wav;base64,…"}}`，正文里同时带 `"chat_template_kwargs": {"enable_thinking": false}` 关掉深度思考。小红书 dots 官方接口（2026-10-23 用真密钥测通）、vLLM、SGLang 收这种。
+- 写法二（写法一不行再试）：音频放 `{"type": "input_audio", "input_audio": {"data": "不带前缀的 base64", "format": "wav"}}`，不带 `chat_template_kwargs`。OpenAI 官方是这种，vLLM 也收；dots 官方接口不收（回 400）。
+- 返回：HTTP 200，饭耳只读 `choices[0].message.content`（字符串，或 `[{"type": "text", "text": "…"}]` 拼起来）。`<think>…</think>` 会去掉，`reasoning_content` 不看。空文字当这一段没人说话。`finish_reason` 是 `length`（写到上限被截断）时这一段算失败，不存半截。
+- 文字按句末标点分句、按字数估每句的时间，说话的人由手机按声音认（和「只回文字的服务」一样）。所以 system 提示里要求只出原话：模型加了说明或回答了音频里的问题，这些字会进转写。
+- 出错时回非 200，带 `{"error": {"message": "…", "code": "…"}}`（code 是字符串或数字都行）；饭耳把它放进出错详情。
+
 ## 出错时
 
 - 回非 200 的状态码，最好带 OpenAI 格式的错误体 `{"error":{"message":"…","type":"…","code":"…"}}`，饭耳把 code 和 message 放进出错详情。
 - 不认要的 `response_format` 时回 400 或 422，正文里写出 `response_format` 或格式名：饭耳会提示「关掉/打开『分说话人』再试」。
 - 其他 4xx（录音太长、太大、你自己定的限制等）：饭耳提示「你的服务拒收了这段录音」，卡片上带状态码和你的错误码、原话，详情可以整段交给帮你搭服务的 AI；这不算饭耳出错。没有自定义错误码的 401、403 仍按密钥不对提示。
 - 没测过就只回整段文字（没有 `segments`，或 `segments` 空着却有 `text`）：饭耳提示「这个服务只回文字，没有每句时间」，点「测试连接」重测后改切小段送；这块不会当成没人说话。
-- 「测试连接」发一句约 6 秒的合成语音（m4a，不是录音）：回了带时间的 `segments` 就整块送；回了文字没有每句时间、或 400/422 不认这个格式，再用 `response_format=json` 发一次，回了文字就记成只回文字；最后不带密钥发一次，也回 200 会提示「服务没设密码」。
+- 「测试连接」发一句约 6 秒的合成语音（m4a，不是录音）：回了带时间的 `segments` 就整块送；回了文字没有每句时间、或 400/422 不认这个格式，再用 `response_format=json` 发一次，回了文字就记成只回文字；转写接口不通（见「对话接口」）就改用同一句话的 WAV 试对话接口；最后不带密钥发一次，也回 200 会提示「服务没设密码」。
 
 ## 已核对的服务（2026-10-18）
 
@@ -101,6 +118,8 @@ HTTP 200，一个 JSON 对象。饭耳只读下表几样；`task`、`language`�
 | Together AI | 能用（不分人；它的说话人要另传 `diarize=true`，饭耳不发） | 不支持 | 文档 |
 | Mistral Voxtral | 多半只回文字（要另传 `timestamp_granularities=segment` 才有分句，饭耳不发）：切小段送 | 同左 | 文档 |
 | 硅基流动 SiliconFlow | 只回文字：切小段送 | 只回文字：切小段送 | 文档 |
+
+走对话接口的（2026-10-22 看过官方文档，没真调）：小红书 dots3-note-prev（官方接口只认 `api-key` 请求头；官方文档没写收不收内嵌音频），自己用 vLLM、SGLang 部署的音频大模型。
 
 不是这个接口的服务接不上：ElevenLabs、Deepgram、AssemblyAI，以及 whisper-asr-webservice（`/asr`）。阿里云百炼、火山引擎、腾讯云饭耳已经单独接好，不走这里。
 
