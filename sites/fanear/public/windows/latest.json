@@ -1,11 +1,11 @@
 {
-  "version": "0.2.2",
-  "notes": "托盘菜单加「登录时打开饭耳」（默认关）；配对卡片说明电脑开着才转",
-  "pub_date": "2026-11-05T19:00:58Z",
+  "version": "0.3.0",
+  "notes": "一键装本地转写：快（SenseVoice）、准（FireRedASR2）两档，只用 CPU，任何电脑都能跑；仍然最推荐在线转写",
+  "pub_date": "2026-11-05T20:09:37Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcTZjS1hCY0pqOEVVTlJSS2NudXFRazV3R3BaUXorcW5wREZlNXhOUnFmakoxa1NNMzZFbXBiZUpaMG5QSUlPUTNrNkpiMkxWYy9qMDhEeUMvaFZyYnFIaXJxbVllWUFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkzOTA1MjM4CWZpbGU66aWt6ICzXzAuMi4yX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjIuMgo1NStRR2xOZksxZkdIdTZya2Y4ZWFZMUNabklpaHFUT1dqamo2eUtEa0RFbmJFdUEwUGg2Skl2MGR1WHpmWnJLUGNwWWRVUzRnNnVnS1g1azdtK0FEQT09Cg==",
-      "url": "https://fanear.fandao.dev/windows/fanear-0.2.2-x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcTZjS1hCY0pqOEJibk94SFFWZ3ZqbmlIcllnNHhJZXVMOUhSMlVqMVVXWXp2UGJUK3ZFVjJkbzJkb3J6T25KVXlaVXJhbkRZYjhuNTkyNDFoQXJuTVZPaUFmZmMvRlFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkzOTA5Mzc3CWZpbGU66aWt6ICzXzAuMy4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMAp6VmZCWTR0YXBMR2RkUXFBNmRWMllLdzg2RWN4RVZNRVl3ZmNEWTNKNThDT3J6SGtRNjduUkUrODJxUHFYSU5LMkI1MXZMNzZaQVhSS1RvMDY1T0lDdz09Cg==",
+      "url": "https://fanear.fandao.dev/windows/fanear-0.3.0-x64-setup.exe"
     }
   }
 }
