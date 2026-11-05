@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "第一个放到官网的 Windows 版：托盘常驻、点击更新、扫码配对让电脑帮手机转写",
+  "pub_date": "2026-11-05T18:33:51Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcTZjS1hCY0pqOEtpNDJ6aEpXQndJZGlaS0QyVHJqRHBHZkFjZ0d6V2ZzTUd3UkdTMGh1bTM0c2hrMXVENUh6V09aeENrREYwREhLdGdYdGhlNDdLWXlVOTI0c0IzN1FFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkzOTAzNjMxCWZpbGU66aWt6ICzXzAuMi4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjIuMAorT3UvcDBJTERkbjFCc0VRMjkxUFlNRjduQWo0VXFsYW11Zyt4dVovY3gzK2x1ZytkKzhxOHByTDNLZ3g3OXd0SkEydTJBSlFZZDdYVEYzR01NOFhEZz09Cg==",
+      "url": "https://fanear.fandao.dev/windows/fanear-0.2.0-x64-setup.exe"
+    }
+  }
+}
