@@ -1,27 +1,22 @@
 ---
 // 首页。首屏「先认识我」（HeroB.astro，10-15 本人 GW1 B）：App 介绍页的稻田照片，ADHD 那段和心愿就在照片旁边，只出现这一次。
-// 原来的「真机」首屏（HeroA）留在 git 提交 2b38ca2。
-// 往下：我 → 这一天 → 手表上 → 手机上（今天、待办、小耳、设置，按 0.3.0 的底部页签）→ 你的数据 → 现在能不能用、最近更新。
-// 文案都取 src/lib/ 里已经核对过的数据（features.ts、why.ts、day.ts、shots.ts、site.ts），不按子串挑句子。
-import { group, homePoints } from '../../lib/features';
+// 往下：我 → 手表上 → 手机上（今天、待办、小耳）→ 你的数据 → 现在能不能用。
+// 官网只写一句话的功能，不写细节、不讲技术（本人北京 11-06：「降低功能的描述」「不讲技术」），字都在 src/lib/（features.ts、why.ts、site.ts）。
+import { group } from '../../lib/features';
 import Shot from '../Shot.astro';
 import Chapter from './Chapter.astro';
 import Data from './Data.astro';
-import Day from './Day.astro';
 import HeroB from './HeroB.astro';
 import Intro from './Intro.astro';
-import Latest from './Latest.astro';
 import Now from './Now.astro';
-import Points from './Points.astro';
 import Watch from './Watch.astro';
 import '../../styles/scroll-motion.css';
 
-// 手机上的四个页签：App 里那一屏叫什么、讲哪一组功能、配哪张截图。
+// 手机上的三个页签：App 里那一屏叫什么、讲哪一组功能、配哪张截图。
 const tabs = [
 	{ id: 'h-tab-today', screen: '今天', group: group('today'), shot: 'today' },
 	{ id: 'h-tab-todo', screen: '待办', group: group('todo'), shot: 'todoDeck' },
 	{ id: 'h-tab-xiaoer', screen: '小耳', group: group('xiaoer'), shot: 'care' },
-	{ id: 'h-tab-settings', screen: '设置', group: group('models'), shot: 'asr' },
 ] as const;
 const [first, ...rest] = tabs;
 
@@ -33,7 +28,6 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 
 	<Intro />
 
-	<Day />
 
 	<div class="group">
 		<h2>手表上</h2>
@@ -42,20 +36,18 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 
 	<div class="group group-phone">
 		<h2>手机上</h2>
-		<p>底部四个页签：{tabs.map((t) => t.screen).join(' - ')}</p>
 	</div>
 
 	<div class="story">
 		{
 			tabs.map((tab, i) => (
 				<Chapter id={tab.id} screen={tab.screen} title={tab.group.headline ?? tab.group.title} lead={tab.group.lead} flip={i % 2 === 1}>
-					<Points items={homePoints(tab.group)} />
 					<Shot slot="figure" id={tab.shot} caption={false} sizes={phoneSizes} motion />
 				</Chapter>
 			))
 		}
 
-		{/* 电脑上往下滑时用的那一部手机：钉在右边不动，四屏跟着左边四节一屏一屏换（styles/scroll-motion.css）。
+		{/* 电脑上往下滑时用的那一部手机：钉在右边不动，三屏跟着左边三节一屏一屏换（styles/scroll-motion.css）。
 		    手机、平板、不支持滚动动画的浏览器和设了「减弱动态效果」的不显示它，还是每节自带截图 */}
 		<div class="story-phone">
 			<div class="story-pin">
@@ -63,11 +55,10 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 			</div>
 		</div>
 	</div>
-	<p class="story-note">这四张是模拟器截图，演示数据。</p>
+	<p class="story-note">这三张是模拟器截图，演示数据。</p>
 
 	<Data />
 	<Now />
-	<Latest />
 </main>
 
 <style>
@@ -108,11 +99,6 @@ const phoneSizes = '(min-width: 1100px) 300px, (min-width: 768px) 280px, 64vw';
 
 	.group-phone {
 		margin-top: var(--s-9);
-	}
-
-	.group p {
-		color: var(--c-ink-2);
-		font-size: 15px;
 	}
 
 	.story-note {

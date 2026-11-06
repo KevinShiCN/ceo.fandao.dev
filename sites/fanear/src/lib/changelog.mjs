@@ -1,5 +1,6 @@
-// 饭耳更新记录的解析器。来源是 fanear 仓库的 CHANGELOG.md（唯一来源），同步命令原样复制到
-// src/data/CHANGELOG.md；官网「更新记录」页和同步脚本都用这里解析。
+// 饭耳更新记录的解析器。来源是 fanear 仓库的 CHANGELOG.md（唯一来源）和 CHANGELOG-HIGHLIGHTS.md（每一版的重点）。
+// 官网只放对外版本和重点（本人北京 11-06：「包括更新日志也不写那么多了」）：同步命令用 publicChangelog 生成
+// src/data/changelog.json，完整的 CHANGELOG.md 不再复制进这个公开仓库。
 // 写成 .mjs 是为了同步脚本和测试（scripts/fanear-changelog.test.mjs）不经编译直接用。
 //
 // 认的格式（跟 CHANGELOG.md 现在的写法一致）：
@@ -141,6 +142,51 @@ export function dateText(/** @type {string} */ iso) {
  */
 export function isDeveloperOnly(item) {
 	return /^(（只在开发者自测的版本里）|自用内测版|饭耳 Beta[：:\s]|开发版)/.test(item.text);
+}
+
+/**
+ * @typedef {{ version: string, anchor: string, date: string | null, highlights: string[] }} PublicVersion
+ */
+
+/**
+ * 官网「更新记录」页的数据：只取「已发布」里标着「对外版」的版本（版本号、日期），重点取 CHANGELOG-HIGHLIGHTS.md 里同一版写的那几句。
+ * 测试版、自用内测版和每一条细节都不进官网。完整的 CHANGELOG.md 照样整份解析一遍，格式不对就报错停下。
+ * @param {string} changelog CHANGELOG.md 全文
+ * @param {string} [highlights] CHANGELOG-HIGHLIGHTS.md 全文；不给就都不带重点
+ * @returns {{ versions: PublicVersion[] }}
+ */
+export function publicChangelog(changelog, highlights = '') {
+	const log = parseChangelog(changelog);
+	const picked = parseHighlights(highlights);
+	return {
+		versions: log.released
+			.filter((v) => noteLabel(v.note) === '对外版')
+			.map((v) => ({ version: v.version, anchor: v.anchor, date: versionDate(v), highlights: picked.get(v.version) ?? [] })),
+	};
+}
+
+/**
+ * CHANGELOG-HIGHLIGHTS.md：「### 版本号」下面一行一条「- 一句」（折行时续行缩进两个空格），标题和说明不管。
+ * @param {string} markdown
+ * @returns {Map<string, string[]>} 版本号 -> 重点
+ */
+export function parseHighlights(markdown) {
+	/** @type {Map<string, string[]>} */
+	const map = new Map();
+	/** @type {string[] | null} */
+	let items = null;
+	for (const raw of markdown.replace(/\r\n?/g, '\n').split('\n')) {
+		if (raw.startsWith('#')) {
+			const match = raw.startsWith('### ') ? VERSION_HEADING.exec(raw.slice(4).trim()) : null;
+			items = match ? (map.get(match[1]) ?? []) : null;
+			if (match) map.set(match[1], items);
+			continue;
+		}
+		if (!items) continue;
+		if (raw.startsWith('- ')) items.push(raw.slice(2).trim());
+		else if (/^\s{2,}\S/.test(raw) && items.length > 0) items[items.length - 1] = joinWrapped(items[items.length - 1], raw.trim());
+	}
+	return map;
 }
 
 /** 「（说明）」去掉外面一层括号；没有括号就原样 */

@@ -1,6 +1,6 @@
 ---
-// 你的数据：没有截图，写成说明书里的一张小表。内容和功能页「数据和隐私」同一份（src/lib/features.ts 的 DATA）。
-import { DATA, DATA_LEAD } from '../../lib/features';
+// 你的数据：没有截图，一段话加几行要点（src/lib/features.ts 的 DATA_LEAD、DATA_POINTS），细节都在隐私说明。
+import { DATA_LEAD, DATA_POINTS } from '../../lib/features';
 import { withBase } from '../../lib/url';
 ---
 
@@ -11,16 +11,9 @@ import { withBase } from '../../lib/url';
 			<p>{DATA_LEAD}</p>
 			<p class="data-more">全文看<a href={withBase('/privacy/')}>隐私说明</a>。</p>
 		</div>
-		<dl class="data-rows">
-			{
-				DATA.map((fact) => (
-					<div>
-						<dt>{fact.title}</dt>
-						<dd>{fact.text}</dd>
-					</div>
-				))
-			}
-		</dl>
+		<ul class="data-rows">
+			{DATA_POINTS.map((point) => <li>{point}</li>)}
+		</ul>
 	</div>
 </section>
 
@@ -54,23 +47,15 @@ import { withBase } from '../../lib/url';
 
 	.data-rows {
 		margin: var(--s-5) 0 0;
+		padding: 0;
+		list-style: none;
 	}
 
-	.data-rows div {
+	.data-rows li {
 		padding: var(--s-3) 0;
 		border-top: 1px solid var(--c-line);
-	}
-
-	dt {
 		font-size: 16px;
 		font-weight: 700;
-	}
-
-	dd {
-		margin: var(--s-1) 0 0;
-		color: var(--c-ink-2);
-		font-size: 16px;
-		line-height: 1.6;
 	}
 
 	@media (min-width: 768px) {
@@ -102,16 +87,8 @@ import { withBase } from '../../lib/url';
 			margin-top: 0;
 		}
 
-		.data-rows div {
-			display: grid;
-			grid-template-columns: 9em minmax(0, 1fr);
-			gap: var(--s-4);
-			align-items: baseline;
+		.data-rows li {
 			padding: var(--s-4) 0;
-		}
-
-		dd {
-			margin: 0;
 		}
 	}
 </style>

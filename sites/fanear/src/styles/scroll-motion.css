@@ -2,16 +2,12 @@
    手机一套（10-16 本人：「移动端为什么没有动效？scroll的动效是要有的」）。
    动画都挂在滚动位置上（CSS 滚动驱动动画）：往下滑就往前走，往回滑就倒回去，不滑就不动；不用 JavaScript。
    浏览器支持滚动驱动动画（Chrome、Edge 115 起，Safari 26 起）、系统没设「减弱动态效果」才打开，否则页面跟原来一样。
-   一共四处，每处都在讲产品本身（首屏是照片，不动）：
+   一共三处，每处都在讲产品本身（首屏是照片，不动）：
    1. 「手表上」「手机上」两道粗线：滑到时从左往右画出来，像说明书翻到新的一章（所有宽度）
    2. 手表三种样子：一开始叠成一块表，往下滑就发开成三种样子，字跟着出来
       （≥768 三张并排，往两边发；手机上一张一行，往下发）
-   3. 手机四个页签：电脑上（≥1024）右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏（淡入），没轮到的那一节字变淡；
+   3. 手机三个页签：电脑上（≥1024）右边钉住一部手机，左边滑到哪个页签，屏幕就换到哪一屏（淡入），没轮到的那一节字变淡；
       手机、平板上每节自带截图，截图从更低的地方、稍小一点升上来，比字晚到位
-   4. 这一天：电脑上（≥1024）整节钉在屏幕上，往下滑时时间条从 8 点往 18 点画出来，一根竖线跟着走，
-      画到哪个时刻，时间条上那根线和下面那一条就亮起来；
-      手机上（<768）时间条钉在屏幕顶上，往下读到哪一条时刻，竖线就走到哪个钟点、前面的颜色露出来，那一条亮起来
-      ——往下滑就是这一天往前过
    选择器里多写一两层类名，是为了压过各组件自己的样式（Astro 给组件样式加了一层属性，权重更高）。
    动画一律分开写（animation-name、animation-timeline……），不用 animation 简写：构建时的压缩会把简写和
    animation-timeline 并成一句简写，浏览器不认，整句作废（10-13 实测：并完以后字、表、首屏全都不动）。 */
@@ -123,9 +119,9 @@
 
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
-		/* ---------- 3. 手机四个页签：一部手机，四屏跟着滑 ---------- */
+		/* ---------- 3. 手机三个页签：一部手机，三屏跟着滑 ---------- */
 
-		/* 左栏四节，每节一屏高、字竖着居中；右栏是钉住的手机。每节自带的截图收起来 */
+		/* 左栏三节，每节一屏高、字竖着居中；右栏是钉住的手机。每节自带的截图收起来 */
 		.home .story {
 			--fe-phone-w: min(300px, calc((100vh - 96px) / 2.1));
 			display: grid;
@@ -156,7 +152,7 @@
 		.home .story .story-phone {
 			display: block;
 			grid-column: 2;
-			grid-row: 1 / span 4;
+			grid-row: 1 / span 3;
 		}
 
 		.home .story .story-pin {
@@ -171,8 +167,8 @@
 			width: var(--fe-phone-w);
 		}
 
-		/* 四节各一屏高，整段钉住的那一截（contain）里，第 k 节正好在屏幕上时进度是 k/3（0、33%、67%、100%）。
-		   在两节交界（17%、50%、83%）前后各 6% 把下一屏淡入；后一屏是不透明的截图，盖住前一屏，所以前一屏不用淡出 */
+		/* 三节各一屏高，整段钉住的那一截（contain）里，第 k 节正好在屏幕上时进度是 k/2（0、50%、100%）。
+		   在两节交界（25%、75%）前后各 6% 把下一屏淡入；后一屏是不透明的截图，盖住前一屏，所以前一屏不用淡出 */
 		.home .story-pin .story-shot .shot-layer {
 			animation-duration: auto;
 			animation-fill-mode: both;
@@ -186,15 +182,11 @@
 		}
 
 		.home .story-pin .story-shot .shot-layer:nth-child(2) {
-			animation-range: contain 11% contain 23%;
+			animation-range: contain 19% contain 31%;
 		}
 
 		.home .story-pin .story-shot .shot-layer:nth-child(3) {
-			animation-range: contain 44% contain 56%;
-		}
-
-		.home .story-pin .story-shot .shot-layer:nth-child(4) {
-			animation-range: contain 77% contain 89%;
+			animation-range: contain 69% contain 81%;
 		}
 
 		/* 没轮到的那一节字变淡：一节在屏幕正中前后那一段是实的，离开正中就淡下去 */
@@ -214,101 +206,10 @@
 				opacity: 0.28;
 			}
 		}
-
-		/* ---------- 4. 这一天：时间条跟着滑画出来 ---------- */
-
-		/* 外面一截拉高到 260vh，里面一屏钉住；这一截在屏幕里滑过的进度就是这一天过到哪了 */
-		.home .day .day-track {
-			height: 260vh;
-			view-timeline: --fe-day block;
-		}
-
-		.home .day .day-stage {
-			position: sticky;
-			top: 0;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			min-height: 100vh;
-			padding: var(--s-6) 0;
-		}
-
-		/* 时间条：从左往右露出来（8% 到 78% 这一段从 8 点画到 18 点） */
-		.home .day .ribbon-fill {
-			animation-name: fe-day-draw;
-			animation-duration: auto;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: --fe-day;
-			animation-range: contain 8% contain 78%;
-		}
-
-		/* 画到哪儿的竖线：跟着走，画完停在 18 点 */
-		.home .day .ribbon-cursor {
-			display: block;
-			position: absolute;
-			top: -4px;
-			bottom: -4px;
-			left: 0;
-			width: 2px;
-			background: var(--c-ink);
-			animation-name: fe-day-cursor;
-			animation-duration: auto;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: --fe-day;
-			animation-range: contain 8% contain 78%;
-		}
-
-		.home .day .ribbon {
-			overflow: visible;
-		}
-
-		.home .day .ribbon-fill {
-			overflow: hidden;
-			border-radius: var(--r-tag);
-		}
-
-		/* 每个时刻：竖线走到它（--p 是它在时间条上的位置）时，上面那根线和下面那一条亮起来 */
-		.home .day .mark,
-		.home .day .moments li {
-			animation-name: fe-day-moment;
-			animation-duration: auto;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: --fe-day;
-			animation-range: contain calc(8% + var(--p) * 70%) contain calc(11% + var(--p) * 70%);
-		}
-
-		@keyframes fe-day-draw {
-			from {
-				clip-path: inset(0 100% 0 0);
-			}
-
-			to {
-				clip-path: inset(0 0 0 0);
-			}
-		}
-
-		@keyframes fe-day-cursor {
-			from {
-				translate: 0 0;
-			}
-
-			to {
-				translate: calc(100cqw - 2px) 0;
-			}
-		}
-
-		@keyframes fe-day-moment {
-			from {
-				opacity: 0.25;
-			}
-		}
 	}
 }
 
-/* ========== <1024：手机、平板的四个页签 ========== */
+/* ========== <1024：手机、平板的三个页签 ========== */
 
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
 	@supports (animation-timeline: view()) {
@@ -380,96 +281,6 @@
 
 		.home .watch .states li:nth-child(3) .state-text {
 			animation-range: contain 20% contain 45%;
-		}
-	}
-
-	/* ---------- 4. 这一天：时间条钉在屏幕顶上，读到哪一条，竖线就走到哪个钟点 ---------- */
-	/* 时间条上的线和竖线要跟着下面列表里的每一条走，靠 timeline-scope 把各条的时间线借给时间条；不支持就不动 */
-	@supports (animation-timeline: view()) and (timeline-scope: --fe-x) {
-		.home .day .day-stage {
-			timeline-scope: var(--fe-day-scope);
-		}
-
-		/* 图例和说明不跟着钉：拆开 figure，让时间条直接钉在这一节里，列表从它底下滑过去 */
-		.home .day .ribbon-figure {
-			display: contents;
-		}
-
-		.home .day .ribbon-wrap {
-			position: sticky;
-			top: 0;
-			z-index: 2;
-			margin: var(--s-6) calc(-1 * var(--gutter)) 0;
-			padding: var(--s-3) var(--gutter) var(--s-2);
-			background: var(--c-paper);
-			border-bottom: 1px solid var(--c-line);
-		}
-
-		/* 「读的那条线」在屏幕 40% 高处：一条从它的上沿碰到这条线，到下沿离开这条线，是这一条的时间线 */
-		.home .day figcaption,
-		.home .day .moments li {
-			view-timeline-axis: block;
-			view-timeline-inset: 40% 59%;
-		}
-
-		.home .day figcaption {
-			view-timeline-name: --fe-day-in;
-		}
-
-		.home .day .moments li {
-			view-timeline-name: var(--t);
-		}
-
-		/* 还没读到的时刻和时间条上它那根线是淡的，读到就亮，读过的一直亮着 */
-		.home .day .moments li,
-		.home .day .mark {
-			animation-name: fe-day-lit;
-			animation-duration: auto;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: var(--t);
-			animation-range: cover 0% cover 30%;
-		}
-
-		/* 竖线一层套一层（Day.astro 的 playHtml）：每层在自己那一条经过时往右挪一段，叠起来就是走到哪个钟点。
-		   竖线右边是一块跟底色一样的灰，盖住还没到的钟点；挪过去，前面的颜色就露出来 */
-		.home .day .ribbon-play,
-		.home .day .play-step {
-			display: block;
-			position: absolute;
-			inset: 0;
-		}
-
-		.home .day .play-step {
-			animation-name: fe-day-step;
-			animation-duration: auto;
-			animation-timing-function: linear;
-			animation-fill-mode: both;
-			animation-timeline: var(--t);
-			animation-range: cover 0% cover 100%;
-		}
-
-		.home .day .play-head {
-			position: absolute;
-			inset: 0;
-			background: var(--c-line);
-			border-left: 2px solid var(--c-ink);
-		}
-
-		@keyframes fe-day-step {
-			from {
-				translate: 0 0;
-			}
-
-			to {
-				translate: calc(var(--d) * (100cqw - 2px)) 0;
-			}
-		}
-
-		@keyframes fe-day-lit {
-			from {
-				opacity: 0.3;
-			}
 		}
 	}
 }

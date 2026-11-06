@@ -6,7 +6,6 @@
 import { Image } from 'astro:assets';
 import hero from '../../assets/intro-hero.jpg';
 import { SITE } from '../../lib/site';
-import { withBase } from '../../lib/url';
 import { INTRO } from '../../lib/why';
 import Logo from '../Logo.astro';
 import Opening from './Opening.astro';
@@ -43,10 +42,6 @@ import Opening from './Opening.astro';
 			<p class="hero-oneline">{SITE.tagline}</p>
 		</div>
 		<Opening />
-		<div class="hero-b-actions">
-			<a class="btn" href={withBase('/guide/')}>看使用说明</a>
-			<a class="btn btn-line" href={withBase('/features/')}>看全部功能</a>
-		</div>
 	</div>
 </section>
 
@@ -146,13 +141,6 @@ import Opening from './Opening.astro';
 		color: var(--c-ink-2);
 		font-size: 17px;
 		line-height: 1.6;
-	}
-
-	.hero-b-actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--s-3);
-		margin-top: var(--s-6);
 	}
 
 	@media (min-width: 768px) {

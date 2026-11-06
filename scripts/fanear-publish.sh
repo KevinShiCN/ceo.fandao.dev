@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# 发布饭耳官网 fanear.fandao.dev：把饭耳仓库的 CHANGELOG.md 和两份条款同步进来，构建、检查、推送，再核对线上页面。
+# 发布饭耳官网 fanear.fandao.dev：从饭耳仓库的 CHANGELOG.md（和 CHANGELOG-HIGHLIGHTS.md）生成更新记录、同步两份条款，构建、检查、推送，再核对线上页面。
 # 平时不直接跑这个：在饭耳仓库根目录跑 scripts/sync-website.sh，它会把下面几个参数填好。
 #
-#   fanear-publish.sh --blog <博客仓库> --changelog <CHANGELOG.md> --legal <饭耳仓库/Sources/FanEarCore> --deny <私有词表> [--asr-doc <接口说明.md>] [--dry-run] [--ref <分支>]
+#   fanear-publish.sh --blog <博客仓库> --changelog <CHANGELOG.md> --legal <饭耳仓库/Sources/FanEarCore> --deny <私有词表> [--highlights <CHANGELOG-HIGHLIGHTS.md>] [--asr-doc <接口说明.md>] [--dry-run] [--ref <分支>]
 #
 # 做的事（任何一步失败就停，不推送）：
 #   1. 从博客仓库 origin/main 新开一个临时 worktree（不碰你正在用的那份），装依赖
-#   2. 把 CHANGELOG.md 原样复制到 sites/fanear/src/data/CHANGELOG.md；
+#   2. 从 CHANGELOG.md 生成 sites/fanear/src/data/changelog.json：只有「已发布」里的对外版本、日期，和 CHANGELOG-HIGHLIGHTS.md 里
+#      同一版的重点（本人北京 11-06「包括更新日志也不写那么多了」）；测试版和每一条细节不进官网，也不进这个公开仓库；
 #      从 LegalTexts.swift、Consent.swift 生成 sites/fanear/src/data/legal.json（/terms/、/privacy/ 的全文，解析不了就停）；
 #      给了 --asr-doc 的话，把接口说明原样复制到 sites/fanear/src/data/self-hosted-asr-api.md（/self-hosted-asr/ 的全文）。
 #      没给 --asr-doc 就不动那份副本，页面还是上次同步的内容
@@ -15,7 +16,7 @@
 #      扫的是 sites/fanear，源码和构建产物里的接口说明页都在里面）
 #   4. CHANGELOG 或条款有变化就在博客仓库提交，推 main（源码）
 #   5. 把构建产物推到发布仓库（GitHub Pages 从它的 main 分支发布，绑 fanear.fandao.dev）
-#   6. 等 GitHub Pages 发布完，打开线上的更新记录页和两份条款页，确认最新一条和条款版本、末段已经在上面
+#   6. 等 GitHub Pages 发布完，打开线上的更新记录页和两份条款页，确认最新的对外版本和条款版本、末段已经在上面
 # --dry-run 只做 1–3 步，再把要推的改动列出来，不推送；发布仓库还没建时跳过第 5 步。
 # --ref 换掉第 1 步的 origin/main（还没合进 main 的分支先试跑用），只能和 --dry-run 一起用。
 set -euo pipefail
@@ -25,6 +26,7 @@ SITE_URL=https://fanear.fandao.dev
 BLOG=''
 CHANGELOG=''
 LEGAL=''
+HIGHLIGHTS=''
 ASR_DOC=''
 DENY="${PUBLIC_SCAN_DENY:-}"
 DRY_RUN=0
@@ -35,6 +37,7 @@ while [ $# -gt 0 ]; do
 		--blog) BLOG=$2; shift 2 ;;
 		--changelog) CHANGELOG=$2; shift 2 ;;
 		--legal) LEGAL=$2; shift 2 ;;
+		--highlights) HIGHLIGHTS=$2; shift 2 ;;
 		--deny) DENY=$2; shift 2 ;;
 		--asr-doc) ASR_DOC=$2; shift 2 ;;
 		--dry-run) DRY_RUN=1; shift ;;
@@ -53,6 +56,7 @@ quiet() { "$@" >"$WORK/step.log" 2>&1 || { tail -30 "$WORK/step.log" >&2; fail "
 [ -f "$LEGAL/LegalTexts.swift" ] && [ -f "$LEGAL/Consent.swift" ] ||
 	fail "--legal 要给饭耳仓库 Sources/FanEarCore 的路径（里面有 LegalTexts.swift、Consent.swift），现在是「$LEGAL」"
 [ -z "$ASR_DOC" ] || [ -f "$ASR_DOC" ] || fail "--asr-doc 要给接口说明 .md 的路径，现在是「$ASR_DOC」"
+[ -z "$HIGHLIGHTS" ] || [ -f "$HIGHLIGHTS" ] || fail "--highlights 要给 CHANGELOG-HIGHLIGHTS.md 的路径，现在是「$HIGHLIGHTS」"
 # 发到公开仓库前必须带私有词表扫一遍（词表里是公司域名、服务器地址这类不能公开的东西）
 [ -f "$DENY" ] || fail "--deny 要给私有词表的路径（或设 PUBLIC_SCAN_DENY），现在是「$DENY」"
 [ "$REF" = origin/main ] || [ "$DRY_RUN" = 1 ] || fail "--ref 只能和 --dry-run 一起用：正式发布只从 origin/main 发"
@@ -62,6 +66,7 @@ CHANGELOG=$(realpath "$CHANGELOG")
 LEGAL=$(realpath "$LEGAL")
 DENY=$(realpath "$DENY")
 [ -z "$ASR_DOC" ] || ASR_DOC=$(realpath "$ASR_DOC")
+[ -z "$HIGHLIGHTS" ] || HIGHLIGHTS=$(realpath "$HIGHLIGHTS")
 WORK="$BLOG/.worktrees/fanear-publish-$(date +%Y%m%d%H%M%S)"
 cleanup() {
 	git -C "$BLOG" worktree remove --force "$WORK/blog" >/dev/null 2>&1 || true
@@ -77,21 +82,23 @@ cd "$WORK/blog"
 echo "博客 $REF：$(git rev-parse --short HEAD)"
 quiet npm ci --no-audit --no-fund
 
-step "2/6 复制 CHANGELOG.md，生成条款"
-cp "$CHANGELOG" sites/fanear/src/data/CHANGELOG.md
+step "2/6 生成更新记录（只取对外版本和重点）、条款"
+# 完整的 CHANGELOG.md 只在这里读，不复制进博客仓库；格式不对时 publicChangelog 报错停下
+LATEST=$(node --input-type=module -e "
+import { readFileSync, writeFileSync } from 'node:fs';
+import { publicChangelog } from './sites/fanear/src/lib/changelog.mjs';
+const [changelog, highlights, out] = process.argv.slice(1);
+const data = publicChangelog(readFileSync(changelog, 'utf8'), highlights ? readFileSync(highlights, 'utf8') : '');
+const v = data.versions[0];
+if (!v) throw new Error('更新记录里一个对外版本都没有');
+writeFileSync(out, JSON.stringify(data, null, '\\t') + '\\n');
+console.log(JSON.stringify({ version: v.version, text: v.highlights[0] ?? v.version }));
+" "$CHANGELOG" "$HIGHLIGHTS" sites/fanear/src/data/changelog.json)
 [ -z "$ASR_DOC" ] || cp "$ASR_DOC" sites/fanear/src/data/self-hosted-asr-api.md
 node scripts/fanear-legal.mjs "$LEGAL" sites/fanear/src/data/legal.json
 LEGAL_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('sites/fanear/src/data/legal.json','utf8')).version)")
-LATEST=$(node --input-type=module -e "
-import { readFileSync } from 'node:fs';
-import { parseChangelog } from './sites/fanear/src/lib/changelog.mjs';
-const log = parseChangelog(readFileSync('sites/fanear/src/data/CHANGELOG.md', 'utf8'));
-const v = log.unreleased[0] ?? log.released[0];
-if (!v) throw new Error('更新记录里一个版本都没有');
-console.log(JSON.stringify({ version: v.version, text: v.items[0].text }));
-")
 VERSION=$(node -e "console.log(JSON.parse(process.argv[1]).version)" "$LATEST")
-echo "最新版本 $VERSION；改动 $(git status --short sites/fanear/src/data/CHANGELOG.md sites/fanear/src/data/legal.json | wc -l) 个文件"
+echo "最新对外版本 $VERSION；改动 $(git status --short sites/fanear/src/data/changelog.json sites/fanear/src/data/legal.json | wc -l) 个文件"
 
 step "3/6 构建和检查"
 quiet npm run fanear:build
@@ -102,14 +109,14 @@ python3 scripts/check-public.py --deny "$DENY" sites/fanear scripts
 
 step "4/6 提交源码"
 SYNCED=()
-git diff --quiet -- sites/fanear/src/data/CHANGELOG.md || SYNCED+=("更新记录（$VERSION）")
+git diff --quiet -- sites/fanear/src/data/changelog.json || SYNCED+=("更新记录（$VERSION）")
 git diff --quiet -- sites/fanear/src/data/legal.json || SYNCED+=("条款（第 $LEGAL_VERSION 版）")
 git diff --quiet -- sites/fanear/src/data/self-hosted-asr-api.md || SYNCED+=("自建服务接口说明")
 if [ ${#SYNCED[@]} = 0 ]; then
 	echo "CHANGELOG、条款和接口说明都跟博客仓库里的一样，不用提交"
 	BLOG_PUSH=0
 else
-	git add sites/fanear/src/data/CHANGELOG.md sites/fanear/src/data/legal.json sites/fanear/src/data/self-hosted-asr-api.md
+	git add sites/fanear/src/data/changelog.json sites/fanear/src/data/legal.json sites/fanear/src/data/self-hosted-asr-api.md
 	git commit --quiet -m "docs(fanear): 同步$(IFS=、; echo "${SYNCED[*]}")"
 	echo "提交 $(git rev-parse --short HEAD)"
 	BLOG_PUSH=1
@@ -130,7 +137,7 @@ else
 	if git -C "$WORK/site" diff --cached --quiet; then
 		echo "构建产物跟线上一样，不用发布"
 	else
-		git -C "$WORK/site" commit --quiet -m "deploy: 构建自 ceo.fandao.dev main ${SOURCE:0:7}（更新记录 $VERSION，条款第 $LEGAL_VERSION 版）"
+		git -C "$WORK/site" commit --quiet -m "deploy: 构建自 ceo.fandao.dev main ${SOURCE:0:7}（更新记录到 $VERSION，条款第 $LEGAL_VERSION 版）"
 		git -C "$WORK/site" show --stat --format='发布提交 %h %s' HEAD | tail -4
 		SITE_PUSH=1
 	fi
@@ -152,7 +159,7 @@ if [ "$SITE_PUSH" = 1 ]; then
 fi
 
 step "6/6 核对线上"
-# 每页要等到的字：更新记录页的最新一条；两份条款页的版本行和最后一段
+# 每页要等到的字：更新记录页最新的对外版本（有重点时是它的第一句）；两份条款页的版本行和最后一段
 EXPECT=$(node --input-type=module -e "
 import { readFileSync } from 'node:fs';
 import { versionLine } from './sites/fanear/src/lib/legal.mjs';
@@ -165,7 +172,7 @@ const heads = process.argv[2]
 	? readFileSync(process.argv[2], 'utf8').split(/\r?\n/).filter((l) => /^#{1,2} /.test(l)).map((l) => l.replace(/^#+ /, '').split(tick).join(''))
 	: [];
 console.log(JSON.stringify([
-	{ path: '/changelog/', what: latest.version + ' 的最新一条', needles: [latest.text] },
+	{ path: '/changelog/', what: '对外版本 ' + latest.version, needles: [latest.version, latest.text] },
 	{ path: '/terms/', what: '条款' + versionLine(legal), needles: [versionLine(legal), last(legal.terms)] },
 	{ path: '/privacy/', what: '隐私说明' + versionLine(legal), needles: [versionLine(legal), last(legal.privacy)] },
 	...(heads.length ? [{ path: '/self-hosted-asr/', what: '自建服务接口说明', needles: [heads[0], heads.at(-1)] }] : []),

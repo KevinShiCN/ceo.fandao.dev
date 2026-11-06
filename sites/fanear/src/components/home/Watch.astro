@@ -1,7 +1,7 @@
 ---
-// 手表上：录音这件事配手表的三种样子（正在录、被打断、自己停的），每张图旁边一句话。
-// 手机上一张一行（图左字右），电脑上三张并排。句子都在 src/lib/features.ts（WATCH_STATES）。
-import { group, WATCH_FOOT, WATCH_STATES } from '../../lib/features';
+// 手表上：录音这件事配手表的三种样子（正在录、被打断、自己停的），每张图旁边只写这一屏叫什么。
+// 手机上一张一行（图左字右），电脑上三张并排。图在 src/lib/features.ts（WATCH_SHOTS）。
+import { group, WATCH_SHOTS } from '../../lib/features';
 import { SHOTS } from '../../lib/shots';
 import Shot from '../Shot.astro';
 
@@ -16,18 +16,16 @@ const watch = group('watch');
 	</div>
 	<ul class="states">
 		{
-			WATCH_STATES.map((state) => (
+			WATCH_SHOTS.map((shot) => (
 				<li>
-					<Shot id={state.shot} caption={false} sizes="(min-width: 768px) 200px, 34vw" />
+					<Shot id={shot} caption={false} sizes="(min-width: 768px) 200px, 34vw" />
 					<div class="state-text">
-						<h4>{SHOTS[state.shot].caption}</h4>
-						<p>{state.text}</p>
+						<h4>{SHOTS[shot].caption}</h4>
 					</div>
 				</li>
 			))
 		}
 	</ul>
-	<p class="watch-foot">{WATCH_FOOT}</p>
 </section>
 
 <style>
@@ -66,21 +64,6 @@ const watch = group('watch');
 	h4 {
 		font-size: 19px;
 		font-weight: 700;
-	}
-
-	.state-text p {
-		margin-top: var(--s-1);
-		color: var(--c-ink-2);
-		font-size: 16px;
-		line-height: 1.6;
-	}
-
-	.watch-foot {
-		margin-top: var(--s-5);
-		padding-top: var(--s-3);
-		border-top: 1px solid var(--c-line);
-		color: var(--c-ink-2);
-		font-size: 16px;
 	}
 
 	@media (min-width: 768px) {

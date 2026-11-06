@@ -2,7 +2,7 @@
 // 解析器在 sites/fanear/src/lib/changelog.mjs，官网的「更新记录」页和同步脚本都用它。
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { dateText, isDeveloperOnly, noteLabel, parseChangelog, versionDate } from '../sites/fanear/src/lib/changelog.mjs';
+import { dateText, isDeveloperOnly, noteLabel, parseChangelog, parseHighlights, publicChangelog, versionDate } from '../sites/fanear/src/lib/changelog.mjs';
 
 const NOW = `# 饭耳 FanEar 更新记录
 
@@ -123,4 +123,66 @@ test('只有开发者那一版才有的条目：只认开头的几种写法', ()
 	assert.ok(only('（只在开发者自测的版本里）「给开发者」导出多一份'));
 	assert.ok(!only('转文字加第三家：阿里云百炼'));
 	assert.ok(!only('点「让手表接着记」时直接告诉你；（只在开发者自测的版本里）会从手机把饭耳叫起来'), '中间才提到的不算');
+});
+
+// 官网只放对外版本和重点（本人北京 11-06「包括更新日志也不写那么多了」）
+const RELEASED = `# 饭耳 FanEar 更新记录
+
+## 未发布
+
+### 1.0.1（测试版，2026-11-05）
+- 2026-11-05 还没发出去的新功能。
+
+## 已发布
+
+### 1.0.0（对外版，2026-11-03）
+- 2026-11-01 对外版里的一条细节。
+
+### 0.3.0（自用内测，2026-11-01）
+- 2026-11-01 只给自己装的一版。
+
+### 0.2.17（对外版，2026-10-29）
+- 2026-10-29 另一条细节。
+`;
+
+const HIGHLIGHTS = `# 饭耳每一版的重点
+
+说明文字不进页面。
+
+### 1.0.0
+- 饭耳 1.0 正式版来了。
+- 戴着手表去开会，
+  不用掏手机。
+
+### 0.9.0
+- 没发布的版本的重点。
+`;
+
+test('官网的更新记录：只留对外版本、日期和重点，测试版、自用内测版和每一条细节都不要', () => {
+	const data = publicChangelog(RELEASED, HIGHLIGHTS);
+	assert.deepEqual(data, {
+		versions: [
+			{ version: '1.0.0', anchor: 'v1-0-0', date: '2026-11-03', highlights: ['饭耳 1.0 正式版来了。', '戴着手表去开会，不用掏手机。'] },
+			{ version: '0.2.17', anchor: 'v0-2-17', date: '2026-10-29', highlights: [] },
+		],
+	});
+	const text = JSON.stringify(data);
+	for (const hidden of ['还没发出去', '细节', '只给自己装', '没发布的版本']) assert.ok(!text.includes(hidden), hidden);
+});
+
+test('不给重点文件：版本照列，重点为空', () => {
+	assert.deepEqual(
+		publicChangelog(RELEASED).versions.map((v) => [v.version, v.highlights.length]),
+		[['1.0.0', 0], ['0.2.17', 0]],
+	);
+});
+
+test('CHANGELOG.md 格式不对时照样报错，不悄悄生成', () => {
+	assert.throws(() => publicChangelog(RELEASED.replace('## 已发布', '## 发布了'), HIGHLIGHTS), /不认识的分组/);
+});
+
+test('重点文件：说明和别的标题不进来，同一版写两段合在一起', () => {
+	const map = parseHighlights(`${HIGHLIGHTS}\n### 1.0.0\n- 第三句。\n`);
+	assert.deepEqual(map.get('1.0.0'), ['饭耳 1.0 正式版来了。', '戴着手表去开会，不用掏手机。', '第三句。']);
+	assert.deepEqual([...map.keys()], ['1.0.0', '0.9.0']);
 });

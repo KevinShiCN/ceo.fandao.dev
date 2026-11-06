@@ -22,7 +22,12 @@ export default defineConfig({
 	output: 'static',
 	trailingSlash: 'always',
 	...(process.env.FANEAR_CACHE_DIR ? { cacheDir: process.env.FANEAR_CACHE_DIR } : {}),
-	integrations: [sitemap()],
+	integrations: [sitemap({ filter: (page) => !/\/(features|guide)\/$/.test(page) })],
+	// 功能页、使用说明 11-06 撤掉了（本人北京 11-06：「我们减少在官网的描述」），旧链接跳回首页
+	redirects: {
+		'/features/': SITE_BASE,
+		'/guide/': SITE_BASE,
+	},
 	image: {
 		layout: 'constrained',
 		breakpoints: [320, 480, 640, 960, 1320],

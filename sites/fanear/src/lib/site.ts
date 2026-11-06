@@ -1,5 +1,6 @@
 // 全站共用的名字、状态和导航。改文案只改这里。
-// 规矩：只写真事。App 现在的状态以 fanear 仓库的 CHANGELOG.md 为准（这里的状态句跟它的「未发布」写法对得上）。
+// 规矩：只写真事；只写一句话的功能，不写细节、不讲技术，更新记录只列对外版本和每版重点（本人北京 11-06：「降低功能的描述」
+// 「我们减少在官网的描述」「不讲技术」「包括更新日志也不写那么多了」）。App 现在的状态以 fanear 仓库的 CHANGELOG.md 为准（这里的状态句跟它的「未发布」写法对得上）。
 
 export const SITE = {
 	name: '饭耳',
@@ -42,8 +43,6 @@ export interface NavItem {
 
 /** 页头导航（首页不在里面，点 LOGO 回首页） */
 export const NAV: readonly NavItem[] = [
-	{ path: '/features/', label: '功能' },
-	{ path: '/guide/', label: '使用说明' },
 	{ path: '/faq/', label: '常见问题' },
 	{ path: '/changelog/', label: '更新记录' },
 ];
