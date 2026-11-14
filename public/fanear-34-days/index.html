@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>一个人带着 AI，34 天做出约 240 人团队的开发量｜饭耳开发报告</title>
+<meta name="description" content="饭耳从立项到现在 34 天，只有一位开发者带着 AI 编程助手。按业界对传统团队最有利的效率折算，他的开发量相当于两三百人的团队。">
+<style>
+:root{--bg:#f7f5f0;--card:#fff;--ink:#1c1b19;--sub:#6e685f;--line:#e8e3da;--acc:#e85b17;--accs:#fde6d8;--team:#b3ac a0;--team:#b1aa9e;--mid:#8a95a6;--lt:#cdd3dc;--tm:#6c7585}
+@media (prefers-color-scheme:dark){:root{--bg:#121110;--card:#1c1b19;--ink:#f3f0ea;--sub:#a9a297;--line:#302e2a;--acc:#ff7c3b;--accs:#3b2416;--team:#6a645b;--mid:#8390a3;--lt:#475060;--tm:#5f6a7c}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif;overflow-x:hidden}
+.wrap{max-width:880px;margin:0 auto;padding:0 18px}
+a{color:var(--acc);overflow-wrap:anywhere}
+h1,h2,h3{line-height:1.3;margin:0}
+p{margin:.6em 0}
+.hero{padding:40px 0 18px}
+.kicker{font-size:13px;color:var(--sub);letter-spacing:.04em}
+h1{font-size:clamp(30px,8.4vw,58px);font-weight:800;margin:12px 0 14px;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--acc)}
+.lead{font-size:17px;color:var(--sub);max-width:680px}
+.lead b{color:var(--ink)}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 8px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px}
+.chip .v{font-size:clamp(26px,7vw,40px);font-weight:800;color:var(--acc);line-height:1.1}
+.chip .v small{font-size:.45em;font-weight:700;margin-left:2px}
+.chip .l{font-size:12px;color:var(--sub);line-height:1.45;margin-top:6px}
+.note{font-size:13px;color:var(--sub)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:22px 0 0}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{border-top:3px solid var(--ink);padding-top:8px}
+.stat .v{font-size:clamp(22px,6vw,30px);font-weight:800;line-height:1.2}
+.stat .l{font-size:13px;color:var(--sub);line-height:1.5}
+section{padding:30px 0 6px}
+h2{font-size:clamp(22px,5.6vw,30px);font-weight:800;margin-bottom:8px}
+h3{font-size:17px;margin:18px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.card h3{margin-top:0}
+.ch{width:100%;margin:10px 0 4px;min-height:40px}
+.ch svg{display:block;max-width:100%;height:auto}
+.ch .nodata{font-size:13px;color:var(--sub)}
+.ch text{font-size:12px;fill:var(--sub)}
+.ch .strong{fill:var(--ink);font-weight:600;font-size:13px}
+.ch .big{font-size:16px;font-weight:800}
+.ch .acc{fill:var(--acc)}
+.ch .inv{fill:#fff;font-weight:700;font-size:14px}
+.ch .sm{font-size:11px}
+.ch .halo{paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
+.me{fill:var(--acc)}.team{fill:var(--team)}.tm{fill:var(--tm)}
+.a1{fill:var(--acc);opacity:.88}.a2{fill:var(--mid);opacity:.6}.a3{fill:var(--lt)}
+.ln{fill:none;stroke:var(--acc);stroke-width:2}
+.dot{fill:var(--acc);stroke:var(--card);stroke-width:1.5}
+.c1{fill:var(--acc)}.c2{fill:var(--mid);opacity:.6}
+.gl{stroke:var(--line);stroke-width:1}
+.av{stroke:var(--ink);stroke-dasharray:4 4;stroke-width:1.2;opacity:.55}
+.hc{fill:var(--acc)}.hz{fill:var(--line)}
+.bd{fill:var(--mid);opacity:.55}
+.br{stroke:var(--acc);stroke-width:1.5;fill:none}
+.team{animation:pop .35s both}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.team{animation:none}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--sub)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.cap{font-size:14px;color:var(--sub)}
+.grid2{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:720px){.grid2{grid-template-columns:1fr 1fr}}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.item .v{font-size:22px;font-weight:800;color:var(--acc);line-height:1.3}
+.item .l{font-size:14px;color:var(--sub);line-height:1.6}
+.callout{background:var(--accs);border-radius:14px;padding:14px 16px;margin:14px 0;font-size:15px}
+.method ol{padding-left:1.3em;margin:.4em 0}
+.method li{margin:.7em 0}
+.f{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--bg);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:600}
+.limits li{margin:.5em 0}
+.src li{margin:.6em 0;font-size:14px}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--line);color:var(--sub);font-size:13px}
+footer{padding:28px 0 44px;font-size:13px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">饭耳 · 开发报告 · 2026-10-12 → 2026-11-14</div>
+  <h1>1 个人带着 AI，34 天<br>做出了约 <em>240 人</em>团队的开发量</h1>
+  <p class="lead">饭耳是一款 App：用 Apple Watch 全天录音，在 iPhone 上转写、认出谁在说话、整理成笔记和待办。从立项到现在 34 天，它只有<b>一位开发者</b>——饭导创始人（网名「干饭CEO」）。他用 AI 编程助手写代码。</p>
+  <p class="lead">我们把他的产出和业界对传统团队<b>最有利</b>的效率作比较。三种算法的结果都落在<b>两三百人</b>：</p>
+  <div class="chips">
+    <div class="chip"><div class="v">238<small>人</small></div><div class="l">按代码量 ÷ 业界最高年产量</div></div>
+    <div class="chip"><div class="v">260<small>人</small></div><div class="l">按代码量 ÷ 业界最高日产量</div></div>
+    <div class="chip"><div class="v">301<small>人</small></div><div class="l">按合进主线的改动数 ÷ 顶尖团队效率</div></div>
+  </div>
+  <p class="note">标题取三者中最保守的 238 人。计算方法和限制见文末「怎么算的」。</p>
+  <div class="stats">
+    <div class="stat"><div class="v">44.25 万行</div><div class="l">产品代码（只算现在还留在产品里的）</div></div>
+    <div class="stat"><div class="v">14,525 个</div><div class="l">代码提交，34 天里天天有提交</div></div>
+    <div class="stat"><div class="v">16 个版本</div><div class="l">通过苹果审核，在 App Store 上架</div></div>
+    <div class="stat"><div class="v">504 个</div><div class="l">传给苹果并处理通过的测试安装包</div></div>
+  </div>
+</header>
+
+<section>
+  <h2>一边 1 个人，一边 238 个人</h2>
+  <div class="card">
+    <div class="ch" id="c-people" data-label="1 个人对比 238 个传统程序员"></div>
+    <p class="cap">每个灰色小人代表一名按业界最高效率工作的传统程序员，每人每年写 20,000 行。要在 34 天里写出饭耳现在的 442,502 行产品代码，需要 238 个这样的人。</p>
+  </div>
+</section>
+
+<section>
+  <h2>三种算法，答案都是两三百人</h2>
+  <p>我们用了三种互不相关的业界基准，分别从「写了多少代码」和「合进了多少改动」两个角度来算，取的都是对传统团队最有利的那一头。</p>
+  <div class="card">
+    <div class="ch" id="c-methods" data-label="三种算法折算出的团队规模"></div>
+  </div>
+  <div class="grid2">
+    <div class="item"><div class="v">238 人</div><div class="l">软件工程专家 Steve McConnell 的统计里，10 万行级项目每人每年最多写 20,000 行。用这个最高值折算。</div></div>
+    <div class="item"><div class="v">260 人</div><div class="l">McConnell《Code Complete》：行业平均每人每天 10–50 行可交付代码。取 50 行，周末也算工作日。</div></div>
+    <div class="item"><div class="v">301 人</div><div class="l">LinearB 统计了 4,813 个研发团队，「顶尖」门槛是每人每周合并 2 个改动。饭耳每周约 602 个。</div></div>
+    <div class="item"><div class="v">415 人</div><div class="l">如果把测试和开发工具代码也算上（共 77.4 万行），按同样的最高效率折算是 415 人。标题不用这个数。</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>换个问法：传统团队要做多久？</h2>
+  <div class="card">
+    <div class="ch" id="c-cocomo" data-label="饭耳 34 天与传统团队 43.5 个月的工期对比"></div>
+    <p class="cap">COCOMO II 是业界常用的软件工作量估算模型（南加州大学 Barry Boehm 等）。按它估算，同样规模（44.25 万行产品代码）的软件约需 2,388 人月，也就是 199 人年。模型给出的正常工期是 43.5 个月，平均约 55 人。换句话说，一支 55 人左右的传统团队大约要做 3 年半。</p>
+  </div>
+  <div class="callout">「相当于两三百人」是按产出折算的当量，不是说真找来这么多人就能在 34 天里做完。《人月神话》早就指出：往进度落后的项目里加人只会更慢，人越多，沟通成本越高。</div>
+</section>
+
+<section>
+  <h2>34 天里做出了什么</h2>
+  <div class="grid2">
+    <div class="item"><div class="v">3 个平台的 App</div><div class="l">iPhone、Apple Watch、Mac（菜单栏小工具）。Windows 版正在开发，还没发布。</div></div>
+    <div class="item"><div class="v">5 个系统扩展</div><div class="l">手表小组件、实时活动（灵动岛）、分享扩展、屏幕使用时间扩展、锁屏相机扩展。</div></div>
+    <div class="item"><div class="v">4 个配套服务</div><div class="l">公开分享页、自建转写服务包（装在用户自己的 NVIDIA 电脑上）、诊断日志收件、需求墙。</div></div>
+    <div class="item"><div class="v">3 种界面语言</div><div class="l">简体中文、英文、日文。写进更新记录、用户能感受到的改动有 3,172 条。</div></div>
+  </div>
+  <div class="card">
+    <h3>代码量每天都在涨</h3>
+    <div class="legend"><span><i style="background:var(--acc)"></i>产品代码</span><span><i style="background:var(--mid);opacity:.6"></i>自动化测试</span><span><i style="background:var(--lt)"></i>开发工具与流程</span></div>
+    <div class="ch" id="c-growth" data-label="每天结束时主线上的代码行数"></div>
+    <p class="cap">图中是每天结束时主线上还留着的代码行数。产品代码从 10-12 当晚的 3,891 行，涨到 11-14 的 442,502 行。</p>
+  </div>
+</section>
+
+<section>
+  <h2>不是一次冲刺，是天天在交付</h2>
+  <div class="card">
+    <h3>每天的代码提交</h3>
+    <div class="legend"><span><i style="background:var(--acc)"></i>写代码的提交</span><span><i style="background:var(--mid);opacity:.6"></i>把改动并进主线的合并提交</span></div>
+    <div class="ch" id="c-commits" data-label="每天的提交数"></div>
+    <p class="cap">主线上共 14,525 个提交：写代码的 9,925 个，合并提交 4,600 个。34 天里每天都有提交。</p>
+  </div>
+  <div class="card">
+    <h3>一天 24 个钟点都有提交</h3>
+    <div class="ch" id="c-heat" data-label="每天每个钟点的提交数热力图"></div>
+    <p class="cap">每一行是一天，每一格是一个北京时间钟点，颜色越深，那个钟点的提交越多。34 天叠起来看，24 个钟点都有提交，早上 7–8 点最少。</p>
+  </div>
+  <div class="card">
+    <h3>上架节奏</h3>
+    <div class="legend"><span><i style="background:var(--acc);border-radius:50%"></i>App Store 上架（有日期记录的 14 次）</span><span><i style="background:var(--mid);opacity:.55"></i>当天传给苹果的测试构建</span></div>
+    <div class="ch" id="c-rel" data-label="App Store 上架与测试构建"></div>
+    <p class="cap">另外 0.2.14、0.2.17 两版也已上架，但上架日期没留下记录，图中未画出。从 10-14 起，32 天里天天都有新的测试构建。版本号一共用过 79 个（0.1.0 → 2.0.1）。</p>
+  </div>
+  <div class="callout">作为参照：按评分数排前 1,000 的 iOS App 里，约一半每周至少更新一次。饭耳第一次上架后的 24 天里上架了 16 版，平均约 1.5 天一版；11-06 到 11-13 连续 8 天，每天上架一个新版本（1.0.0 → 1.0.7）。</div>
+</section>
+
+<section>
+  <h2>快，也有把关</h2>
+  <div class="grid2">
+    <div class="item"><div class="v">约 9,701 个测试用例</div><div class="l">自动化测试代码 164,853 行（Swift 用例 8,206 个，Python 用例 1,495 个）。这些不计入「相当于多少人」的换算。</div></div>
+    <div class="item"><div class="v">242 次被退回重做</div><div class="l">10-29 起，每个改动都要先通过自动检查才能进主线。到 11-14，共合进 1,379 个改动，有 242 次没通过检查、被退回重做。</div></div>
+    <div class="item"><div class="v">81 个构建</div><div class="l">交苹果审核做 TestFlight 外部测试，全部通过。</div></div>
+    <div class="item"><div class="v">1,417 个 AI 会话</div><div class="l">代码仓库里的全部提交都在他一个人的账号下，没有其他人类开发者。写代码用的是 AI 编程助手，以 Claude Code 为主；做过提交的 AI 会话共 1,417 个。</div></div>
+  </div>
+</section>
+
+<section class="method" id="how">
+  <h2>怎么算的</h2>
+  <p>饭耳的数字来自代码仓库和 App Store Connect 后台记录，业界数字来自下面列出的公开资料。时间按 34 个日历天，即 34/365 年计算。这比实际经过的 33 天多算了一天，结果偏保守。</p>
+
+  <h3>代码量的口径</h3>
+  <p>只算主线上现在还留着的代码，按「非空、非纯注释行」计数（与 cloc 等工具的「代码行」口径相同）。第三方库、写在代码里的数据表、文档、图片、多语言字符串都不算。换算团队规模时只用产品代码 442,502 行（3,199 个文件，其中 Swift 433,192 行）。测试代码 164,853 行、开发工具与流程代码 166,658 行另列，三项合计 774,013 行。</p>
+
+  <h3>四种方法</h3>
+  <ol>
+    <li><b>代码量 × 业界最高年产量 → 238 人</b><br><span class="f">442,502 ÷（20,000 × 34/365）≈ 238</span><br>20,000 是 McConnell 表里 10 万行级项目的最高值，是最照顾传统团队的口径。饭耳现在有 44 万行，如果按 100 万行级的最高值 10,000 行算，是 475 人。</li>
+    <li><b>代码量 × 行业日均 → 260 人</b><br><span class="f">442,502 ÷（50 × 34）≈ 260</span><br>50 行是「每人每天 10–50 行」里的最高值，而且周末也按工作日算。按每天 10 行算是 1,301 人。</li>
+    <li><b>合进主线的改动数 × 顶尖团队效率 → 301 人</b><br><span class="f">每周约 602 个 ÷ 每人每周 2 个 ≈ 301</span><br>自动合并检查从 10-29 21:08 开始，到 11-14 21:46 共 2.29 周，合进主线 1,379 个改动，每周约 602 个。</li>
+    <li><b>COCOMO II → 2,388 人月 = 199 人年，约 55 人做 43.5 个月</b><br><span class="f">工作量（人月）= 2.94 × 千行代码数^1.0997</span><br><span class="f">工期（月）= 3.67 × 人月^0.318</span><br>五个比例因子都取「名义」值，工作量乘数取 1，1 人月按 152 小时算。如果连测试和开发工具一起算（77.4 万行），是 368 人年，约 83 人做 52.9 个月。</li>
+  </ol>
+  <p>三种按 34 天折算的方法（238、260、301）落在同一个量级，所以标题用最保守的「约 240 人」。如果按业界<b>平均</b>效率算，McConnell 10 万行级平均 2,600 行对应 1,827 人，100 万行级平均 2,000 行对应 2,375 人。这些数字只作对照，不作结论。</p>
+
+  <h3>McConnell 的「每人每年代码行数」表</h3>
+  <table>
+    <tr><th>项目规模</th><th>每人每年</th><th>COCOMO 平均</th></tr>
+    <tr><td>1 万行级</td><td>2,000–25,000 行</td><td>3,200 行</td></tr>
+    <tr><td>10 万行级</td><td>1,000–20,000 行</td><td>2,600 行</td></tr>
+    <tr><td>100 万行级</td><td>700–10,000 行</td><td>2,000 行</td></tr>
+    <tr><td>1,000 万行级</td><td>300–5,000 行</td><td>1,600 行</td></tr>
+  </table>
+  <blockquote>"the effort for a 1,000,000 LOC system is more than 10 times as large as the effort for a 100,000 LOC system"<br>——项目越大，每人效率越低。</blockquote>
+
+  <h3>必须说明的限制</h3>
+  <ul class="limits">
+    <li><b>代码行数不等于价值</b>，AI 写的代码可能比人写的更长。所以我们只算还留在产品里的代码（删掉的、测试、开发工具、数据表都不算），再拿业界最高效率来比。</li>
+    <li><b>「相当于多少人」是按产出折算的当量</b>，不是说那么多人真能在 34 天里做完。按 COCOMO，同样规模的软件，传统团队要做 3 年半左右；人越多，沟通成本越高。</li>
+    <li><b>各项业界基准年代不一、口径不同</b>，我们取的都是对传统团队最有利的那一头。</li>
+    <li>饭耳的数字来自代码仓库和 App Store Connect 后台记录；业界数字来自下面列出的公开资料。</li>
+  </ul>
+
+  <h3>出处</h3>
+  <ol class="src">
+    <li>Steve McConnell《Software Estimation》（2006），按项目规模统计的「每人每年代码行数」。转引自 Jeff Atwood 2006 年的博客：<a href="https://blog.codinghorror.com/diseconomies-of-scale-and-lines-of-code/" target="_blank" rel="noopener">blog.codinghorror.com/diseconomies-of-scale-and-lines-of-code/</a></li>
+    <li>Steve McConnell《Code Complete》第 2 版，"The General Principle of Software Quality" 一节："The industry average productivity for a software product is about 10 to 50 lines of delivered code per person per day (including all noncoding overhead)." 转引自 <a href="https://nikola-breznjak.com/blog/books/programming/code-complete-2-steve-mcconnell-software-quality-landscape/" target="_blank" rel="noopener">nikola-breznjak.com/blog/books/programming/code-complete-2-steve-mcconnell-software-quality-landscape/</a></li>
+    <li>COCOMO II.2000（Barry Boehm 等，南加州大学），业界常用的软件工作量估算模型。</li>
+    <li>LinearB《2026 Software Engineering Benchmarks Report》（810 万个 PR、4,813 个研发团队）：合并频率的「顶尖（Elite）」门槛是每人每周合并 2 个以上。<a href="https://linearb.io/library/engineering-benchmarks-and-research" target="_blank" rel="noopener">linearb.io/library/engineering-benchmarks-and-research</a></li>
+    <li>42matters（页面 2026-11-08 更新）：按评分数排前 1,000 的 iOS App，每周有 498 个更新（约一半），每月 799 个（80%），每年 982 个（98%）。<a href="https://42matters.com/apple-app-store-aso-with-app-update-frequency-statistics" target="_blank" rel="noopener">42matters.com/apple-app-store-aso-with-app-update-frequency-statistics</a></li>
+    <li>Fred Brooks《人月神话》：往进度落后的项目里加人只会更慢，人越多，沟通成本越高。</li>
+  </ol>
+</section>
+
+<footer>
+  <p>饭耳（App Store 名称「饭耳 - Watch全天录音智能体」）于 2026-10-12 21:56 立项，第一个提交是项目规则与立项说明。本页所有饭耳数据统计截至 <span id="asof">2026-11-14 晚</span>（北京时间）。</p>
+</footer>
+</div>
+
+<script type="application/json" id="fanear-data">{"as_of_beijing":"2026-11-14 21:29","first_commit_beijing":"2026-10-12 21:56","calendar_days":34,"equivalence":{"mcconnell_best_100k":238,"mcconnell_best_1m":475,"mcconnell_avg_100k":1827,"mcconnell_avg_1m":2375,"codecomplete_50_per_day":260,"codecomplete_10_per_day":1301,"all_code_mcconnell_best_100k":415,"cocomo2_product":{"person_months":2388,"person_years":199,"schedule_months":43.5,"avg_staff":55},"cocomo2_all":{"person_months":4417,"person_years":368,"schedule_months":52.9,"avg_staff":83},"linearb_elite_equiv":301},"merge_gate":{"since":"10-29 21:08","until":"11-14 21:46","merged":1379,"returned":242,"weeks":2.29,"per_week":602},"days":["2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-17","2026-10-18","2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-24","2026-10-25","2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30","2026-10-31","2026-11-01","2026-11-02","2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12","2026-11-13","2026-11-14"],"code_lines":{"product":[3891,19249,41089,65623,75541,92217,104883,111647,111950,111950,123186,130173,134544,155237,161052,169600,181774,199008,211767,225379,247930,261493,271167,291954,304821,321105,338123,346410,359964,376130,399238,418914,437632,442502],"tests":[197,2687,6826,11480,13963,20204,23660,27416,27537,27537,34317,39045,40685,49396,51831,54370,58904,67737,72188,77299,85351,92209,97357,105476,110314,115123,121745,124789,129357,135403,147188,154633,161439,164853],"tools":[503,4261,12220,20960,23923,31143,35664,38791,39151,39151,48522,52427,55239,67898,70726,76579,84269,90388,96650,100894,104128,112392,120659,127840,131232,136291,140219,141628,145213,149620,157149,161500,164287,166658]},"commits":{"code":[20,200,393,348,177,379,276,224,12,47,296,343,250,333,179,240,381,552,340,269,374,349,579,418,215,326,323,250,330,259,378,358,358,149],"merge":[0,32,269,205,94,198,136,77,3,34,128,182,112,177,84,117,203,198,113,94,115,134,149,182,89,144,164,127,165,164,193,204,227,87]},"builds":{"iphone":[0,0,29,37,6,8,13,16,3,2,25,31,28,30,18,29,47,39,14,8,7,7,7,6,5,11,11,6,2,3,3,6,3,2],"mac":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1,0,0,0,0,1,1,2,2,2,1,2,0,1,1,2,0,2,1],"beta":[0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"new_versions":[0,0,12,37,6,2,0,0,0,0,3,0,3,1,1,1,2,1,1,0,1,0,0,0,1,1,0,1,1,1,0,3,0,0],"appstore_launches":[{"day":"2026-10-21","version":"0.2.6"},{"day":"2026-10-22","version":"0.2.7"},{"day":"2026-10-23","version":"0.2.8"},{"day":"2026-10-24","version":"0.2.9"},{"day":"2026-10-24","version":"0.2.10"},{"day":"2026-10-26","version":"0.2.11"},{"day":"2026-11-06","version":"1.0.0"},{"day":"2026-11-07","version":"1.0.1"},{"day":"2026-11-08","version":"1.0.2"},{"day":"2026-11-09","version":"1.0.3"},{"day":"2026-11-10","version":"1.0.4"},{"day":"2026-11-11","version":"1.0.5"},{"day":"2026-11-12","version":"1.0.6"},{"day":"2026-11-13","version":"1.0.7"}],"changelog_entries":[2,26,137,253,156,138,90,27,4,20,64,73,63,87,83,73,114,151,96,77,106,44,138,121,60,98,86,99,129,138,110,88,169,52],"commit_heatmap_by_hour":[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,10,9],[0,4,0,0,0,0,0,0,13,31,7,35,21,17,13,0,2,16,13,7,21,15,6,11],[14,0,0,0,0,0,0,0,0,0,0,0,19,46,41,61,69,47,41,72,61,76,50,65],[73,40,1,0,0,0,0,0,29,29,19,66,37,27,12,16,52,45,16,13,4,10,24,40],[35,2,0,2,2,0,0,0,0,0,0,2,8,7,28,26,29,27,3,28,21,15,29,7],[27,58,43,0,0,0,0,0,8,33,7,27,35,18,28,29,45,21,32,32,41,38,29,26],[8,33,54,25,27,17,15,6,8,17,4,20,50,12,20,4,29,0,0,0,1,14,25,23],[7,36,15,17,12,7,7,2,0,2,1,0,0,0,2,29,48,53,29,16,12,1,1,4],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,0,0,0,0,0,0,4,0],[0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,6,8,14,21],[35,27,23,19,15,10,10,6,5,5,0,0,9,10,22,21,25,12,13,33,17,27,27,53],[23,0,0,51,38,9,0,0,37,26,51,35,32,24,17,27,1,1,23,19,29,25,37,20],[30,25,11,18,22,4,0,0,0,20,41,60,20,0,36,0,0,0,2,12,21,5,11,24],[6,6,15,31,21,4,6,9,22,47,34,28,20,41,21,22,17,23,25,32,38,32,10,0],[0,0,0,0,0,0,0,0,0,0,0,41,45,18,18,29,14,22,15,23,4,0,18,16],[14,2,0,0,0,0,0,0,0,4,2,0,25,43,23,27,30,40,28,31,24,16,21,27],[32,32,30,27,19,8,6,8,3,22,22,46,20,25,46,32,21,23,44,15,42,20,23,18],[11,19,43,26,46,38,41,31,20,14,26,27,39,47,43,34,43,30,54,32,28,15,21,22],[14,9,0,0,11,5,9,0,0,7,20,30,46,38,9,12,18,6,25,58,29,30,40,37],[25,24,16,9,14,14,1,0,0,2,24,21,43,27,35,25,30,13,3,1,4,2,14,16],[25,20,54,37,18,12,7,4,3,7,17,51,25,19,13,13,10,9,1,11,26,28,47,32],[37,14,25,16,2,19,25,21,15,25,49,37,18,41,19,6,30,6,9,11,6,20,19,13],[0,16,51,63,46,36,40,36,26,3,6,21,50,57,65,54,31,15,6,4,32,32,28,10],[11,24,54,74,44,38,12,0,0,13,2,19,44,15,5,27,37,8,35,20,30,25,10,53],[37,36,31,24,7,0,0,0,0,1,14,21,20,29,19,4,1,13,16,0,2,11,11,7],[14,33,41,77,31,7,6,4,0,4,0,8,22,24,15,16,6,14,16,29,30,16,29,28],[38,20,45,17,24,28,33,28,25,11,0,0,0,5,12,44,54,17,11,8,3,27,25,12],[0,16,37,12,1,2,2,0,0,7,14,1,12,6,8,32,40,32,37,40,17,17,23,21],[25,20,27,5,24,23,5,0,5,14,9,0,7,39,36,62,29,21,12,36,31,21,19,25],[29,3,10,20,27,16,15,0,0,6,7,3,24,48,48,44,39,13,17,14,7,9,10,14],[5,35,21,22,6,0,0,0,0,6,22,49,49,47,28,6,25,33,30,24,26,29,41,67],[24,27,25,40,67,19,2,0,0,5,33,63,53,9,50,45,30,17,21,5,6,2,12,7],[21,68,22,29,21,31,69,35,28,16,8,29,42,28,17,31,19,11,9,12,18,7,11,3],[16,1,16,9,8,0,0,0,0,7,19,17,21,16,17,18,36,28,5,0,1,1,0,0]]}</script>
+<script>
+(function(){
+var D=null;
+try{D=JSON.parse(document.getElementById('fanear-data').textContent);}catch(e){D=null;}
+var NS=(function(){var d=document.createElement('div');d.innerHTML='<svg></svg>';return d.firstChild.namespaceURI;})();
+var IDS=['c-people','c-methods','c-cocomo','c-growth','c-commits','c-heat','c-rel'];
+if(!D||!D.days){IDS.forEach(function(id){document.getElementById(id).innerHTML='<div class="nodata">图表数据未载入</div>';});return;}
+if(D.as_of_beijing)document.getElementById('asof').textContent=D.as_of_beijing;
+
+function el(t,a,p){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function tx(p,x,y,s,c,an){var e=el('text',{x:x,y:y,'class':c||'','text-anchor':an||'start'},p);e.textContent=s;return e;}
+function W(id){return Math.max(240,Math.floor(document.getElementById(id).clientWidth));}
+function mk(id,h){var b=document.getElementById(id);b.innerHTML='';var w=W(id);var s=el('svg',{width:w,height:h,viewBox:'0 0 '+w+' '+h,role:'img','aria-label':b.getAttribute('data-label')||''},b);return {s:s,w:w};}
+function f(n){return Number(n).toLocaleString('en-US');}
+function md(d){return d.slice(5);}
+function sum(a){return a.reduce(function(x,y){return x+y;},0);}
+function mxOf(a){return Math.max.apply(null,a);}
+function clamp(x,lo,hi){return Math.min(hi,Math.max(lo,x));}
+var N=D.days.length, last=N-1;
+
+function person(p,x,y,z,c,delay){
+  var g=el('g',{'class':c},p);
+  if(delay!=null)g.style.animationDelay=delay+'ms';
+  el('circle',{cx:x+z/2,cy:y+z*.26,r:z*.18},g);
+  el('rect',{x:x+z*.2,y:y+z*.5,width:z*.6,height:z*.44,rx:z*.22},g);
+}
+
+function people(){
+  var n=D.equivalence.mcconnell_best_100k, w=W('c-people'), c=w<520?15:19;
+  var cols=Math.floor(w/c), rows=Math.ceil(n/cols), g0=86, h=g0+rows*c+4;
+  var s=mk('c-people',h).s;
+  person(s,0,2,42,'me');
+  tx(s,52,20,'饭耳：1 个人 + AI','strong');
+  tx(s,52,40,D.calendar_days+' 天，'+f(D.code_lines.product[last])+' 行产品代码');
+  tx(s,0,74,'换成传统程序员（按业界最高效率）：'+n+' 人','strong');
+  for(var i=0;i<n;i++)person(s,(i%cols)*c,g0+Math.floor(i/cols)*c,c-2,'team',i*4);
+}
+
+function methods(){
+  var E=D.equivalence;
+  var R=[['饭耳实际投入',1,'1 人 + AI','me'],
+         ['方法一 · 代码量 ÷ 业界最高年产量',E.mcconnell_best_100k,E.mcconnell_best_100k+' 人','tm'],
+         ['方法二 · 代码量 ÷ 业界最高日产量',E.codecomplete_50_per_day,E.codecomplete_50_per_day+' 人','tm'],
+         ['方法三 · 合进主线的改动 ÷ 顶尖团队效率',E.linearb_elite_equiv,E.linearb_elite_equiv+' 人','tm']];
+  var w=W('c-methods'), rh=58, o=mk('c-methods',R.length*rh), mx=mxOf(R.map(function(r){return r[1];}));
+  var sc=(w-80)/mx;
+  R.forEach(function(r,i){
+    var y=i*rh, bw=Math.max(5,r[1]*sc);
+    tx(o.s,0,y+16,r[0],i?'':'strong');
+    el('rect',{x:0,y:y+24,width:bw,height:22,rx:4,'class':r[3]},o.s);
+    tx(o.s,bw+8,y+41,r[2],'strong big'+(i?'':' acc'));
+  });
+}
+
+function cocomo(){
+  var C=D.equivalence.cocomo2_product, w=W('c-cocomo'), o=mk('c-cocomo',128), s=o.s;
+  var dTeam=C.schedule_months*30.44, dMe=D.calendar_days, sc=w/dTeam, bm=Math.max(5,dMe*sc);
+  tx(s,0,16,'饭耳：1 个人 + AI','strong');
+  el('rect',{x:0,y:24,width:bm,height:24,rx:4,'class':'me'},s);
+  tx(s,bm+8,42,dMe+' 天','strong big acc');
+  tx(s,0,82,'传统团队：平均约 '+C.avg_staff+' 人（COCOMO II 估算）','strong');
+  el('rect',{x:0,y:90,width:w,height:30,rx:5,'class':'tm'},s);
+  tx(s,w-10,110,C.schedule_months+' 个月','inv','end');
+}
+
+function growth(){
+  var P=D.code_lines.product,T=D.code_lines.tests,L=D.code_lines.tools;
+  var w=W('c-growth'), h=w<520?250:300, t=44, b=24, s=mk('c-growth',h).s, st=w/N;
+  var tot=P.map(function(v,i){return v+T[i]+L[i];}), mx=mxOf(tot);
+  function X(i){return st*(i+.5);} function Y(v){return t+(h-t-b)*(1-v/mx);}
+  for(var g=0;g<=4;g++){var gy=t+(h-t-b)*g/4;el('line',{x1:0,x2:w,y1:gy,y2:gy,'class':'gl'},s);}
+  var base=P.map(function(){return 0;});
+  [[P,'a1'],[T,'a2'],[L,'a3']].forEach(function(Lr){
+    var top=base.map(function(v,i){return v+Lr[0][i];}), d='M'+X(0)+','+Y(top[0]);
+    for(var i=1;i<N;i++)d+='L'+X(i)+','+Y(top[i]);
+    for(var j=N-1;j>=0;j--)d+='L'+X(j)+','+Y(base[j]);
+    el('path',{d:d+'Z','class':Lr[1]},s); base=top;
+  });
+  var dl='M'+X(0)+','+Y(P[0]);for(var i=1;i<N;i++)dl+='L'+X(i)+','+Y(P[i]);
+  el('path',{d:dl,'class':'ln'},s);
+  ['2026-10-20','2026-11-01'].forEach(function(d){
+    var i=D.days.indexOf(d); if(i<0)return;
+    el('circle',{cx:X(i),cy:Y(P[i]),r:4,'class':'dot'},s);
+    tx(s,clamp(X(i),60,w-60),Y(P[i])-10,md(d)+' 约 '+(P[i]/1e4).toFixed(1)+' 万','strong halo','middle');
+  });
+  el('circle',{cx:X(last),cy:Y(P[last]),r:4,'class':'dot'},s);
+  tx(s,w-4,Y(P[last])-10,md(D.days[last])+' 产品代码 '+f(P[last])+' 行','strong halo','end');
+  tx(s,w-4,Y(tot[last])-10,'三项合计 '+f(tot[last])+' 行','strong halo','end');
+  tx(s,0,h-6,md(D.days[0]));
+  var mid=D.days.indexOf('2026-11-01'); if(mid>=0)tx(s,X(mid),h-6,md(D.days[mid]),'','middle');
+  tx(s,w,h-6,md(D.days[last]),'','end');
+}
+
+function commits(){
+  var C=D.commits.code,M=D.commits.merge, w=W('c-commits'), h=w<520?220:260, t=38, b=24;
+  var s=mk('c-commits',h).s, st=w/N, bw=Math.max(2,st*.72);
+  var tot=C.map(function(v,i){return v+M[i];}), mx=mxOf(tot), ph=h-t-b;
+  function X(i){return st*(i+.5);}
+  tot.forEach(function(v,i){
+    var hc=ph*C[i]/mx, hm=ph*M[i]/mx, y0=h-b;
+    el('rect',{x:X(i)-bw/2,y:y0-hc,width:bw,height:hc,'class':'c1'},s);
+    el('rect',{x:X(i)-bw/2,y:y0-hc-hm,width:bw,height:hm,'class':'c2'},s);
+  });
+  var avg=sum(tot)/N, ay=h-b-ph*avg/mx;
+  el('line',{x1:0,x2:w,y1:ay,y2:ay,'class':'av'},s);
+  tx(s,2,ay-6,'平均每天约 '+Math.round(avg)+' 个','strong halo');
+  var mi=tot.indexOf(mx);
+  tx(s,clamp(X(mi),70,w-70),t-10,'最多的一天 '+md(D.days[mi])+'：'+mx+' 个','strong halo','middle');
+  tx(s,0,h-6,md(D.days[0]));
+  var mid=D.days.indexOf('2026-11-01'); if(mid>=0)tx(s,X(mid),h-6,md(D.days[mid]),'','middle');
+  tx(s,w,h-6,md(D.days[last]),'','end');
+}
+
+function heat(){
+  var H=D.commit_heatmap_by_hour, n=H.length, w=W('c-heat'), lw=42, t=22, rh=w<520?9:12;
+  var h=t+n*rh+4, s=mk('c-heat',h).s, cw=(w-lw)/24, mx=0;
+  H.forEach(function(r){r.forEach(function(v){if(v>mx)mx=v;});});
+  [0,6,12,18].forEach(function(hr){tx(s,lw+cw*(hr+.5),14,hr+' 点','sm','middle');});
+  tx(s,w,14,'23 点','sm','end');
+  H.forEach(function(r,i){
+    if(i%7===0||i===n-1)tx(s,0,t+i*rh+rh-1,md(D.days[i]),'sm');
+    r.forEach(function(v,j){
+      el('rect',{x:lw+j*cw+.5,y:t+i*rh+.5,width:Math.max(1,cw-1),height:rh-1,rx:1.5,
+        'class':v?'hc':'hz','fill-opacity':v?(.14+.86*Math.sqrt(v/mx)).toFixed(2):1},s);
+    });
+  });
+}
+
+function rel(){
+  var B=D.builds, w=W('c-rel'), h=w<520?240:270, s=mk('c-rel',h).s, st=w/N, b0=100, b=24;
+  function X(i){return st*(i+.5);}
+  var bt=D.days.map(function(_,i){return B.iphone[i]+B.mac[i]+B.beta[i];}), mx=mxOf(bt), ph=h-b0-b;
+  bt.forEach(function(v,i){if(!v)return;var bh=ph*v/mx;el('rect',{x:X(i)-st*.36,y:h-b-bh,width:st*.72,height:bh,rx:1.5,'class':'bd'},s);});
+  var mi=bt.indexOf(mx);
+  tx(s,clamp(X(mi),80,w-80),b0-8,md(D.days[mi])+' 单日 '+mx+' 个构建','','middle');
+  var has={}, cnt={}, r=Math.max(2.5,Math.min(5,st*.42));
+  D.appstore_launches.forEach(function(L){
+    var i=D.days.indexOf(L.day); if(i<0)return;
+    has[i]=1; var k=cnt[i]=(cnt[i]||0)+1;
+    el('circle',{cx:X(i),cy:48-(k-1)*11,r:r,'class':'dot'},s);
+  });
+  var bs=-1,bl=0,cs=-1,cl=0;
+  for(var i=0;i<N;i++){if(has[i]){if(cs<0){cs=i;cl=0;}cl++;if(cl>bl){bl=cl;bs=cs;}}else{cs=-1;cl=0;}}
+  if(bl>1){
+    var x1=X(bs)-st*.45, x2=X(bs+bl-1)+st*.45;
+    el('path',{d:'M'+x1+',32V26H'+x2+'V32','class':'br'},s);
+    tx(s,Math.min(w,x2),16,md(D.days[bs])+' → '+md(D.days[bs+bl-1])+' 连续 '+bl+' 天每天上架','strong','end');
+  }
+  var F=D.appstore_launches[0], fi=D.days.indexOf(F.day);
+  if(fi>=0)tx(s,Math.max(0,X(fi)-6),74,'首次上架 '+F.version+'（'+md(F.day)+'，第 '+(fi+1)+' 天）','strong');
+  tx(s,0,h-6,md(D.days[0]));
+  var mid=D.days.indexOf('2026-11-01'); if(mid>=0)tx(s,X(mid),h-6,md(D.days[mid]),'','middle');
+  tx(s,w,h-6,md(D.days[last]),'','end');
+}
+
+var FN=[people,methods,cocomo,growth,commits,heat,rel];
+function draw(){FN.forEach(function(fn,i){try{fn();}catch(e){document.getElementById(IDS[i]).innerHTML='<div class="nodata">图表数据不完整</div>';}});}
+draw();
+var lw=document.documentElement.clientWidth, tm=null;
+window.addEventListener('resize',function(){
+  clearTimeout(tm);
+  tm=setTimeout(function(){var nw=document.documentElement.clientWidth;if(nw!==lw){lw=nw;draw();}},150);
+});
+})();
+</script>
+</body>
+</html>
